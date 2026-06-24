@@ -1,7 +1,7 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)"  srcset="readme-assets/banner-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="readme-assets/banner-light.svg">
-  <img src="readme-assets/banner-dark.svg" alt="PCS SWAT Release Notes" width="100%">
+  <source media="(prefers-color-scheme: dark)"  srcset="readme-assets/banner-dark-v2.svg">
+  <source media="(prefers-color-scheme: light)" srcset="readme-assets/banner-light-v2.svg">
+  <img src="readme-assets/banner-dark-v2.svg" alt="PCS SWAT Release Notes" width="100%">
 </picture>
 
 <div align="center">
@@ -162,8 +162,8 @@ swat-releases/
 │   ├── cortex-background.png
 │   └── cortex_RGB_logo_By-Line_Negative.png
 ├── readme-assets/                    ← README SVG components
-│   ├── banner-dark.svg
-│   ├── banner-light.svg
+│   ├── banner-dark-v2.svg
+│   ├── banner-light-v2.svg
 │   └── divider.svg
 ├── cortex-catalyst/                  ← Cortex Catalyst release notes
 │   ├── 26.6.1.html
