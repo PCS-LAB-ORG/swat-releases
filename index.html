@@ -109,24 +109,20 @@
       position: relative;
       z-index: 1;
     }
-    .tool-header {
-      display: flex;
-      align-items: baseline;
-      gap: 14px;
-      margin-bottom: 6px;
-    }
     .tool-label {
       font-size: 11px;
       font-weight: 700;
       letter-spacing: .1em;
       text-transform: uppercase;
       color: var(--accent);
+      margin-bottom: 6px;
     }
     .tool-title {
       font-size: 22px;
       font-weight: 700;
       color: var(--text-strong);
       letter-spacing: -.01em;
+      margin-bottom: 6px;
     }
     .tool-desc {
       font-size: 14px;
@@ -135,72 +131,141 @@
       max-width: 640px;
     }
 
-    /* ── Release cards ── */
-    .release-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 12px;
-    }
-    .release-card {
-      background: var(--bg-card);
+    /* ── Release list container ── */
+    .release-list {
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 20px 20px 18px;
+      overflow: hidden;
+    }
+
+    /* ── Featured (latest) release row ── */
+    .release-featured {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 20px;
+      background: var(--bg-card);
+      border-left: 3px solid var(--accent);
       text-decoration: none;
       color: inherit;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      transition: border-color .15s, background .15s;
-      cursor: pointer;
+      transition: background .15s;
     }
-    .release-card:hover {
-      border-color: var(--accent);
-      background: #1e2130;
-    }
-    .release-card.placeholder {
-      cursor: default;
-      opacity: .5;
-    }
-    .release-card.placeholder:hover {
-      border-color: var(--border);
-      background: var(--bg-card);
-    }
-    .release-version {
-      font-size: 18px;
+    .release-featured:hover { background: #1e2130; }
+
+    .release-featured .r-version {
+      font-size: 16px;
       font-weight: 800;
       color: var(--text-strong);
       letter-spacing: -.01em;
+      min-width: 56px;
     }
-    .release-date {
+    .release-featured .r-badge {
+      background: var(--accent);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .release-featured .r-date {
       font-size: 12px;
       color: var(--text-muted);
-      font-weight: 500;
+      min-width: 96px;
+      flex-shrink: 0;
     }
-    .release-summary {
+    .release-featured .r-summary {
       font-size: 13px;
       color: var(--text-muted);
-      line-height: 1.5;
-      margin-top: 4px;
       flex: 1;
+      line-height: 1.5;
     }
-    .release-link {
-      font-size: 12px;
-      font-weight: 600;
+    .release-featured .r-arrow {
+      font-size: 14px;
       color: var(--accent);
-      margin-top: 8px;
+      flex-shrink: 0;
+    }
+
+    /* ── Collapsible month group ── */
+    details {
+      border-top: 1px solid var(--border);
+    }
+    details summary {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 10px;
+      padding: 12px 20px;
+      background: var(--bg-table-hd);
+      cursor: pointer;
+      user-select: none;
+      list-style: none;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      transition: background .15s, color .15s;
     }
-    .release-link::after { content: '→'; }
+    details summary::-webkit-details-marker { display: none; }
+    details summary::before {
+      content: '▶';
+      font-size: 9px;
+      color: var(--text-muted);
+      transition: transform .15s;
+      flex-shrink: 0;
+    }
+    details[open] summary::before { transform: rotate(90deg); }
+    details summary:hover { background: #1a1d2a; color: var(--text); }
+    details[open] summary { color: var(--text); }
 
-    /* ── Coming soon card ── */
+    /* ── Compact release rows inside details ── */
+    .release-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 20px 12px 36px;
+      background: var(--bg-table-row);
+      text-decoration: none;
+      color: inherit;
+      border-top: 1px solid var(--border);
+      transition: background .15s;
+    }
+    .release-row:hover { background: rgba(74,158,255,.04); }
+
+    .release-row .r-version {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-strong);
+      min-width: 56px;
+    }
+    .release-row .r-date {
+      font-size: 12px;
+      color: var(--text-muted);
+      min-width: 96px;
+      flex-shrink: 0;
+    }
+    .release-row .r-summary {
+      font-size: 13px;
+      color: var(--text-muted);
+      flex: 1;
+      line-height: 1.5;
+    }
+    .release-row .r-arrow {
+      font-size: 13px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      transition: color .15s;
+    }
+    .release-row:hover .r-arrow { color: var(--accent); }
+
+    /* ── Coming soon ── */
     .coming-soon {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 28px 24px;
+      padding: 20px 24px;
       color: var(--text-muted);
       font-size: 14px;
       display: flex;
@@ -235,7 +300,8 @@
 
     @media (max-width: 600px) {
       .hero h1 { font-size: 26px; }
-      .release-grid { grid-template-columns: 1fr; }
+      .release-featured .r-summary,
+      .release-row .r-summary { display: none; }
     }
   </style>
 </head>
@@ -261,38 +327,51 @@
     <!-- Cortex Catalyst -->
     <div class="tool-section">
       <div class="tool-label">Tool 01</div>
-      <div class="tool-header">
-        <h2 class="tool-title">Cortex® Catalyst</h2>
-      </div>
+      <h2 class="tool-title">Cortex® Catalyst</h2>
       <p class="tool-desc">
         AI-powered research and troubleshooting assistant for the Cortex Product Suite.
         Ask questions in natural language and receive grounded answers from official documentation.
       </p>
-      <div class="release-grid">
-        <a href="cortex-catalyst/26.6.1.html" class="release-card">
-          <div class="release-version">26.6.1</div>
-          <div class="release-date">June 2026</div>
-          <div class="release-summary">Follow-up suggestions, inline citation markers, date-aware queries, hybrid search reranking, and 12 features total.</div>
-          <div class="release-link">View release notes</div>
+
+      <div class="release-list">
+
+        <!-- Latest release — always visible -->
+        <a href="cortex-catalyst/26.6.1.html" class="release-featured">
+          <span class="r-version">26.6.1</span>
+          <span class="r-badge">Latest</span>
+          <span class="r-date">June 2026</span>
+          <span class="r-summary">Follow-up suggestions, inline citation markers, date-aware queries, hybrid search reranking, and 12 features total.</span>
+          <span class="r-arrow">→</span>
         </a>
-        <a href="cortex-catalyst/26.3.1.html" class="release-card">
-          <div class="release-version">26.3.1</div>
-          <div class="release-date">March 2026</div>
-          <div class="release-summary">Multi-turn conversation support, citation panel, product scoping improvements, and UI refinements.</div>
-          <div class="release-link">View release notes</div>
-        </a>
-        <a href="cortex-catalyst/26.2.2.html" class="release-card">
-          <div class="release-version">26.2.2</div>
-          <div class="release-date">February 2026</div>
-          <div class="release-summary">Patch release addressing retrieval quality regressions and citation accuracy improvements.</div>
-          <div class="release-link">View release notes</div>
-        </a>
-        <a href="cortex-catalyst/26.2.1.html" class="release-card">
-          <div class="release-version">26.2.1</div>
-          <div class="release-date">February 2026</div>
-          <div class="release-summary">Initial public release. Core RAG pipeline, product-scoped retrieval, and citation sourcing.</div>
-          <div class="release-link">View release notes</div>
-        </a>
+
+        <!-- March 2026 -->
+        <details>
+          <summary>March 2026</summary>
+          <a href="cortex-catalyst/26.3.1.html" class="release-row">
+            <span class="r-version">26.3.1</span>
+            <span class="r-date">March 2026</span>
+            <span class="r-summary">Multi-turn conversation support, citation panel, product scoping improvements, and UI refinements.</span>
+            <span class="r-arrow">→</span>
+          </a>
+        </details>
+
+        <!-- February 2026 -->
+        <details>
+          <summary>February 2026</summary>
+          <a href="cortex-catalyst/26.2.2.html" class="release-row">
+            <span class="r-version">26.2.2</span>
+            <span class="r-date">February 2026</span>
+            <span class="r-summary">Patch release addressing retrieval quality regressions and citation accuracy improvements.</span>
+            <span class="r-arrow">→</span>
+          </a>
+          <a href="cortex-catalyst/26.2.1.html" class="release-row">
+            <span class="r-version">26.2.1</span>
+            <span class="r-date">February 2026</span>
+            <span class="r-summary">Initial public release. Core RAG pipeline, product-scoped retrieval, and citation sourcing.</span>
+            <span class="r-arrow">→</span>
+          </a>
+        </details>
+
       </div>
     </div>
 
@@ -301,9 +380,7 @@
     <!-- cortex-search-pipeline -->
     <div class="tool-section">
       <div class="tool-label">Tool 02</div>
-      <div class="tool-header">
-        <h2 class="tool-title">cortex-search-pipeline</h2>
-      </div>
+      <h2 class="tool-title">cortex-search-pipeline</h2>
       <p class="tool-desc">
         The retrieval infrastructure underlying Cortex Catalyst — corpus ingestion,
         chunking, hybrid search indexing, and reranking.
