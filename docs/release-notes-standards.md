@@ -179,3 +179,53 @@ Release date as written month: `June 2026`, `March 2026`. Not ISO dates.
 - **Enhancement not Improved** — A noun that names a category, not an adjective describing an outcome. An enhancement is a change to something that worked as designed but now works better. Source: Elastic taxonomy, widely adopted in developer tooling.
 - **Fixed in amber** — Fixed and Feature were both green, making them visually indistinguishable. Amber signals "was broken, now resolved" without the alarm of red.
 - **No "Technical" tag** — "Technical" is redundant: everything in release notes is technical. Changes formerly labeled "Technical" are reclassified as `Architecture` (structural design decisions), `Enhancement` (internal improvements with operational impact), or `Infrastructure` (platform/dependency changes) — or omitted if they have no operator consequence.
+
+---
+
+## Research Citations
+
+Sources consulted during the development of these standards. Ordered by utility for the decisions made here.
+
+### Primary — Most Actionable
+
+**Keep a Changelog v1.1.0**
+<https://keepachangelog.com/en/1.1.0/>
+The canonical standard. Defines the six change types (Added, Changed, Deprecated, Removed, Fixed, Security), the principle that changelogs are for humans not machines, and why git logs are not changelogs. The source of the tag taxonomy used here. Required reading before authoring anything.
+
+**Elastic Contributor Docs — Changelogs**
+<https://www.elastic.co/docs/contribute-docs/content-types/changelogs>
+The most rigorous real-world engineering taxonomy found. Defines `feature`, `enhancement`, `bug-fix`, `regression`, `breaking-change`, `deprecation`, `known-issue`, `security`, `docs`, `other` with precise decision rules for each. The distinction between `feature` (net-new capability) and `enhancement` (improvement to existing, doesn't break or fix) came directly from here.
+
+**Common Changelog**
+<https://common-changelog.org/>
+A stricter alternative to Keep a Changelog. Key contribution: imperative mood ("Add search", not "Added search"), breaking changes must be prefixed in bold, no Deprecated or Security categories (put deprecations under Changed). Useful for teams that need machine-parseable changelog structure.
+
+**Propel / DEV Community — Deployment Notes**
+<https://dev.to/propel/deployment-notes-how-we-document-changes-to-production-223b>
+Real-world practice from a production engineering team. Key finding: automated commit-generated changelogs are "too low-level" — human authorship of deployment notes has value because it forces the engineer to think about the changes going out. Uses a Customer-facing / Non-customer-facing / Rollback strategy split that informed the operational model here.
+
+**Doc Holiday — What Should Actually Be in a Software Changelog**
+<https://doc.holiday/blog/what-should-actually-be-in-a-software-changelog>
+Best explanation of the feature/enhancement distinction found: "An enhancement is a change to existing functionality. It is not a bug fix (the feature was working as designed, but now it works better), and it is not a new feature (the core capability already existed)." Also covers progressive disclosure as a structuring principle.
+
+### Secondary — Useful Context
+
+**Releaseglow — Keep a Changelog SaaS Adaptation Guide**
+<https://releaseglow.com/blog/keep-a-changelog-saas-guide>
+Maps Keep a Changelog's canonical labels to SaaS-friendly equivalents (Added→New, Changed→Improved, etc.). Also the source of the warning against inventing new categories: "Polish, Miscellaneous, Internal — they all drift toward Other and defeat the point."
+
+**AnnounceKit — Internal Release Notes: Ultimate Guide**
+<https://announcekit.app/blog/internal-release-notes/>
+Covers the internal vs external audience distinction in depth. Defines the six questions every internal release note must answer: which version, what changed, why it matters, who is affected, what to do, where to find more. Informed the operational model section.
+
+**CommitCatalog — Release Notes Examples: 12 Real-World Templates**
+<https://commitcatalog.com/blog/release-notes-examples>
+Real examples from VS Code, GitHub, Stripe, and others organized by style and audience. Key observation: VS Code's developer-facing format is "consistent month after month, making it trivial for CI/CD pipelines to parse." Useful comparison point for format decisions.
+
+**Keep a Changelog — GitHub Issues: "Technical Changes" debate**
+<https://github.com/olivierlacan/keep-a-changelog/issues/636>
+Community discussion on whether "Technical" or "Refactored" is a valid release note category. Consensus: it's not standard, it's always audience-dependent, and "everything in a technical changelog is technical." Confirmed the decision to drop the `Technical` tag here.
+
+**capgo.app — Application Release Notes: A Complete Guide for 2026**
+<https://capgo.app/blog/application-release-notes/>
+Covers multi-audience layered format: plain-language summary → user-facing details → optional technical appendix. Table of what each audience needs vs. what to avoid. Reinforced the three-model structure used in this document.
