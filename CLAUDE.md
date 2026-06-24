@@ -4,36 +4,14 @@
 
 Public-facing HTML release notes for PCS SWAT internal tools. Each tool gets its own subfolder. Release notes are self-contained HTML files — all images are base64-encoded inline, no build step required.
 
-**Owner:** bgoldstein / PCS SWAT  
+**Owner:** bgoldstein / PCS SWAT
 **Visibility:** Public — these pages are intended to be shared with the team and accessible without authentication.
-
----
-
-## FIRST STEP ON ANY SESSION — Initialize the Repo
-
-**This repo does not yet exist on GitHub.** Before doing anything else, create it:
-
-```bash
-gh repo create PCS-LAB-ORG/swat-releases \
-  --public \
-  --description "PCS SWAT tool release notes — Cortex Catalyst, cortex-search-pipeline, and more" \
-  --source=. \
-  --remote=origin \
-  --push
-```
-
-Then verify:
-```bash
-gh repo view PCS-LAB-ORG/swat-releases
-```
-
-**Critical:** The repo MUST be created as `--public`. GitHub Pages (if enabled later) requires public visibility on the free org tier.
 
 ---
 
 ## Repository Structure
 
-```
+```text
 swat-releases/
 ├── images/                          ← shared brand assets (logos, backgrounds, icons)
 │   ├── cortex-icon.png
@@ -58,10 +36,13 @@ swat-releases/
 4. The new release's pill is `active` (orange); all others are `<a href="...">` links
 
 ### Version nav pill order (newest → oldest, left to right)
+
 Always maintain this order in the nav across all pages:
-```
+
+```text
 June 2026 — 26.6.1  |  March 2026 — 26.3.1  |  Feb 2026 — 26.2.2  |  Feb 2026 — 26.2.1
 ```
+
 Add new releases to the LEFT of the existing sequence.
 
 ---
@@ -101,6 +82,7 @@ Feature tags: `New` (green), `Improved` (blue), `Planned` (yellow), `Known` (ora
 ## Branching
 
 Follow the same GitOps rules as other PCS SWAT repos:
+
 - No direct commits to `main`
 - Every change on a branch: `chore/add-26.7.1-release-notes`, etc.
 - Merge via PR
@@ -110,8 +92,8 @@ Follow the same GitOps rules as other PCS SWAT repos:
 ## Open Items
 
 | Item | Notes |
-|---|---|
+| --- | --- |
 | GitHub Pages | Enable once repo is public and content is reviewed. Settings → Pages → Deploy from main `/` root. |
-| Index page | A root `index.html` listing all tools and their latest release would be a good addition. |
+| Index page | Central hub at root `index.html` — built, sidebar navigation with all tools. |
 | cortex-search-pipeline | Folder exists, no pages yet. |
 | `cortex_RGB_logo_Lockup_Negative.png` | In images/ for reference but not currently used in any page. |

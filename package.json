@@ -2,9 +2,17 @@
   "name": "swat-releases",
   "private": true,
   "scripts": {
-    "dev": "browser-sync start --server --files '**/*.html, images/*' --port 8765 --no-open"
+    "dev": "browser-sync start --server --files '**/*.html, images/*' --port 8765 --no-open",
+    "lint:html": "htmlhint --config .htmlhintrc 'index.html' 'cortex-catalyst/*.html' 'cortex-search-pipeline/*.html'",
+    "lint:md": "markdownlint-cli2 '**/*.md' '!node_modules/**' '!session-summaries/**'",
+    "lint:js": "eslint . --no-error-on-unmatched-pattern",
+    "lint": "npm run lint:html && npm run lint:md && npm run lint:js"
   },
   "devDependencies": {
-    "browser-sync": "^3.0.3"
+    "@eslint/js": "^10.0.1",
+    "browser-sync": "^3.0.3",
+    "eslint": "^10.5.0",
+    "htmlhint": "^1.9.2",
+    "markdownlint-cli2": "^0.22.1"
   }
 }
