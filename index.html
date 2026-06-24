@@ -23,6 +23,8 @@
       --blue:         #4a9eff;
       --green:        #3ecf8e;
       --yellow:       #f4c94f;
+      --topbar-h:     101px;
+      --sidebar-w:    220px;
     }
 
     html { scroll-behavior: smooth; }
@@ -36,9 +38,20 @@
       min-height: 100vh;
     }
 
-    .wrapper { max-width: 960px; margin: 0 auto; padding: 0 24px 80px; }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; right: 0;
+      width: 32%; height: 60vh;
+      background-image: url('images/cortex-background.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: right center;
+      opacity: 0.07;
+      pointer-events: none;
+      z-index: 0;
+    }
 
-    /* ── Top bar ── */
     .topbar {
       background: #0b0d14;
       border-bottom: 1px solid var(--border);
@@ -53,8 +66,6 @@
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      display: flex;
-      align-items: center;
     }
     .topbar-badge {
       margin-left: auto;
@@ -68,82 +79,106 @@
       letter-spacing: .04em;
     }
 
-    /* ── Background watermark ── */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: 32%;
-      height: 60vh;
-      background-image: url('images/cortex-background.png');
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: right center;
-      opacity: 0.07;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ── Hero ── */
-    .hero {
-      padding: 60px 0 40px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 48px;
+    .page {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
       position: relative;
       z-index: 1;
     }
+
+    .hero {
+      padding: 52px 0 36px;
+      border-bottom: 1px solid var(--border);
+    }
     .hero h1 {
-      font-size: 36px;
+      font-size: 32px;
       font-weight: 800;
       color: var(--text-strong);
       line-height: 1.2;
-      margin-bottom: 18px;
+      margin-bottom: 10px;
       letter-spacing: -.02em;
     }
-    .hero p { font-size: 15px; color: var(--text-muted); max-width: 640px; line-height: 1.7; }
+    .hero p { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
 
-    /* ── Tool section ── */
-    .tool-section {
-      margin-bottom: 56px;
-      position: relative;
-      z-index: 1;
+    .layout {
+      display: flex;
+      align-items: flex-start;
     }
-    .tool-label {
-      font-size: 11px;
+
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      position: sticky;
+      top: var(--topbar-h);
+      max-height: calc(100vh - var(--topbar-h));
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 28px 0;
+    }
+    .sidebar-label {
+      font-size: 10px;
       font-weight: 700;
-      letter-spacing: .1em;
+      letter-spacing: .12em;
       text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 6px;
+      color: var(--text-muted);
+      padding: 0 20px 12px;
     }
+    .nav-tool {
+      display: block;
+      padding: 9px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      cursor: pointer;
+      border-left: 2px solid transparent;
+      transition: color .12s, border-color .12s, background .12s;
+      line-height: 1.4;
+    }
+    .nav-tool:hover { color: var(--text); background: rgba(255,255,255,.03); }
+    .nav-tool.active {
+      color: var(--text-strong);
+      border-left-color: var(--accent);
+      background: rgba(250,88,45,.06);
+      font-weight: 600;
+    }
+
+    .content {
+      flex: 1;
+      min-width: 0;
+      padding: 36px 0 0 48px;
+    }
+
+    .tool-panel { display: none; }
+    .tool-panel.active { display: block; }
+
     .tool-title {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 700;
       color: var(--text-strong);
       letter-spacing: -.01em;
       margin-bottom: 6px;
     }
     .tool-desc {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--text-muted);
       margin-bottom: 24px;
-      max-width: 640px;
+      max-width: 580px;
+      line-height: 1.65;
     }
 
-    /* ── Release list container ── */
     .release-list {
       border: 1px solid var(--border);
       border-radius: 10px;
       overflow: hidden;
     }
 
-    /* ── Featured (latest) release row ── */
     .release-featured {
       display: flex;
       align-items: center;
       gap: 16px;
-      padding: 18px 20px;
+      padding: 16px 18px;
       background: var(--bg-card);
       border-left: 3px solid var(--accent);
       text-decoration: none;
@@ -151,157 +186,81 @@
       transition: background .15s;
     }
     .release-featured:hover { background: #1e2130; }
-
-    .release-featured .r-version {
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--text-strong);
-      letter-spacing: -.01em;
-      min-width: 56px;
-    }
+    .release-featured .r-version { font-size: 15px; font-weight: 800; color: var(--text-strong); min-width: 52px; }
     .release-featured .r-badge {
-      background: var(--accent);
-      color: #fff;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      padding: 2px 7px;
-      border-radius: 4px;
-      flex-shrink: 0;
+      background: var(--accent); color: #fff;
+      font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      padding: 2px 7px; border-radius: 4px; flex-shrink: 0;
     }
-    .release-featured .r-date {
-      font-size: 12px;
-      color: var(--text-muted);
-      min-width: 96px;
-      flex-shrink: 0;
-    }
-    .release-featured .r-summary {
-      font-size: 13px;
-      color: var(--text-muted);
-      flex: 1;
-      line-height: 1.5;
-    }
-    .release-featured .r-arrow {
-      font-size: 14px;
-      color: var(--accent);
-      flex-shrink: 0;
-    }
+    .release-featured .r-date { font-size: 12px; color: var(--text-muted); min-width: 88px; flex-shrink: 0; }
+    .release-featured .r-summary { font-size: 13px; color: var(--text-muted); flex: 1; line-height: 1.5; }
+    .release-featured .r-arrow { font-size: 14px; color: var(--accent); flex-shrink: 0; }
 
-    /* ── Collapsible month group ── */
-    details {
-      border-top: 1px solid var(--border);
-    }
+    details { border-top: 1px solid var(--border); }
     details summary {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 12px 20px;
+      padding: 10px 18px;
       background: var(--bg-table-hd);
       cursor: pointer;
       user-select: none;
       list-style: none;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: .06em;
-      text-transform: uppercase;
+      font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
       color: var(--text-muted);
-      transition: background .15s, color .15s;
+      transition: background .12s, color .12s;
     }
     details summary::-webkit-details-marker { display: none; }
-    details summary::before {
-      content: '▶';
-      font-size: 9px;
-      color: var(--text-muted);
-      transition: transform .15s;
-      flex-shrink: 0;
-    }
+    details summary::before { content: '▶'; font-size: 8px; color: var(--text-muted); transition: transform .15s; }
     details[open] summary::before { transform: rotate(90deg); }
     details summary:hover { background: #1a1d2a; color: var(--text); }
     details[open] summary { color: var(--text); }
 
-    /* ── Compact release rows inside details ── */
     .release-row {
       display: flex;
       align-items: center;
       gap: 16px;
-      padding: 12px 20px 12px 36px;
+      padding: 11px 18px 11px 34px;
       background: var(--bg-table-row);
       text-decoration: none;
       color: inherit;
       border-top: 1px solid var(--border);
-      transition: background .15s;
+      transition: background .12s;
     }
     .release-row:hover { background: rgba(74,158,255,.04); }
-
-    .release-row .r-version {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-strong);
-      min-width: 56px;
-    }
-    .release-row .r-date {
-      font-size: 12px;
-      color: var(--text-muted);
-      min-width: 96px;
-      flex-shrink: 0;
-    }
-    .release-row .r-summary {
-      font-size: 13px;
-      color: var(--text-muted);
-      flex: 1;
-      line-height: 1.5;
-    }
-    .release-row .r-arrow {
-      font-size: 13px;
-      color: var(--text-muted);
-      flex-shrink: 0;
-      transition: color .15s;
-    }
+    .release-row .r-version { font-size: 13px; font-weight: 700; color: var(--text-strong); min-width: 52px; }
+    .release-row .r-date { font-size: 12px; color: var(--text-muted); min-width: 88px; flex-shrink: 0; }
+    .release-row .r-summary { font-size: 13px; color: var(--text-muted); flex: 1; line-height: 1.5; }
+    .release-row .r-arrow { font-size: 13px; color: var(--text-muted); flex-shrink: 0; transition: color .12s; }
     .release-row:hover .r-arrow { color: var(--accent); }
 
-    /* ── Coming soon ── */
     .coming-soon {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 20px 24px;
+      padding: 20px;
       color: var(--text-muted);
-      font-size: 14px;
+      font-size: 13px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
-    .coming-soon-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--border);
-      flex-shrink: 0;
-    }
-
-    /* ── Divider ── */
-    .divider {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 0 0 56px;
-    }
+    .coming-soon-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
 
     footer {
       border-top: 1px solid var(--border);
-      padding: 32px 24px;
+      padding: 28px 24px;
       text-align: center;
-      max-width: 960px;
+      max-width: 1060px;
       margin: 0 auto;
       position: relative;
       z-index: 1;
     }
-    footer p { font-size: 12px; color: var(--text-muted); max-width: 600px; margin: 0 auto; line-height: 1.6; }
+    footer p { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
 
-    @media (max-width: 600px) {
-      .hero h1 { font-size: 26px; }
-      .release-featured .r-summary,
-      .release-row .r-summary { display: none; }
+    @media (max-width: 680px) {
+      .sidebar { display: none; }
+      .content { padding: 24px 0 0; }
     }
   </style>
 </head>
@@ -314,89 +273,114 @@
     <span class="topbar-badge">Release Notes</span>
   </nav>
 
-  <div class="wrapper">
-
+  <div class="page">
     <div class="hero">
-      <h1>PCS SWAT<br>Release Notes</h1>
-      <p>
-        Release notes for PCS SWAT tools. Select a product below to browse individual
-        releases and learn what changed in each version.
-      </p>
+      <h1>PCS SWAT Release Notes</h1>
+      <p>Select a tool from the left to browse its release history.</p>
     </div>
 
-    <!-- Cortex Catalyst -->
-    <div class="tool-section">
-      <div class="tool-label">Tool 01</div>
-      <h2 class="tool-title">Cortex® Catalyst</h2>
-      <p class="tool-desc">
-        AI-powered research and troubleshooting assistant for the Cortex Product Suite.
-        Ask questions in natural language and receive grounded answers from official documentation.
-      </p>
+    <div class="layout">
 
-      <div class="release-list">
+      <aside class="sidebar">
+        <div class="sidebar-label">Tools</div>
+        <a class="nav-tool" data-panel="ai-sweeper">AI Sweeper</a>
+        <a class="nav-tool active" data-panel="catalyst">Cortex Catalyst</a>
+        <a class="nav-tool" data-panel="insights">Cortex Insights</a>
+        <a class="nav-tool" data-panel="search-pipeline">Cortex Search Pipeline</a>
+        <a class="nav-tool" data-panel="unity">Cortex Unity</a>
+        <a class="nav-tool" data-panel="sno-scheduler">SnO Scheduler</a>
+      </aside>
 
-        <!-- Latest release — always visible -->
-        <a href="cortex-catalyst/26.6.1.html" class="release-featured">
-          <span class="r-version">26.6.1</span>
-          <span class="r-badge">Latest</span>
-          <span class="r-date">June 2026</span>
-          <span class="r-summary">Follow-up suggestions, inline citation markers, date-aware queries, hybrid search reranking, and 12 features total.</span>
-          <span class="r-arrow">→</span>
-        </a>
+      <main class="content">
 
-        <!-- March 2026 -->
-        <details>
-          <summary>March 2026</summary>
-          <a href="cortex-catalyst/26.3.1.html" class="release-row">
-            <span class="r-version">26.3.1</span>
-            <span class="r-date">March 2026</span>
-            <span class="r-summary">Multi-turn conversation support, citation panel, product scoping improvements, and UI refinements.</span>
-            <span class="r-arrow">→</span>
-          </a>
-        </details>
+        <div class="tool-panel active" id="panel-catalyst">
+          <h2 class="tool-title">Cortex® Catalyst</h2>
+          <p class="tool-desc">AI-powered research and troubleshooting assistant for the Cortex Product Suite. Ask questions in natural language and receive grounded answers from official documentation.</p>
+          <div class="release-list">
+            <a href="cortex-catalyst/26.6.1.html" class="release-featured">
+              <span class="r-version">26.6.1</span>
+              <span class="r-badge">Latest</span>
+              <span class="r-date">June 2026</span>
+              <span class="r-summary">Follow-up suggestions, inline citation markers, date-aware queries, hybrid search reranking, and 12 features total.</span>
+              <span class="r-arrow">→</span>
+            </a>
+            <details>
+              <summary>March 2026</summary>
+              <a href="cortex-catalyst/26.3.1.html" class="release-row">
+                <span class="r-version">26.3.1</span>
+                <span class="r-date">March 2026</span>
+                <span class="r-summary">Multi-turn conversation support, citation panel, product scoping improvements, and UI refinements.</span>
+                <span class="r-arrow">→</span>
+              </a>
+            </details>
+            <details>
+              <summary>February 2026</summary>
+              <a href="cortex-catalyst/26.2.2.html" class="release-row">
+                <span class="r-version">26.2.2</span>
+                <span class="r-date">February 2026</span>
+                <span class="r-summary">Patch release addressing retrieval quality regressions and citation accuracy improvements.</span>
+                <span class="r-arrow">→</span>
+              </a>
+              <a href="cortex-catalyst/26.2.1.html" class="release-row">
+                <span class="r-version">26.2.1</span>
+                <span class="r-date">February 2026</span>
+                <span class="r-summary">Initial public release. Core RAG pipeline, product-scoped retrieval, and citation sourcing.</span>
+                <span class="r-arrow">→</span>
+              </a>
+            </details>
+          </div>
+        </div>
 
-        <!-- February 2026 -->
-        <details>
-          <summary>February 2026</summary>
-          <a href="cortex-catalyst/26.2.2.html" class="release-row">
-            <span class="r-version">26.2.2</span>
-            <span class="r-date">February 2026</span>
-            <span class="r-summary">Patch release addressing retrieval quality regressions and citation accuracy improvements.</span>
-            <span class="r-arrow">→</span>
-          </a>
-          <a href="cortex-catalyst/26.2.1.html" class="release-row">
-            <span class="r-version">26.2.1</span>
-            <span class="r-date">February 2026</span>
-            <span class="r-summary">Initial public release. Core RAG pipeline, product-scoped retrieval, and citation sourcing.</span>
-            <span class="r-arrow">→</span>
-          </a>
-        </details>
+        <div class="tool-panel" id="panel-search-pipeline">
+          <h2 class="tool-title">Cortex Search Pipeline</h2>
+          <p class="tool-desc">The retrieval infrastructure underlying Cortex Catalyst — corpus ingestion, chunking, hybrid search indexing, and reranking.</p>
+          <div class="coming-soon"><div class="coming-soon-dot"></div>Release notes coming soon.</div>
+        </div>
 
-      </div>
+        <div class="tool-panel" id="panel-insights">
+          <h2 class="tool-title">Cortex Insights</h2>
+          <p class="tool-desc"></p>
+          <div class="coming-soon"><div class="coming-soon-dot"></div>Release notes coming soon.</div>
+        </div>
+
+        <div class="tool-panel" id="panel-unity">
+          <h2 class="tool-title">Cortex Unity</h2>
+          <p class="tool-desc"></p>
+          <div class="coming-soon"><div class="coming-soon-dot"></div>Release notes coming soon.</div>
+        </div>
+
+        <div class="tool-panel" id="panel-sno-scheduler">
+          <h2 class="tool-title">SnO Scheduler</h2>
+          <p class="tool-desc"></p>
+          <div class="coming-soon"><div class="coming-soon-dot"></div>Release notes coming soon.</div>
+        </div>
+
+        <div class="tool-panel" id="panel-ai-sweeper">
+          <h2 class="tool-title">AI Sweeper</h2>
+          <p class="tool-desc"></p>
+          <div class="coming-soon"><div class="coming-soon-dot"></div>Release notes coming soon.</div>
+        </div>
+
+      </main>
     </div>
-
-    <hr class="divider" />
-
-    <!-- cortex-search-pipeline -->
-    <div class="tool-section">
-      <div class="tool-label">Tool 02</div>
-      <h2 class="tool-title">cortex-search-pipeline</h2>
-      <p class="tool-desc">
-        The retrieval infrastructure underlying Cortex Catalyst — corpus ingestion,
-        chunking, hybrid search indexing, and reranking.
-      </p>
-      <div class="coming-soon">
-        <div class="coming-soon-dot"></div>
-        Release notes coming soon.
-      </div>
-    </div>
-
   </div>
 
   <footer>
-    <p>PCS SWAT Team &nbsp;·&nbsp; Palo Alto Networks<br>
-    Release notes cover user-facing changes only. For engineering details see GitHub releases.</p>
+    <p>PCS SWAT Team &nbsp;·&nbsp; Palo Alto Networks</p>
   </footer>
+
+  <script>
+    const navLinks = document.querySelectorAll('.nav-tool');
+    const panels   = document.querySelectorAll('.tool-panel');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.forEach(l => l.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+        link.classList.add('active');
+        document.getElementById('panel-' + link.dataset.panel).classList.add('active');
+      });
+    });
+  </script>
 
 </body>
 </html>
