@@ -3,3 +3,4 @@ session-summaries/
 **/.DS_Store
 .playwright-mcp/
 /*.png
+node_modules/
