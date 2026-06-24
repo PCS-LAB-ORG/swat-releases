@@ -26,7 +26,7 @@ Standards for authoring release notes in this repository. All tools follow one o
 - Internal refactors with no visible behavior change
 - Monitoring stack changes
 
-**Tag taxonomy:** `New`, `Improved`, `Fixed`, `Planned`, `Known`
+**Tag taxonomy:** `Feature`, `Enhancement`, `Fixed`, `Planned`, `Known`
 
 **Examples:** Cortex Catalyst
 
@@ -55,7 +55,7 @@ Standards for authoring release notes in this repository. All tools follow one o
 - Internal implementation detail (dataclass fields, handler registries, argparse flags)
 - Commit SHAs and PR numbers in body text (link to GitHub release instead)
 
-**Tag taxonomy:** `New`, `Fixed`, `Improved`, `Technical`, `Infrastructure`
+**Tag taxonomy:** `Feature`, `Fixed`, `Enhancement`, `Technical`, `Infrastructure`
 
 **Format:**
 
@@ -136,15 +136,21 @@ Release date as written month: `June 2026`, `March 2026`. Not ISO dates.
 
 ## Tag Reference
 
-| Tag | Color | Use for |
-| --- | --- | --- |
-| `New` | Green | New features or capabilities |
-| `Improved` | Blue | Enhancements to existing behavior |
-| `Fixed` | Green | Bug fixes |
-| `Planned` | Yellow | Upcoming features (Catalyst only) |
-| `Known` | Orange | Known issues (Catalyst only) |
-| `Technical` | Purple | Refactoring, architecture changes (operational/engineering models) |
-| `Infrastructure` | Teal | CI/CD, deployment, cloud config changes (operational/engineering models) |
-| `Architecture` | Purple | Major design decisions (engineering milestones model) |
-| `Pipeline` | Teal | Data pipeline or retrieval changes (engineering milestones model) |
-| `Quality` | Green | Measurable quality improvements (engineering milestones model) |
+| Tag | Color | Hex | Maps to (Keep a Changelog) | Use for |
+| --- | --- | --- | --- | --- |
+| `Feature` | Green | `#3ecf8e` | Added | Net-new capability that didn't exist before |
+| `Enhancement` | Blue | `#4a9eff` | Changed | Improvement to existing functionality |
+| `Fixed` | Amber | `#f59e0b` | Fixed | Bug fix — was broken, now correct |
+| `Planned` | Yellow | `#f4c94f` | — | Upcoming in a future release (user-facing model only) |
+| `Known` | Orange | `#fa582d` | — | Known issue users will encounter (user-facing model only) |
+| `Technical` | Purple | `#a78bfa` | — | Refactoring, architecture — headline only, no function detail |
+| `Infrastructure` | Teal | `#06b6d4` | — | CI/CD, deployment, cloud config changes |
+| `Architecture` | Purple | `#a78bfa` | — | Major design decisions (engineering milestones model) |
+| `Pipeline` | Teal | `#06b6d4` | — | Data pipeline or retrieval changes (engineering milestones model) |
+| `Quality` | Green | `#3ecf8e` | — | Measurable quality improvements (engineering milestones model) |
+
+### Why these labels
+
+- **Feature not New** — 'New' describes *when* something appeared; every entry in a release note is new. 'Feature' describes *what kind of change it is* — a net-new capability. Source: Elastic internal taxonomy, Keep a Changelog `Added`.
+- **Enhancement not Improved/Improvement** — A noun category label, not an adjective. An enhancement is a change to existing functionality that worked as designed but now works better. Source: Elastic, widely adopted in developer tooling.
+- **Fixed in amber not green** — Fixed and Feature (formerly New) were both green, making them indistinguishable at a glance. Amber signals 'was broken, now resolved' without the alarm of red.
