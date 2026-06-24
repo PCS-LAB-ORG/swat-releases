@@ -1,0 +1,12 @@
+<svg viewBox="0 0 900 8" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="div-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#fa582d" stop-opacity="0"/>
+      <stop offset="25%"  stop-color="#fa582d" stop-opacity="0.6"/>
+      <stop offset="50%"  stop-color="#fa582d" stop-opacity="1"/>
+      <stop offset="75%"  stop-color="#fa582d" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#fa582d" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="1" y="4" fill="url(#div-grad)"/>
+</svg>
