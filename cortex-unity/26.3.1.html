@@ -182,9 +182,9 @@
       font-size: 11px; font-weight: 700; letter-spacing: .04em;
       white-space: nowrap;
     }
-    .tag-new      { background: rgba(62,207,142,.15); color: var(--green); }
-    .tag-improved { background: rgba(74,158,255,.12); color: var(--blue); }
-    .tag-fixed    { background: rgba(62,207,142,.12); color: var(--green); }
+    .tag-feature   { background: rgba(62,207,142,.15); color: var(--green); }
+    .tag-enhancement { background: rgba(74,158,255,.12); color: var(--blue); }
+    .tag-fixed     { background: rgba(245,158,11,.12);  color: #f59e0b; }
     .tag-planned  { background: rgba(244,201,79,.12); color: var(--yellow); }
     .tag-known    { background: rgba(250,88,45,.12);  color: var(--accent); }
     .tag-technical { background: rgba(167,139,250,.12); color: #a78bfa; }
@@ -254,27 +254,27 @@
           <thead><tr><th>Change</th><th>Description</th></tr></thead>
           <tbody>
             <tr>
-              <td>GCS-Triggered Project Creation <span class="tag tag-new">New</span></td>
+              <td>GCS-Triggered Project Creation <span class="tag tag-feature">Feature</span></td>
               <td>When Cortex Insights uploads a customer CSV to the GCS bucket, the function parses the customer name, checks for an existing Asana project, and either creates a new project from the template or appends a timestamped task section to the existing one.</td>
             </tr>
             <tr>
-              <td>Duplicate Detection <span class="tag tag-new">New</span></td>
+              <td>Duplicate Detection <span class="tag tag-feature">Feature</span></td>
               <td>Typeahead search by customer name followed by exact project name equality check prevents duplicate projects on re-runs. Projects are named <code>{customer} - {product} - {SFDC ID}</code>.</td>
             </tr>
             <tr>
-              <td>Dynamic Custom Field Mapping <span class="tag tag-new">New</span></td>
+              <td>Dynamic Custom Field Mapping <span class="tag tag-feature">Feature</span></td>
               <td>All CSV columns are mapped to Asana task custom fields dynamically. Supported field types: <code>enum</code>, <code>multi_enum</code>, <code>number</code>, <code>date</code>, <code>text</code>.</td>
             </tr>
             <tr>
-              <td>Project Membership <span class="tag tag-new">New</span></td>
+              <td>Project Membership <span class="tag tag-feature">Feature</span></td>
               <td>SWAT - TS team and the requestor email (from CSV) are added as project admins via the Asana Memberships API on every new project.</td>
             </tr>
             <tr>
-              <td>Rate Limit Handling <span class="tag tag-new">New</span></td>
+              <td>Rate Limit Handling <span class="tag tag-feature">Feature</span></td>
               <td>Asana 429 responses are retried using the <code>Retry-After</code> header value.</td>
             </tr>
             <tr>
-              <td>CSV Archival <span class="tag tag-new">New</span></td>
+              <td>CSV Archival <span class="tag tag-feature">Feature</span></td>
               <td>Processed CSVs are moved to <code>processed/</code> prefix after a successful run to prevent re-triggering.</td>
             </tr>
             <tr>

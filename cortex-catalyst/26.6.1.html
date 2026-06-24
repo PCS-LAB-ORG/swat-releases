@@ -181,9 +181,9 @@
       font-size: 11px; font-weight: 700; letter-spacing: .04em;
       white-space: nowrap;
     }
-    .tag-new      { background: rgba(62,207,142,.15); color: var(--green); }
-    .tag-improved { background: rgba(74,158,255,.12); color: var(--blue); }
-    .tag-fixed    { background: rgba(62,207,142,.12); color: var(--green); }
+    .tag-feature   { background: rgba(62,207,142,.15); color: var(--green); }
+    .tag-enhancement { background: rgba(74,158,255,.12); color: var(--blue); }
+    .tag-fixed     { background: rgba(245,158,11,.12);  color: #f59e0b; }
     .tag-planned  { background: rgba(244,201,79,.12); color: var(--yellow); }
     .tag-known    { background: rgba(250,88,45,.12);  color: var(--accent); }
 
@@ -270,51 +270,51 @@
           <thead><tr><th>Feature</th><th>Description</th></tr></thead>
           <tbody>
             <tr>
-              <td>Follow-Up Suggestions &amp; Disambiguation <span class="tag tag-new">New</span> <span class="issue">#40</span></td>
+              <td>Follow-Up Suggestions &amp; Disambiguation <span class="tag tag-feature">Feature</span> <span class="issue">#40</span></td>
               <td>After each response, Cortex Catalyst surfaces three clickable follow-up question chips to help guide the next query. When the retrieved content doesn't match the detected product, disambiguation chips appear — for example, "Did you mean Cortex XSOAR?" — allowing a one-click refinement.</td>
             </tr>
             <tr>
-              <td>Inline Citation Markers <span class="tag tag-new">New</span> <span class="issue">#37</span></td>
+              <td>Inline Citation Markers <span class="tag tag-feature">Feature</span> <span class="issue">#37</span></td>
               <td>Source references now appear as clickable superscript markers — [1], [2], [3] — embedded directly in the response text at the sentence or bullet that draws from each source. Clicking any marker opens the citation panel scrolled to that source.</td>
             </tr>
             <tr>
-              <td>Multi-Phase Loading Animation <span class="tag tag-new">New</span> <span class="issue">#44</span></td>
+              <td>Multi-Phase Loading Animation <span class="tag tag-feature">Feature</span> <span class="issue">#44</span></td>
               <td>The loading state now reflects the actual pipeline phases — Discovery, Synthesis, Composing, and Finalizing — with phase timing calibrated from real query latency data. Vocabulary across phases is varied to reduce repetition in multi-turn conversations.</td>
             </tr>
             <tr>
-              <td>Date-Aware Queries <span class="tag tag-new">New</span> <span class="issue">#85</span></td>
+              <td>Date-Aware Queries <span class="tag tag-feature">Feature</span> <span class="issue">#85</span></td>
               <td>Queries such as "what changed in the last 6 months," "releases since Q1 2026," or "what came out recently" now retrieve documentation filtered by publication date. The agent detects temporal language and applies the appropriate date range to the search — newer content is no longer buried behind older results.</td>
             </tr>
             <tr>
-              <td>AgentiX &amp; XDR Agent Support <span class="tag tag-new">New</span> <span class="issue">#80</span></td>
+              <td>AgentiX &amp; XDR Agent Support <span class="tag tag-feature">Feature</span> <span class="issue">#80</span></td>
               <td>Cortex AgentiX and Cortex XDR Agent are now recognized as distinct products. Queries mentioning either product are correctly scoped to their respective documentation, rather than falling through to the more generic Cortex XDR results.</td>
             </tr>
             <tr>
-              <td>Version Scope Notice <span class="tag tag-new">New</span> <span class="issue">#99</span></td>
+              <td>Version Scope Notice <span class="tag tag-feature">Feature</span> <span class="issue">#99</span></td>
               <td>When a query references a specific version of a product whose documentation does not carry version metadata (such as XSIAM 3.5), a notice is displayed below the response: "Results cover the full documentation set — version-specific filtering is not yet available for this product." The response is still grounded in the correct product's documentation.</td>
             </tr>
             <tr>
-              <td>Debug Panel <span class="tag tag-new">New</span> <span class="issue">#41</span></td>
+              <td>Debug Panel <span class="tag tag-feature">Feature</span> <span class="issue">#41</span></td>
               <td>Available in the development environment, each assistant response now includes a collapsible debug section showing what the agent detected (product, version, content type), how many sources were retrieved and reranked, which model responded, token counts, and per-phase latencies. A copy button exports the full debug context, and a Cloud Logging trace link opens the exact request log.</td>
             </tr>
             <tr>
-              <td>Improved Answers for Complex Queries <span class="tag tag-improved">Improved</span> <span class="issue">#28</span></td>
+              <td>Improved Answers for Complex Queries <span class="tag tag-enhancement">Enhancement</span> <span class="issue">#28</span></td>
               <td>Multi-part questions, long queries, and XQL-focused requests now use Gemini's extended reasoning mode, producing more thorough and structured responses for queries that require synthesizing information across multiple sources.</td>
             </tr>
             <tr>
-              <td>Code Block Formatting <span class="tag tag-improved">Improved</span> <span class="issue">#33</span></td>
+              <td>Code Block Formatting <span class="tag tag-enhancement">Enhancement</span> <span class="issue">#33</span></td>
               <td>XQL queries and CLI commands in responses are now consistently wrapped in formatted, copyable code blocks. Previously these appeared as inline text, making them difficult to read and use.</td>
             </tr>
             <tr>
-              <td>Release Notes Retrieval Quality <span class="tag tag-improved">Improved</span> <span class="issue">#86</span></td>
+              <td>Release Notes Retrieval Quality <span class="tag tag-enhancement">Enhancement</span> <span class="issue">#86</span></td>
               <td>The documentation index now uses topic-grouped chunking for release notes — each release period is represented as a single cohesive chunk rather than many small fragments. This significantly improves the relevance of results for release note queries across all Cortex products, with the most recently published release surfacing at the top.</td>
             </tr>
             <tr>
-              <td>Overall Answer Relevance <span class="tag tag-improved">Improved</span> <span class="issue">#48</span> <span class="issue">#34</span></td>
+              <td>Overall Answer Relevance <span class="tag tag-enhancement">Enhancement</span> <span class="issue">#48</span> <span class="issue">#34</span></td>
               <td>The retrieval pipeline now uses hybrid search — combining semantic similarity and keyword matching — and a dedicated reranking step that scores 150 candidate sources before selecting the top 20 for the response. The result is more topically diverse, on-point citations and fewer off-topic or redundant sources.</td>
             </tr>
             <tr>
-              <td>Cortex Branding <span class="tag tag-improved">Improved</span> <span class="issue">#42</span> <span class="issue">#91</span> <span class="issue">#98</span></td>
+              <td>Cortex Branding <span class="tag tag-enhancement">Enhancement</span> <span class="issue">#42</span> <span class="issue">#91</span> <span class="issue">#98</span></td>
               <td>The assistant avatar has been updated to the Cortex icon, a Cortex favicon appears in the browser tab, and the browser tab title now reads "Cortex Catalyst" throughout the application.</td>
             </tr>
           </tbody>

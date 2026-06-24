@@ -154,9 +154,9 @@
       font-size: 11px; font-weight: 700; letter-spacing: .04em;
       white-space: nowrap;
     }
-    .tag-new       { background: rgba(62,207,142,.15);  color: var(--green); }
-    .tag-improved  { background: rgba(74,158,255,.12);  color: var(--blue); }
-    .tag-fixed     { background: rgba(62,207,142,.12);  color: var(--green); }
+    .tag-feature   { background: rgba(62,207,142,.15);  color: var(--green); }
+    .tag-enhancement { background: rgba(74,158,255,.12);  color: var(--blue); }
+    .tag-fixed     { background: rgba(245,158,11,.12);   color: #f59e0b; }
     .tag-technical { background: rgba(167,139,250,.12); color: var(--purple); }
 
     footer {
@@ -205,23 +205,23 @@
           <thead><tr><th>Feature</th><th>Description</th></tr></thead>
           <tbody>
             <tr>
-              <td>BigQuery Data Upload for Trend Analysis <span class="tag tag-new">New</span></td>
+              <td>BigQuery Data Upload for Trend Analysis <span class="tag tag-feature">Feature</span></td>
               <td>Assessment results and insights data are now automatically uploaded to BigQuery to enable long-term trend analysis. A CSV of the results is also included in the downloadable report.</td>
             </tr>
             <tr>
-              <td>Optional File Uploads and Requestor Validation <span class="tag tag-new">New</span></td>
+              <td>Optional File Uploads and Requestor Validation <span class="tag tag-feature">Feature</span></td>
               <td>File uploads for assessments are now optional, and the requestor&#x27;s email address is validated to ensure it belongs to the correct organization.</td>
             </tr>
             <tr>
-              <td>Dark Theme for HTML Reports <span class="tag tag-new">New</span></td>
+              <td>Dark Theme for HTML Reports <span class="tag tag-feature">Feature</span></td>
               <td>HTML reports now feature an XSIAM-style dark theme for improved readability and a better user experience.</td>
             </tr>
             <tr>
-              <td>Resilient LLM API Calls <span class="tag tag-new">New</span></td>
+              <td>Resilient LLM API Calls <span class="tag tag-feature">Feature</span></td>
               <td>Implemented retry logic with exponential backoff for LLM API calls to better handle transient network or API issues.</td>
             </tr>
             <tr>
-              <td>Flexible BigQuery API Endpoint Support <span class="tag tag-new">New</span></td>
+              <td>Flexible BigQuery API Endpoint Support <span class="tag tag-feature">Feature</span></td>
               <td>The BigQuery uploader now supports a configurable list of multiple allowed API endpoints, enhancing deployment flexibility.</td>
             </tr>
             <tr>
@@ -245,11 +245,11 @@
               <td>Corrected an error in the server settings for distribution lists within As-Built reports.</td>
             </tr>
             <tr>
-              <td>Companion Service Resource Allocation <span class="tag tag-improved">Improved</span></td>
+              <td>Companion Service Resource Allocation <span class="tag tag-enhancement">Enhancement</span></td>
               <td>Increased the memory limit for companion services to 12Gi to improve performance and stability, especially for large assessments.</td>
             </tr>
             <tr>
-              <td>Codebase Refactoring <span class="tag tag-improved">Improved</span></td>
+              <td>Codebase Refactoring <span class="tag tag-enhancement">Enhancement</span></td>
               <td>Performed a significant code refactor to simplify service logic, remove redundant data processing, and centralize configuration management for improved maintainability.</td>
             </tr>
           </tbody>

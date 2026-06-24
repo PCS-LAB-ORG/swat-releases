@@ -154,9 +154,9 @@
       font-size: 11px; font-weight: 700; letter-spacing: .04em;
       white-space: nowrap;
     }
-    .tag-new       { background: rgba(62,207,142,.15);  color: var(--green); }
-    .tag-improved  { background: rgba(74,158,255,.12);  color: var(--blue); }
-    .tag-fixed     { background: rgba(62,207,142,.12);  color: var(--green); }
+    .tag-feature   { background: rgba(62,207,142,.15);  color: var(--green); }
+    .tag-enhancement { background: rgba(74,158,255,.12);  color: var(--blue); }
+    .tag-fixed     { background: rgba(245,158,11,.12);   color: #f59e0b; }
     .tag-technical { background: rgba(167,139,250,.12); color: var(--purple); }
 
     footer {
@@ -205,23 +205,23 @@
           <thead><tr><th>Feature</th><th>Description</th></tr></thead>
           <tbody>
             <tr>
-              <td>Unity Cloud Platform Workflow <span class="tag tag-new">New</span></td>
+              <td>Unity Cloud Platform Workflow <span class="tag tag-feature">Feature</span></td>
               <td>A new workflow has been added to the Unity companion service to support cloud platform assessments, introducing new prompts and service definitions.</td>
             </tr>
             <tr>
-              <td>Total Vulnerabilities in BigQuery Export <span class="tag tag-new">New</span></td>
+              <td>Total Vulnerabilities in BigQuery Export <span class="tag tag-feature">Feature</span></td>
               <td>The BigQuery CSV output now includes a new <code>cld_vln_repo_total</code> derived column, providing a sum of total code vulnerabilities across all repositories for easier tracking.</td>
             </tr>
             <tr>
-              <td>Automated Platform Detection <span class="tag tag-new">New</span></td>
+              <td>Automated Platform Detection <span class="tag tag-feature">Feature</span></td>
               <td>The Unity service now automatically derives the platform from the <code>unity_platform</code> variable, removing the need for users to provide this input manually.</td>
             </tr>
             <tr>
-              <td>Manifest Field Requirements <span class="tag tag-new">New</span></td>
+              <td>Manifest Field Requirements <span class="tag tag-feature">Feature</span></td>
               <td>The <code>requestorEmail</code> field is now required for the Unity service, and a <code>region</code> field is now required for the base manifest to improve data quality and ensure proper execution.</td>
             </tr>
             <tr>
-              <td>Check and Badge Logic Updates <span class="tag tag-new">New</span></td>
+              <td>Check and Badge Logic Updates <span class="tag tag-feature">Feature</span></td>
               <td>Several runtime and AppSec checks have been updated to improve accuracy and filtering. The <code>runtime_trusted_images_bronze</code> check is now correctly limited to the cloud platform, and <code>cas_repo_CI_bronze</code> now returns both a count and status.</td>
             </tr>
             <tr>
