@@ -1,8 +1,4 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)"  srcset="readme-assets/banner-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="readme-assets/banner-light.svg">
-  <img src="readme-assets/banner-dark.svg" alt="PCS SWAT Release Notes" width="100%">
-</picture>
+<img src="readme-assets/banner-dark.svg" alt="PCS SWAT Release Notes" width="100%">
 
 <div align="center">
 
