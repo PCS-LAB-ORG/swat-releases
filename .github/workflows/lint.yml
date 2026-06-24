@@ -21,7 +21,7 @@ jobs:
         run: npm ci
 
       - name: HTMLHint
-        run: npx htmlhint --config .htmlhintrc 'index.html' 'cortex-catalyst/*.html' 'cortex-insights/*.html' 'cortex-search-pipeline/*.html'
+        run: npx htmlhint --config .htmlhintrc 'index.html' 'cortex-catalyst/*.html' 'cortex-insights/*.html' 'cortex-unity/*.html' 'cortex-search-pipeline/*.html'
 
       - name: Markdownlint
         run: npx markdownlint-cli2 '**/*.md' '!node_modules/**' '!session-summaries/**'
