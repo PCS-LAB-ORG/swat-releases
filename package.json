@@ -1,0 +1,10 @@
+{
+  "name": "swat-releases",
+  "private": true,
+  "scripts": {
+    "dev": "browser-sync start --server --files '**/*.html, images/*' --port 8765 --no-open"
+  },
+  "devDependencies": {
+    "browser-sync": "^3.0.3"
+  }
+}
