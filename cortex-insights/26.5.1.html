@@ -157,7 +157,7 @@
     .tag-feature   { background: rgba(62,207,142,.15);  color: var(--green); }
     .tag-enhancement { background: rgba(74,158,255,.12);  color: var(--blue); }
     .tag-fixed     { background: rgba(245,158,11,.12);   color: #f59e0b; }
-    .tag-technical { background: rgba(167,139,250,.12); color: var(--purple); }
+    .tag-architecture { background: rgba(167,139,250,.12); color: var(--purple); }
 
     footer {
       border-top: 1px solid var(--border); padding: 32px 24px;
@@ -229,20 +229,12 @@
               <td>A new check has been introduced to identify and report on agents that have reached their End-of-Life (EOL) status.</td>
             </tr>
             <tr>
-              <td>Migrated to Google GenAI SDK <span class="tag tag-technical">Technical</span></td>
+              <td>Migrated to Google GenAI SDK <span class="tag tag-infra">Infrastructure</span></td>
               <td>The service has been migrated from the legacy <code>vertexai</code> SDK to the <code>google-genai</code> SDK for all generative AI functionalities.</td>
             </tr>
             <tr>
-              <td>Improved BigQuery Upload Logic <span class="tag tag-technical">Technical</span></td>
+              <td>Improved BigQuery Upload Logic <span class="tag tag-enhancement">Enhancement</span></td>
               <td>The BigQuery and additional data upload processes will now gracefully skip if a <code>project_id</code> is not configured, preventing errors and logging an informational message instead.</td>
-            </tr>
-            <tr>
-              <td>Internal Manifest Cleanup <span class="tag tag-technical">Technical</span></td>
-              <td>The unused <code>tenantAbout</code> and <code>About</code> fields have been removed from the service definition manifests and related backend configurations.</td>
-            </tr>
-            <tr>
-              <td>Added SFDC ID Design Specification <span class="tag tag-technical">Technical</span></td>
-              <td>An internal design specification document was created to outline the implementation of the new SFDC ID input field.</td>
             </tr>
           </tbody>
         </table>

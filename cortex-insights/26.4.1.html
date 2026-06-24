@@ -157,7 +157,7 @@
     .tag-feature   { background: rgba(62,207,142,.15);  color: var(--green); }
     .tag-enhancement { background: rgba(74,158,255,.12);  color: var(--blue); }
     .tag-fixed     { background: rgba(245,158,11,.12);   color: #f59e0b; }
-    .tag-technical { background: rgba(167,139,250,.12); color: var(--purple); }
+    .tag-architecture { background: rgba(167,139,250,.12); color: var(--purple); }
 
     footer {
       border-top: 1px solid var(--border); padding: 32px 24px;
@@ -225,23 +225,23 @@
               <td>Several runtime and AppSec checks have been updated to improve accuracy and filtering. The <code>runtime_trusted_images_bronze</code> check is now correctly limited to the cloud platform, and <code>cas_repo_CI_bronze</code> now returns both a count and status.</td>
             </tr>
             <tr>
-              <td>As-Built Report Content Expansion <span class="tag tag-technical">Technical</span></td>
+              <td>As-Built Report Content Expansion <span class="tag tag-enhancement">Enhancement</span></td>
               <td>Significantly expanded the scope and detail of As-Built reports by adding and refining dozens of YAML definitions for posture, inventory, AppSec, data collection, and more. Report section ordering has also been updated for better clarity.</td>
             </tr>
             <tr>
-              <td>CI/CD Pipeline Improvements <span class="tag tag-technical">Technical</span></td>
+              <td>CI/CD Pipeline Improvements <span class="tag tag-infra">Infrastructure</span></td>
               <td>Introduced a new script to build and push all companion services at once, with an option to target a single service. Build scripts have been updated with corrected container registry paths for stage and production environments.</td>
             </tr>
             <tr>
-              <td>Enhanced Debug Logging <span class="tag tag-technical">Technical</span></td>
+              <td>Enhanced Debug Logging <span class="tag tag-enhancement">Enhancement</span></td>
               <td>Removed truncation from API and query debug logs to provide full visibility during troubleshooting. GCP authentication logs now include the service account email to simplify identity verification.</td>
             </tr>
             <tr>
-              <td>GCP Authentication Refactor <span class="tag tag-technical">Technical</span></td>
+              <td>GCP Authentication Refactor <span class="tag tag-enhancement">Enhancement</span></td>
               <td>Centralized the logic for Google Cloud Application Default Credentials (ADC) identity resolution to simplify authentication flows. A fix was also implemented to force credential refreshes, resolving potential stale token issues.</td>
             </tr>
             <tr>
-              <td>Manifest Generation Utility <span class="tag tag-technical">Technical</span></td>
+              <td>Manifest Generation Utility <span class="tag tag-enhancement">Enhancement</span></td>
               <td>The internal manifest generator now supports a key-value pivot, providing more flexibility for creating basic badge manifests from check data.</td>
             </tr>
           </tbody>
