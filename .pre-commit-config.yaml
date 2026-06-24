@@ -1,0 +1,47 @@
+# Pre-commit hook configuration for swat-releases
+# Setup (once per developer, per repo):
+#   pip install pre-commit
+#   pre-commit install
+#   pre-commit install --hook-type commit-msg
+#   pre-commit run --all-files   # establish baseline on existing files
+
+repos:
+  # Essential safety checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: detect-private-key
+      - id: no-commit-to-branch
+        args: [--branch, main, --branch, develop]
+      - id: check-merge-conflict
+      - id: check-json
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  # HTML linting
+  - repo: local
+    hooks:
+      - id: htmlhint
+        name: HTMLHint
+        entry: npx htmlhint --config .htmlhintrc
+        language: system
+        files: \.html$
+
+  # Markdown linting
+  - repo: local
+    hooks:
+      - id: markdownlint
+        name: markdownlint
+        entry: npx markdownlint-cli2
+        language: system
+        files: \.(md|markdown)$
+        exclude: ^node_modules/
+
+  # JavaScript / TypeScript linting
+  - repo: local
+    hooks:
+      - id: eslint
+        name: ESLint
+        entry: npx eslint --no-error-on-unmatched-pattern
+        language: system
+        files: \.(js|ts|mjs)$
