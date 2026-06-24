@@ -2,7 +2,7 @@
   <rect width="900" height="160" fill="#0f1117"/>
   <rect width="900" height="3" fill="#fa582d"/>
   <rect y="158" width="900" height="1" fill="#2a2e3f"/>
-  <g opacity="0.07">
+  <g opacity="0.20">
     <rect x="648" y="18"  width="4" height="124" fill="#7b82a0" rx="2"/>
     <rect x="660" y="8"   width="4" height="144" fill="#7b82a0" rx="2"/>
     <rect x="672" y="28"  width="4" height="104" fill="#7b82a0" rx="2"/>
@@ -39,8 +39,4 @@
   <text x="110" y="104"
         font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
         font-size="14" fill="#7b82a0">Centralized release notes for all PCS SWAT tools</text>
-  <rect x="110" y="120" width="120" height="22" rx="11" fill="#1a1d27" stroke="#2a2e3f" stroke-width="1"/>
-  <text x="170" y="135"
-        font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-        font-size="11" font-weight="600" fill="#7b82a0" text-anchor="middle" letter-spacing="0.06em">PCS-LAB-ORG</text>
 </svg>

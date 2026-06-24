@@ -9,7 +9,7 @@
   <rect y="158" width="900" height="1" fill="#e2e5ef"/>
 
   <!-- Right-side geometric accent -->
-  <g opacity="0.12">
+  <g opacity="0.20">
     <rect x="648" y="18"  width="4" height="124" fill="#3ecf8e" rx="2"/>
     <rect x="660" y="8"   width="4" height="144" fill="#3ecf8e" rx="2"/>
     <rect x="672" y="28"  width="4" height="104" fill="#3ecf8e" rx="2"/>
@@ -57,11 +57,4 @@
         font-size="14" fill="#6b7280">
     Centralized release notes for all PCS SWAT tools — Cortex Catalyst and more
   </text>
-
-  <!-- Org tag -->
-  <rect x="110" y="120" width="120" height="22" rx="11" fill="#f3f4f6" stroke="#e2e5ef" stroke-width="1"/>
-  <text x="170" y="135"
-        font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-        font-size="11" font-weight="600" fill="#6b7280"
-        text-anchor="middle" letter-spacing="0.06em">PCS-LAB-ORG</text>
 </svg>
