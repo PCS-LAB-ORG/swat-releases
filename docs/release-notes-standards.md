@@ -14,17 +14,20 @@ Standards for authoring release notes in this repository. All tools follow one o
 
 **Include:**
 
-- New features and UI changes
+- Net-new features and UI changes
 - Quality improvements to answers, outputs, or citations
 - Bug fixes that affected user experience
 - Known issues and limitations users will encounter
+- Planned features coming in future releases
 
-**Exclude:**
+**Omit — always:**
 
 - Backend infrastructure (Cloud Run, BQ schema, alert policies, CI/CD)
-- Developer tooling (Docker, test suite, SDK upgrades)
+- Developer tooling (Docker, test suite, SDK upgrades, conftest changes)
 - Internal refactors with no visible behavior change
-- Monitoring stack changes
+- Monitoring and observability stack changes
+- Documentation updates
+- Any change that required no action and caused no observable difference
 
 **Tag taxonomy:** `Feature`, `Enhancement`, `Fixed`, `Planned`, `Known`
 
@@ -36,26 +39,29 @@ Standards for authoring release notes in this repository. All tools follow one o
 
 **Audience:** Engineers who run, debug, monitor, or hand off the automation. No direct "users" — but someone is always the operator.
 
-**Filter:** Anything that affects the behavior, reliability, observability, or operability of the system. State architectural changes at headline level — not function-level detail.
+**Filter:** Anything that affects the behavior, reliability, observability, or operability of the system. The test: would an engineer debugging an incident, onboarding to the system, or handing it off need to know this?
 
 **Include:**
 
-- Bug fixes, especially silent ones with data integrity impact (name what was affected)
-- New capabilities or behaviors
-- Infrastructure changes (CI/CD pipeline, trigger config, deployment method)
-- Architectural refactors — one-line headline and operational consequence only
-- Reliability and observability improvements
-- Breaking changes to inputs, schemas, or integrations
+- Bug fixes — especially silent ones with data integrity impact; name what was affected and for how long
+- Net-new capabilities or trigger behaviors
+- Infrastructure changes: CI/CD pipeline, trigger config, deployment method, SDK platform migrations
+- Significant architectural changes — one-line headline stating the operational consequence (not the implementation)
+- Reliability and observability improvements: error handling, logging, retry logic
+- Breaking changes to inputs, schemas, CSV contracts, or integrations
 
-**Exclude:**
+**Omit — always:**
 
-- Full lists of extracted/renamed functions
-- Test counts
-- Individual documentation file names updated
-- Internal implementation detail (dataclass fields, handler registries, argparse flags)
-- Commit SHAs and PR numbers in body text (link to GitHub release instead)
+- Individual function names, parameter signatures, extracted classes
+- Test counts and coverage metrics
+- Documentation file names or doc-only changes (CHANGELOG.md, README section updates, etc.)
+- Internal implementation details: dataclass field lists, handler registry names, argparse flags
+- Minor code cleanup with no behavioral change (removing unused imports, renaming variables)
+- Any change whose omission leaves an operator with a complete picture of how the system behaves
 
-**Tag taxonomy:** `Feature`, `Fixed`, `Enhancement`, `Technical`, `Infrastructure`
+**Tag taxonomy:** `Feature`, `Fixed`, `Enhancement`, `Architecture`, `Infrastructure`
+
+**Note on "Technical":** Not used. "Technical" is redundant — everything in release notes is technical. Refactoring that belongs in release notes is significant enough to warrant a precise label: `Architecture` for structural design decisions, `Enhancement` for internal improvements with operational impact, `Infrastructure` for platform or dependency changes. Pure refactoring with no behavioral consequence is omitted.
 
 **Format:**
 
@@ -64,12 +70,12 @@ Standards for authoring release notes in this repository. All tools follow one o
 
 [1-2 sentence plain-language summary of the release]
 
-Table: Feature | Tag | Description
+Table: Change | Tag | Description
 ```
 
-Descriptions lead with operational impact, not implementation. "Silent field mapping dropped data on every run since launch" beats "Fixed field name lookup in handler dict."
+Descriptions lead with operational impact, not implementation. "Silent field mapping dropped data on every run since launch — fixed" beats "Fixed KeyError in field_map lookup."
 
-**Examples:** Cortex Unity, SnO Scheduler, AI Sweeper (automation tools with no direct users)
+**Examples:** Cortex Unity, SnO Scheduler, AI Sweeper
 
 ---
 
@@ -77,21 +83,23 @@ Descriptions lead with operational impact, not implementation. "Silent field map
 
 **Audience:** Engineering leadership, managers reviewing the body of work, engineers onboarding to the stack.
 
-**Filter:** Substantive architectural decisions and milestones. Not every commit, not user-facing changes, not minor config tweaks.
+**Filter:** Substantive architectural decisions and milestones. The test: would this entry help someone understand why the system is designed the way it is, or what generation of the architecture they're looking at?
 
 **Include:**
 
-- Architectural generations and major design decisions
+- Architectural generations and major design decisions, with the rationale
 - Schema or indexing strategy changes
-- Changes that unblocked specific product capabilities
-- Performance milestones with measurable impact
+- Changes that directly unblocked specific product capabilities
+- Performance milestones with measurable before/after impact
 - Corpus or data quality decisions
 
-**Exclude:**
+**Omit — always:**
 
-- Dependency bumps and config tweaks with no architectural impact
-- CI/CD fixes
+- Dependency version bumps with no architectural consequence
+- CI/CD pipeline changes
 - Documentation-only changes
+- Config tweaks that don't reflect a design decision
+- Any change that a future engineer reading the architecture docs wouldn't need to know
 
 **Tag taxonomy:** `Architecture`, `Pipeline`, `Quality`, `Infrastructure`, `Fixed`
 
@@ -103,25 +111,42 @@ Descriptions lead with operational impact, not implementation. "Silent field map
 
 ### Lead with impact, not implementation
 
+Every entry should answer: *what can the operator/user now do, or what problem no longer exists?* Not: *what code changed?*
+
 | Instead of | Write |
 | --- | --- |
 | `Refactored field handler to use registry pattern` | `Adding a new Asana field type is now a data change, not a code change` |
 | `Fixed KeyError in field_map lookup` | `Silent mapping failure that dropped Tenant ID on every task since launch — fixed` |
 | `Added retry logic with exponential backoff` | `LLM API calls now retry with exponential backoff — transient failures no longer abort the run` |
+| `Updated docs/logging.md` | *(omit)* |
+| `Removed unused imports, renamed internal variables` | *(omit)* |
+
+### The omit decision
+
+When deciding whether a change belongs in release notes, apply this test in order:
+
+1. **Would an operator or user notice if this wasn't here?** If no — omit.
+2. **Does this change what the system does, how reliably it does it, or how someone would debug it?** If no — omit.
+3. **Is it purely internal implementation detail?** Function names, test counts, doc file names, variable renames — omit.
+4. **Is it a documentation or cleanup change only?** Omit. These belong in the GitHub release, not release notes.
+
+The GitHub release is the place for everything. Release notes are the curated, durable record of what mattered.
 
 ### Progressive disclosure
 
-Start with a one-line plain-language release summary. Then table rows for individual changes. Link to the GitHub release for full engineering detail — don't reproduce it.
+Start with a one-line plain-language release summary. Table rows for individual changes. Link to the GitHub release for full engineering detail — don't reproduce it.
 
-### What belongs in the GitHub release vs. release notes
+### What belongs where
 
-| Belongs in GitHub release | Belongs in release notes |
+| Belongs in GitHub release only | Belongs in release notes |
 | --- | --- |
 | Function names, parameter signatures | Architectural change + operational consequence |
 | Test counts and coverage | — |
 | Individual file names changed | — |
+| Documentation updates | — |
+| Minor cleanup and refactoring | — |
 | PR and commit links | Link to GitHub release at page footer |
-| Full refactor rationale | One-line headline |
+| Full refactor rationale | One-line headline of the consequence |
 | Every config key touched | Config change + what it enables |
 
 ### Consistent date format
@@ -143,14 +168,64 @@ Release date as written month: `June 2026`, `March 2026`. Not ISO dates.
 | `Fixed` | Amber | `#f59e0b` | Fixed | Bug fix — was broken, now correct |
 | `Planned` | Yellow | `#f4c94f` | — | Upcoming in a future release (user-facing model only) |
 | `Known` | Orange | `#fa582d` | — | Known issue users will encounter (user-facing model only) |
-| `Technical` | Purple | `#a78bfa` | — | Refactoring, architecture — headline only, no function detail |
-| `Infrastructure` | Teal | `#06b6d4` | — | CI/CD, deployment, cloud config changes |
-| `Architecture` | Purple | `#a78bfa` | — | Major design decisions (engineering milestones model) |
+| `Architecture` | Purple | `#a78bfa` | — | Significant structural design decision (operational/engineering models) |
+| `Infrastructure` | Teal | `#06b6d4` | — | CI/CD, deployment, platform, SDK migrations |
 | `Pipeline` | Teal | `#06b6d4` | — | Data pipeline or retrieval changes (engineering milestones model) |
 | `Quality` | Green | `#3ecf8e` | — | Measurable quality improvements (engineering milestones model) |
 
 ### Why these labels
 
-- **Feature not New** — 'New' describes *when* something appeared; every entry in a release note is new. 'Feature' describes *what kind of change it is* — a net-new capability. Source: Elastic internal taxonomy, Keep a Changelog `Added`.
-- **Enhancement not Improved/Improvement** — A noun category label, not an adjective. An enhancement is a change to existing functionality that worked as designed but now works better. Source: Elastic, widely adopted in developer tooling.
-- **Fixed in amber not green** — Fixed and Feature (formerly New) were both green, making them indistinguishable at a glance. Amber signals 'was broken, now resolved' without the alarm of red.
+- **Feature not New** — "New" describes *when* something appeared; every release note entry is new by definition. "Feature" describes *what kind of change it is* — a net-new capability. Source: Elastic internal taxonomy, Keep a Changelog `Added`.
+- **Enhancement not Improved** — A noun that names a category, not an adjective describing an outcome. An enhancement is a change to something that worked as designed but now works better. Source: Elastic taxonomy, widely adopted in developer tooling.
+- **Fixed in amber** — Fixed and Feature were both green, making them visually indistinguishable. Amber signals "was broken, now resolved" without the alarm of red.
+- **No "Technical" tag** — "Technical" is redundant: everything in release notes is technical. Changes formerly labeled "Technical" are reclassified as `Architecture` (structural design decisions), `Enhancement` (internal improvements with operational impact), or `Infrastructure` (platform/dependency changes) — or omitted if they have no operator consequence.
+
+---
+
+## Research Citations
+
+Sources consulted during the development of these standards. Ordered by utility for the decisions made here.
+
+### Primary — Most Actionable
+
+**Keep a Changelog v1.1.0**
+<https://keepachangelog.com/en/1.1.0/>
+The canonical standard. Defines the six change types (Added, Changed, Deprecated, Removed, Fixed, Security), the principle that changelogs are for humans not machines, and why git logs are not changelogs. The source of the tag taxonomy used here. Required reading before authoring anything.
+
+**Elastic Contributor Docs — Changelogs**
+<https://www.elastic.co/docs/contribute-docs/content-types/changelogs>
+The most rigorous real-world engineering taxonomy found. Defines `feature`, `enhancement`, `bug-fix`, `regression`, `breaking-change`, `deprecation`, `known-issue`, `security`, `docs`, `other` with precise decision rules for each. The distinction between `feature` (net-new capability) and `enhancement` (improvement to existing, doesn't break or fix) came directly from here.
+
+**Common Changelog**
+<https://common-changelog.org/>
+A stricter alternative to Keep a Changelog. Key contribution: imperative mood ("Add search", not "Added search"), breaking changes must be prefixed in bold, no Deprecated or Security categories (put deprecations under Changed). Useful for teams that need machine-parseable changelog structure.
+
+**Propel / DEV Community — Deployment Notes**
+<https://dev.to/propel/deployment-notes-how-we-document-changes-to-production-223b>
+Real-world practice from a production engineering team. Key finding: automated commit-generated changelogs are "too low-level" — human authorship of deployment notes has value because it forces the engineer to think about the changes going out. Uses a Customer-facing / Non-customer-facing / Rollback strategy split that informed the operational model here.
+
+**Doc Holiday — What Should Actually Be in a Software Changelog**
+<https://doc.holiday/blog/what-should-actually-be-in-a-software-changelog>
+Best explanation of the feature/enhancement distinction found: "An enhancement is a change to existing functionality. It is not a bug fix (the feature was working as designed, but now it works better), and it is not a new feature (the core capability already existed)." Also covers progressive disclosure as a structuring principle.
+
+### Secondary — Useful Context
+
+**Releaseglow — Keep a Changelog SaaS Adaptation Guide**
+<https://releaseglow.com/blog/keep-a-changelog-saas-guide>
+Maps Keep a Changelog's canonical labels to SaaS-friendly equivalents (Added→New, Changed→Improved, etc.). Also the source of the warning against inventing new categories: "Polish, Miscellaneous, Internal — they all drift toward Other and defeat the point."
+
+**AnnounceKit — Internal Release Notes: Ultimate Guide**
+<https://announcekit.app/blog/internal-release-notes/>
+Covers the internal vs external audience distinction in depth. Defines the six questions every internal release note must answer: which version, what changed, why it matters, who is affected, what to do, where to find more. Informed the operational model section.
+
+**CommitCatalog — Release Notes Examples: 12 Real-World Templates**
+<https://commitcatalog.com/blog/release-notes-examples>
+Real examples from VS Code, GitHub, Stripe, and others organized by style and audience. Key observation: VS Code's developer-facing format is "consistent month after month, making it trivial for CI/CD pipelines to parse." Useful comparison point for format decisions.
+
+**Keep a Changelog — GitHub Issues: "Technical Changes" debate**
+<https://github.com/olivierlacan/keep-a-changelog/issues/636>
+Community discussion on whether "Technical" or "Refactored" is a valid release note category. Consensus: it's not standard, it's always audience-dependent, and "everything in a technical changelog is technical." Confirmed the decision to drop the `Technical` tag here.
+
+**capgo.app — Application Release Notes: A Complete Guide for 2026**
+<https://capgo.app/blog/application-release-notes/>
+Covers multi-audience layered format: plain-language summary → user-facing details → optional technical appendix. Table of what each audience needs vs. what to avoid. Reinforced the three-model structure used in this document.

@@ -110,7 +110,7 @@
     .hero-meta-item strong { color: var(--text); font-weight: 600; }
     .hero p { font-size: 15px; color: var(--text-muted); max-width: 640px; line-height: 1.7; }
 
-    section { margin-bottom: 56px; }
+    section { margin-bottom: 56px; scroll-margin-top: 120px; }
     .section-label {
       font-size: 11px; font-weight: 700; letter-spacing: .1em;
       text-transform: uppercase; color: var(--accent); margin-bottom: 10px;
@@ -154,10 +154,10 @@
       font-size: 11px; font-weight: 700; letter-spacing: .04em;
       white-space: nowrap;
     }
-    .tag-new       { background: rgba(62,207,142,.15);  color: var(--green); }
-    .tag-improved  { background: rgba(74,158,255,.12);  color: var(--blue); }
-    .tag-fixed     { background: rgba(62,207,142,.12);  color: var(--green); }
-    .tag-technical { background: rgba(167,139,250,.12); color: var(--purple); }
+    .tag-feature   { background: rgba(62,207,142,.15);  color: var(--green); }
+    .tag-enhancement { background: rgba(74,158,255,.12);  color: var(--blue); }
+    .tag-fixed     { background: rgba(245,158,11,.12);   color: #f59e0b; }
+    .tag-architecture { background: rgba(167,139,250,.12); color: var(--purple); }
 
     footer {
       border-top: 1px solid var(--border); padding: 32px 24px;
@@ -205,44 +205,36 @@
           <thead><tr><th>Feature</th><th>Description</th></tr></thead>
           <tbody>
             <tr>
-              <td>HTML Report Redesign with Sidebar Navigation <span class="tag tag-new">New</span></td>
+              <td>HTML Report Redesign with Sidebar Navigation <span class="tag tag-feature">Feature</span></td>
               <td>The HTML report has been redesigned to include a persistent sidebar, making it easier to navigate between different sections. Token limits have also been increased to support more comprehensive reports.</td>
             </tr>
             <tr>
-              <td>New Playbook Analytics Checks <span class="tag tag-new">New</span></td>
+              <td>New Playbook Analytics Checks <span class="tag tag-feature">Feature</span></td>
               <td>A comprehensive suite of new checks has been added to provide detailed analytics on playbook performance. This includes execution trends, run status summaries, work plan task summaries, and auto-close case rates.</td>
             </tr>
             <tr>
-              <td>SFDC ID in CSV Reports <span class="tag tag-new">New</span></td>
+              <td>SFDC ID in CSV Reports <span class="tag tag-feature">Feature</span></td>
               <td>A new required Salesforce ID (SFDC ID) field has been added. This ID is now automatically injected into relevant CSV reports for better tracking and integration.</td>
             </tr>
             <tr>
-              <td>Improved Navigation Filtering <span class="tag tag-new">New</span></td>
+              <td>Improved Navigation Filtering <span class="tag tag-feature">Feature</span></td>
               <td>When filtering the sidebar navigation in the HTML report, non-matching sibling items within a section are now hidden for a cleaner and more focused view.</td>
             </tr>
             <tr>
-              <td>New &#x27;Posture&#x27; Report Group <span class="tag tag-new">New</span></td>
+              <td>New &#x27;Posture&#x27; Report Group <span class="tag tag-feature">Feature</span></td>
               <td>A &quot;Posture&quot; group has been added to the report structure, helping to better organize related security and configuration checks.</td>
             </tr>
             <tr>
-              <td>Agent End-of-Life Check <span class="tag tag-new">New</span></td>
+              <td>Agent End-of-Life Check <span class="tag tag-feature">Feature</span></td>
               <td>A new check has been introduced to identify and report on agents that have reached their End-of-Life (EOL) status.</td>
             </tr>
             <tr>
-              <td>Migrated to Google GenAI SDK <span class="tag tag-technical">Technical</span></td>
+              <td>Migrated to Google GenAI SDK <span class="tag tag-infra">Infrastructure</span></td>
               <td>The service has been migrated from the legacy <code>vertexai</code> SDK to the <code>google-genai</code> SDK for all generative AI functionalities.</td>
             </tr>
             <tr>
-              <td>Improved BigQuery Upload Logic <span class="tag tag-technical">Technical</span></td>
+              <td>Improved BigQuery Upload Logic <span class="tag tag-enhancement">Enhancement</span></td>
               <td>The BigQuery and additional data upload processes will now gracefully skip if a <code>project_id</code> is not configured, preventing errors and logging an informational message instead.</td>
-            </tr>
-            <tr>
-              <td>Internal Manifest Cleanup <span class="tag tag-technical">Technical</span></td>
-              <td>The unused <code>tenantAbout</code> and <code>About</code> fields have been removed from the service definition manifests and related backend configurations.</td>
-            </tr>
-            <tr>
-              <td>Added SFDC ID Design Specification <span class="tag tag-technical">Technical</span></td>
-              <td>An internal design specification document was created to outline the implementation of the new SFDC ID input field.</td>
             </tr>
           </tbody>
         </table>

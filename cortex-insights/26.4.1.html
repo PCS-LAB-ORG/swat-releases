@@ -110,7 +110,7 @@
     .hero-meta-item strong { color: var(--text); font-weight: 600; }
     .hero p { font-size: 15px; color: var(--text-muted); max-width: 640px; line-height: 1.7; }
 
-    section { margin-bottom: 56px; }
+    section { margin-bottom: 56px; scroll-margin-top: 120px; }
     .section-label {
       font-size: 11px; font-weight: 700; letter-spacing: .1em;
       text-transform: uppercase; color: var(--accent); margin-bottom: 10px;
@@ -154,10 +154,10 @@
       font-size: 11px; font-weight: 700; letter-spacing: .04em;
       white-space: nowrap;
     }
-    .tag-new       { background: rgba(62,207,142,.15);  color: var(--green); }
-    .tag-improved  { background: rgba(74,158,255,.12);  color: var(--blue); }
-    .tag-fixed     { background: rgba(62,207,142,.12);  color: var(--green); }
-    .tag-technical { background: rgba(167,139,250,.12); color: var(--purple); }
+    .tag-feature   { background: rgba(62,207,142,.15);  color: var(--green); }
+    .tag-enhancement { background: rgba(74,158,255,.12);  color: var(--blue); }
+    .tag-fixed     { background: rgba(245,158,11,.12);   color: #f59e0b; }
+    .tag-architecture { background: rgba(167,139,250,.12); color: var(--purple); }
 
     footer {
       border-top: 1px solid var(--border); padding: 32px 24px;
@@ -205,43 +205,43 @@
           <thead><tr><th>Feature</th><th>Description</th></tr></thead>
           <tbody>
             <tr>
-              <td>Unity Cloud Platform Workflow <span class="tag tag-new">New</span></td>
+              <td>Unity Cloud Platform Workflow <span class="tag tag-feature">Feature</span></td>
               <td>A new workflow has been added to the Unity companion service to support cloud platform assessments, introducing new prompts and service definitions.</td>
             </tr>
             <tr>
-              <td>Total Vulnerabilities in BigQuery Export <span class="tag tag-new">New</span></td>
+              <td>Total Vulnerabilities in BigQuery Export <span class="tag tag-feature">Feature</span></td>
               <td>The BigQuery CSV output now includes a new <code>cld_vln_repo_total</code> derived column, providing a sum of total code vulnerabilities across all repositories for easier tracking.</td>
             </tr>
             <tr>
-              <td>Automated Platform Detection <span class="tag tag-new">New</span></td>
+              <td>Automated Platform Detection <span class="tag tag-feature">Feature</span></td>
               <td>The Unity service now automatically derives the platform from the <code>unity_platform</code> variable, removing the need for users to provide this input manually.</td>
             </tr>
             <tr>
-              <td>Manifest Field Requirements <span class="tag tag-new">New</span></td>
+              <td>Manifest Field Requirements <span class="tag tag-feature">Feature</span></td>
               <td>The <code>requestorEmail</code> field is now required for the Unity service, and a <code>region</code> field is now required for the base manifest to improve data quality and ensure proper execution.</td>
             </tr>
             <tr>
-              <td>Check and Badge Logic Updates <span class="tag tag-new">New</span></td>
+              <td>Check and Badge Logic Updates <span class="tag tag-feature">Feature</span></td>
               <td>Several runtime and AppSec checks have been updated to improve accuracy and filtering. The <code>runtime_trusted_images_bronze</code> check is now correctly limited to the cloud platform, and <code>cas_repo_CI_bronze</code> now returns both a count and status.</td>
             </tr>
             <tr>
-              <td>As-Built Report Content Expansion <span class="tag tag-technical">Technical</span></td>
+              <td>As-Built Report Content Expansion <span class="tag tag-enhancement">Enhancement</span></td>
               <td>Significantly expanded the scope and detail of As-Built reports by adding and refining dozens of YAML definitions for posture, inventory, AppSec, data collection, and more. Report section ordering has also been updated for better clarity.</td>
             </tr>
             <tr>
-              <td>CI/CD Pipeline Improvements <span class="tag tag-technical">Technical</span></td>
+              <td>CI/CD Pipeline Improvements <span class="tag tag-infra">Infrastructure</span></td>
               <td>Introduced a new script to build and push all companion services at once, with an option to target a single service. Build scripts have been updated with corrected container registry paths for stage and production environments.</td>
             </tr>
             <tr>
-              <td>Enhanced Debug Logging <span class="tag tag-technical">Technical</span></td>
+              <td>Enhanced Debug Logging <span class="tag tag-enhancement">Enhancement</span></td>
               <td>Removed truncation from API and query debug logs to provide full visibility during troubleshooting. GCP authentication logs now include the service account email to simplify identity verification.</td>
             </tr>
             <tr>
-              <td>GCP Authentication Refactor <span class="tag tag-technical">Technical</span></td>
+              <td>GCP Authentication Refactor <span class="tag tag-enhancement">Enhancement</span></td>
               <td>Centralized the logic for Google Cloud Application Default Credentials (ADC) identity resolution to simplify authentication flows. A fix was also implemented to force credential refreshes, resolving potential stale token issues.</td>
             </tr>
             <tr>
-              <td>Manifest Generation Utility <span class="tag tag-technical">Technical</span></td>
+              <td>Manifest Generation Utility <span class="tag tag-enhancement">Enhancement</span></td>
               <td>The internal manifest generator now supports a key-value pivot, providing more flexibility for creating basic badge manifests from check data.</td>
             </tr>
           </tbody>

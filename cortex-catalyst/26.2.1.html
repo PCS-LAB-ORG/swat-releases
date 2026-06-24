@@ -55,7 +55,7 @@
       font-size: 11px; font-weight: 700; color: var(--accent); min-width: 20px; }
     .toc ol li a { color: var(--text-muted); text-decoration: none; transition: color .15s; }
     .toc ol li a:hover { color: var(--accent); }
-    section { margin-bottom: 56px; }
+    section { margin-bottom: 56px; scroll-margin-top: 120px; }
     .section-label { font-size: 11px; font-weight: 700; letter-spacing: .1em;
       text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
     h2.section-title { font-size: 22px; font-weight: 700; color: var(--text-strong);
@@ -77,9 +77,9 @@
     td:first-child { font-weight: 600; color: var(--text-strong); min-width: 200px; }
     .tag { display: inline-block; padding: 2px 8px; border-radius: 4px;
       font-size: 11px; font-weight: 700; letter-spacing: .04em; white-space: nowrap; }
-    .tag-new      { background: rgba(62,207,142,.15); color: var(--green); }
-    .tag-improved { background: rgba(74,158,255,.12); color: var(--blue); }
-    .tag-fixed    { background: rgba(62,207,142,.12); color: var(--green); }
+    .tag-feature   { background: rgba(62,207,142,.15); color: var(--green); }
+    .tag-enhancement { background: rgba(74,158,255,.12); color: var(--blue); }
+    .tag-fixed     { background: rgba(245,158,11,.12);  color: #f59e0b; }
     .tag-planned  { background: rgba(244,201,79,.12); color: var(--yellow); }
     .tag-known    { background: rgba(250,88,45,.12);  color: var(--accent); }
     .issue { font-size: 11px; color: var(--blue); background: rgba(74,158,255,.1);
@@ -139,7 +139,7 @@
       <div class="table-wrap">
         <table>
           <thead><tr><th>Feature</th><th>Description</th></tr></thead>
-          <tbody><tr><td>Conversational AI Search <span class="tag tag-new">New</span></td><td>Ask questions in natural language about the Cortex product suite and receive answers grounded in official documentation, with support for multi-turn follow-up conversation.</td></tr><tr><td>Source Citations <span class="tag tag-new">New</span></td><td>Each response includes expandable source references showing which documents were used to generate the answer.</td></tr><tr><td>Dynamic Query Intelligence <span class="tag tag-new">New</span></td><td>The agent automatically detects query patterns — release notes, product-specific, version-specific, temporal — and applies contextual instructions to improve answer relevance.</td></tr><tr><td>Dynamic Datastore Scoping <span class="tag tag-new">New</span></td><td>Queries are automatically routed to the most relevant documentation subset based on detected patterns, improving result quality for targeted searches such as release notes and XQL queries.</td></tr><tr><td>Dark Mode <span class="tag tag-new">New</span></td><td>Toggle between light and dark themes. System preference is detected automatically on first load.</td></tr><tr><td>Copy Message <span class="tag tag-new">New</span></td><td>Copy any individual message — question or answer — to the clipboard with visual confirmation.</td></tr><tr><td>Copy Transcript <span class="tag tag-new">New</span></td><td>Export the full conversation as a formatted transcript including timestamps and source citations.</td></tr><tr><td>Markdown Rendering <span class="tag tag-new">New</span></td><td>Responses are rendered with professional formatting including headings, bold, lists, code blocks, links, and blockquotes.</td></tr></tbody>
+          <tbody><tr><td>Conversational AI Search <span class="tag tag-feature">Feature</span></td><td>Ask questions in natural language about the Cortex product suite and receive answers grounded in official documentation, with support for multi-turn follow-up conversation.</td></tr><tr><td>Source Citations <span class="tag tag-feature">Feature</span></td><td>Each response includes expandable source references showing which documents were used to generate the answer.</td></tr><tr><td>Dynamic Query Intelligence <span class="tag tag-feature">Feature</span></td><td>The agent automatically detects query patterns — release notes, product-specific, version-specific, temporal — and applies contextual instructions to improve answer relevance.</td></tr><tr><td>Dynamic Datastore Scoping <span class="tag tag-feature">Feature</span></td><td>Queries are automatically routed to the most relevant documentation subset based on detected patterns, improving result quality for targeted searches such as release notes and XQL queries.</td></tr><tr><td>Dark Mode <span class="tag tag-feature">Feature</span></td><td>Toggle between light and dark themes. System preference is detected automatically on first load.</td></tr><tr><td>Copy Message <span class="tag tag-feature">Feature</span></td><td>Copy any individual message — question or answer — to the clipboard with visual confirmation.</td></tr><tr><td>Copy Transcript <span class="tag tag-feature">Feature</span></td><td>Export the full conversation as a formatted transcript including timestamps and source citations.</td></tr><tr><td>Markdown Rendering <span class="tag tag-feature">Feature</span></td><td>Responses are rendered with professional formatting including headings, bold, lists, code blocks, links, and blockquotes.</td></tr></tbody>
         </table>
       </div>
     </section>
