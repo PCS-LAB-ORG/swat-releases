@@ -3,7 +3,7 @@
   <rect width="900" height="160" fill="#ffffff"/>
 
   <!-- Top accent bar -->
-  <rect width="900" height="3" fill="#fa582d"/>
+  <rect width="900" height="3" fill="#3ecf8e"/>
 
   <!-- Bottom border -->
   <rect y="158" width="900" height="1" fill="#e2e5ef"/>
