@@ -144,7 +144,7 @@ Release date as written month: `June 2026`, `March 2026`. Not ISO dates.
 | `Planned` | Yellow | Upcoming features (Catalyst only) |
 | `Known` | Orange | Known issues (Catalyst only) |
 | `Technical` | Purple | Refactoring, architecture changes (operational/engineering models) |
-| `Infrastructure` | Blue | CI/CD, deployment, cloud config changes (operational/engineering models) |
+| `Infrastructure` | Teal | CI/CD, deployment, cloud config changes (operational/engineering models) |
 | `Architecture` | Purple | Major design decisions (engineering milestones model) |
-| `Pipeline` | Blue | Data pipeline or retrieval changes (engineering milestones model) |
+| `Pipeline` | Teal | Data pipeline or retrieval changes (engineering milestones model) |
 | `Quality` | Green | Measurable quality improvements (engineering milestones model) |
