@@ -80,13 +80,30 @@ def load_all_versions(data_folder: str, current_version: str,
     return sorted(seen.values(), key=lambda x: x["version"], reverse=True)
 
 
-def load_all_release_data(data_folder: str) -> list[dict]:
-    """Return all release artifacts as a list of dicts, newest first."""
-    folder = Path(data_folder)
-    releases = []
-    for json_file in sorted(folder.glob("*.json"), key=lambda f: f.stem, reverse=True):
-        releases.append(json.loads(json_file.read_text()))
-    return releases
+def load_all_release_data(data_folder: str,
+                          html_folder: str | None = None) -> list[dict]:
+    """Return all releases (JSON artifacts + HTML-only pages) newest first."""
+    seen: dict[str, dict] = {}
+    for json_file in Path(data_folder).glob("*.json"):
+        data = json.loads(json_file.read_text())
+        seen[data["version"]] = data
+    if html_folder:
+        date_re = re.compile(
+            r'<div class="hero-meta-item"><strong>Released</strong>\s*&nbsp;([^<]+)</div>'
+        )
+        for html_file in Path(html_folder).glob("*.html"):
+            v = html_file.stem
+            if v in seen:
+                continue
+            match = date_re.search(html_file.read_text())
+            seen[v] = {
+                "version": v,
+                "date": match.group(1).strip() if match else v,
+                "summary": "",
+                "release_url": "",
+                "entries": [],
+            }
+    return sorted(seen.values(), key=lambda x: x["version"], reverse=True)
 
 
 def _group_by_month(releases: list[dict]) -> list[dict]:
@@ -232,7 +249,7 @@ def main() -> None:
             print(f"Updated nav: {other_path}", file=sys.stderr)
 
     # Rebuild index.html panel from all artifacts
-    all_releases = load_all_release_data(str(data_folder))
+    all_releases = load_all_release_data(str(data_folder), html_folder=tool["folder"])
     latest = all_releases[0] if all_releases else None
     month_groups = _group_by_month(all_releases[1:]) if len(all_releases) > 1 else []
     updater.rebuild_catalyst_panel(tool, latest=latest,
