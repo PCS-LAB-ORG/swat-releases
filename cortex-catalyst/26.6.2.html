@@ -168,7 +168,7 @@
 
     <section id="changes">
       <h2 class="section-title">Changes</h2>
-      <p class="section-desc">This release enhances citation quality and reliability while restoring temporal filters and stabilizing follow-up suggestion chips.</p>
+      <p class="section-desc">This release delivers cleaner citation previews, resolves temporal filtering and UI display bugs, and introduces clearer scope notifications when search filters expand.</p>
 
       <div class="version-nav">
         
@@ -201,48 +201,53 @@
           <tbody>
             
             <tr>
-              <td>Scope notices for fallback search results <span class="tag tag-enhancement">Enhancement</span></td>
-              <td>Users are now explicitly notified when a product- or date-filtered query returns zero results and falls back to a broader search.</td>
-            </tr>
-            
-            <tr>
-              <td>Restored date-scoped search filters <span class="tag tag-fixed">Fixed</span></td>
-              <td>Queries specifying timeframes, such as &#39;last 6 months&#39;, now correctly filter results by publication date rather than returning the entire unfiltered document library.</td>
-            </tr>
-            
-            <tr>
-              <td>Cleaner citation previews in side panel <span class="tag tag-enhancement">Enhancement</span></td>
-              <td>Citation excerpts now display actual document content and instructions instead of cluttered structural headers and topic paths.</td>
-            </tr>
-            
-            <tr>
-              <td>Consolidated citations for multiple product versions <span class="tag tag-enhancement">Enhancement</span></td>
-              <td>The citation panel now collapses duplicate entries of the same documentation topic across different software versions, automatically showing only the most recent version to reduce clutter.</td>
+              <td>Restored time-based query filtering <span class="tag tag-fixed">Fixed</span></td>
+              <td>Queries specifying temporal constraints (such as &#39;last 6 months&#39;) now correctly filter by document publication dates, resolving an issue where the full, unfiltered documentation corpus was returned instead.</td>
             </tr>
             
             <tr>
               <td>Scrollable citation panel for large source lists <span class="tag tag-fixed">Fixed</span></td>
-              <td>Resolved an issue where the citation panel became cut off and unscrollable on smaller screens when displaying more than six source documents.</td>
+              <td>Fixed an issue that prevented users from scrolling through the citation panel on smaller screens when more than six sources were returned.</td>
             </tr>
             
             <tr>
-              <td>Consistent follow-up suggestion chips <span class="tag tag-fixed">Fixed</span></td>
-              <td>Follow-up question suggestion chips no longer disappear during rapid, back-to-back queries, as the application now automatically retries failed background requests.</td>
+              <td>Reliable rendering of follow-up suggestions <span class="tag tag-fixed">Fixed</span></td>
+              <td>Follow-up question suggestions now automatically retry loading if they are temporarily interrupted, ensuring recommended next steps consistently display even during rapid back-to-back searches.</td>
             </tr>
             
             <tr>
-              <td>High initial response generation latency <span class="tag tag-known">Known</span></td>
-              <td>Responses currently take up to 28 seconds to complete; streaming text generation is planned as a future update to improve perceived performance.</td>
+              <td>Cleaner citation previews with stripped headers <span class="tag tag-enhancement">Enhancement</span></td>
+              <td>Citation previews in the side panel now display actual document body text rather than repetitive structural headers and file paths, making it easier to quickly evaluate source relevance.</td>
             </tr>
             
             <tr>
-              <td>Version filtering unavailable for Cortex XSIAM <span class="tag tag-known">Known</span></td>
-              <td>Queries targeting specific Cortex XSIAM versions will fallback to broader XSIAM documentation due to calendar-based indexing, accompanied by an explanatory scope notice.</td>
+              <td>Deduplicated citations for multi-version documentation <span class="tag tag-enhancement">Enhancement</span></td>
+              <td>The citation panel now automatically collapses duplicate topics across multiple product versions to show only the most recent source, significantly reducing clutter and redundant entries.</td>
             </tr>
             
             <tr>
-              <td>Limited coverage for Cortex AgentiX documentation <span class="tag tag-known">Known</span></td>
-              <td>Because the Cortex AgentiX platform is new, some specific queries may yield general XSOAR-based documentation where dedicated AgentiX resources are still being populated.</td>
+              <td>Scope notifications for fallback search results <span class="tag tag-enhancement">Enhancement</span></td>
+              <td>When a highly filtered query returns zero results and falls back to a broader search, a notification now clearly informs you that the results span multiple products or time periods.</td>
+            </tr>
+            
+            <tr>
+              <td>Elevated initial response generation latency <span class="tag tag-known">Known</span></td>
+              <td>Average response times currently range between 18 to 28 seconds due to backend processing limits while we work on introducing response streaming.</td>
+            </tr>
+            
+            <tr>
+              <td>Version-specific filtering unavailable for Cortex XSIAM <span class="tag tag-known">Known</span></td>
+              <td>Searching for specific XSIAM version numbers will trigger a fallback notification, as XSIAM documentation is organized by calendar date rather than version.</td>
+            </tr>
+            
+            <tr>
+              <td>Limited documentation coverage for Cortex AgentiX <span class="tag tag-known">Known</span></td>
+              <td>Because Cortex AgentiX is a newly launched platform, queries may temporarily pull from general Cortex XSOAR documentation when specific AgentiX resources are unavailable.</td>
+            </tr>
+            
+            <tr>
+              <td>Progressive response streaming <span class="tag tag-planned">Planned</span></td>
+              <td>An experimental feature to stream text progressively as it is generated is planned to significantly reduce the perceived wait time for search responses.</td>
             </tr>
             
           </tbody>
