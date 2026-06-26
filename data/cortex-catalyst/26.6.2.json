@@ -2,57 +2,52 @@
   "version": "26.6.2",
   "date": "June 2026",
   "release_url": "https://github.com/PCS-LAB-ORG/catalyst-rag-agent/releases/tag/26.6.2",
-  "summary": "This release delivers cleaner citation previews, resolves temporal filtering and UI display bugs, and introduces clearer scope notifications when search filters expand.",
+  "summary": "This release improves citation quality, restores search date filtering, ensures follow-up suggestions load reliably, and fixes several user interface bugs.",
   "entries": [
     {
       "tag": "Fixed",
-      "title": "Restored time-based query filtering",
-      "description": "Queries specifying temporal constraints (such as 'last 6 months') now correctly filter by document publication dates, resolving an issue where the full, unfiltered documentation corpus was returned instead."
+      "title": "Date-filtered searches now work correctly",
+      "description": "Temporal search queries, such as \"last 6 months\" or \"since 2026,\" once again properly filter search results based on the publication date instead of returning the entire unfiltered document set."
+    },
+    {
+      "tag": "Enhancement",
+      "title": "Clearer notifications for empty filtered searches",
+      "description": "When a search filtered by product or date finds no matching results, the assistant now clearly notifies you that it has expanded the search to a broader, unfiltered set of documents."
+    },
+    {
+      "tag": "Enhancement",
+      "title": "Cleaner and more readable citation previews",
+      "description": "The citation side panel now displays the actual substantive text of the source documents rather than showing redundant structural headers and URL paths."
+    },
+    {
+      "tag": "Enhancement",
+      "title": "Duplicated documentation versions are now collapsed",
+      "description": "When a search returns multiple versions of the same documentation topic (e.g., across different software versions), the citation panel collapses them into a single entry pointing to the latest version to reduce noise."
     },
     {
       "tag": "Fixed",
-      "title": "Scrollable citation panel for large source lists",
-      "description": "Fixed an issue that prevented users from scrolling through the citation panel on smaller screens when more than six sources were returned."
+      "title": "Scrollbar restored for long citation lists",
+      "description": "Resolved an issue where users on smaller screens could not scroll down to view more than six sources in the citation panel."
     },
     {
       "tag": "Fixed",
-      "title": "Reliable rendering of follow-up suggestions",
-      "description": "Follow-up question suggestions now automatically retry loading if they are temporarily interrupted, ensuring recommended next steps consistently display even during rapid back-to-back searches."
-    },
-    {
-      "tag": "Enhancement",
-      "title": "Cleaner citation previews with stripped headers",
-      "description": "Citation previews in the side panel now display actual document body text rather than repetitive structural headers and file paths, making it easier to quickly evaluate source relevance."
-    },
-    {
-      "tag": "Enhancement",
-      "title": "Deduplicated citations for multi-version documentation",
-      "description": "The citation panel now automatically collapses duplicate topics across multiple product versions to show only the most recent source, significantly reducing clutter and redundant entries."
-    },
-    {
-      "tag": "Enhancement",
-      "title": "Scope notifications for fallback search results",
-      "description": "When a highly filtered query returns zero results and falls back to a broader search, a notification now clearly informs you that the results span multiple products or time periods."
+      "title": "Follow-up question chips load reliably",
+      "description": "Suggested follow-up questions now automatically retry loading if rate limits are hit, ensuring they consistently appear beneath responses even during rapid search sessions."
     },
     {
       "tag": "Known",
-      "title": "Elevated initial response generation latency",
-      "description": "Average response times currently range between 18 to 28 seconds due to backend processing limits while we work on introducing response streaming."
+      "title": "Temporary latency when generating responses",
+      "description": "Responses currently take between 18 to 28 seconds to fully generate. Work is underway to introduce streaming responses to display text progressively."
     },
     {
       "tag": "Known",
-      "title": "Version-specific filtering unavailable for Cortex XSIAM",
-      "description": "Searching for specific XSIAM version numbers will trigger a fallback notification, as XSIAM documentation is organized by calendar date rather than version."
+      "title": "Version-specific filtering unavailable for XSIAM",
+      "description": "Because Cortex XSIAM documentation is organized by date rather than version numbers, queries specifying XSIAM versions will search all XSIAM documents and display a scope notice."
     },
     {
       "tag": "Known",
       "title": "Limited documentation coverage for Cortex AgentiX",
-      "description": "Because Cortex AgentiX is a newly launched platform, queries may temporarily pull from general Cortex XSOAR documentation when specific AgentiX resources are unavailable."
-    },
-    {
-      "tag": "Planned",
-      "title": "Progressive response streaming",
-      "description": "An experimental feature to stream text progressively as it is generated is planned to significantly reduce the perceived wait time for search responses."
+      "description": "As Cortex AgentiX is a newly launched platform, its documentation coverage is currently limited. Some queries may fall back to general XSOAR documentation."
     }
   ]
 }
