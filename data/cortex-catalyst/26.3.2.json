@@ -1,0 +1,33 @@
+{
+  "version": "26.3.2",
+  "date": "November 2023",
+  "release_url": "https://github.com/PCS-LAB-ORG/catalyst-rag-agent/releases/tag/26.3.2",
+  "summary": "Cortex Catalyst now supports live documentation Q&A with transparent source attribution, using an initial subset of the Cortex documentation corpus.",
+  "entries": [
+    {
+      "tag": "Feature",
+      "title": "Interactive Cortex documentation search launched",
+      "description": "You can now ask natural-language questions directly against the Cortex documentation corpus and receive AI-generated answers."
+    },
+    {
+      "tag": "Enhancement",
+      "title": "Transparent source attribution for answers",
+      "description": "The assistant now explicitly flags whether its answers are derived from its pre-trained knowledge or retrieved directly from the official documentation corpus."
+    },
+    {
+      "tag": "Known",
+      "title": "Citations are currently blank",
+      "description": "Citations in answers do not display links because the underlying source material points to internal storage buckets instead of public documentation URLs."
+    },
+    {
+      "tag": "Known",
+      "title": "Advanced metadata filtering is inactive",
+      "description": "Filtering your documentation searches by specific product, version, or content type is currently unavailable."
+    },
+    {
+      "tag": "Known",
+      "title": "Limited initial documentation coverage",
+      "description": "Answers are restricted to a subset of 30 FluidTopics documentation maps out of the planned total of over 400."
+    }
+  ]
+}
