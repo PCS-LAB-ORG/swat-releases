@@ -1,0 +1,58 @@
+{
+  "version": "26.6.2",
+  "date": "June 2026",
+  "release_url": "https://github.com/PCS-LAB-ORG/catalyst-rag-agent/releases/tag/26.6.2",
+  "summary": "This release improves citation readability, restores temporal search filters, and ensures follow-up suggestions remain visible during active chat sessions.",
+  "entries": [
+    {
+      "tag": "Enhancement",
+      "title": "Clearer notifications on fallback searches",
+      "description": "When a search filtered by product or date yields no results, the chat response now displays a notice explaining that the search has broadened to the wider documentation library."
+    },
+    {
+      "tag": "Fixed",
+      "title": "Restored date-based search filtering",
+      "description": "Temporal queries such as \"last 6 months\" or \"since 2026\" now correctly filter search results based on document publication dates instead of returning the entire unfiltered library."
+    },
+    {
+      "tag": "Enhancement",
+      "title": "Cleaner citation excerpts in side panel",
+      "description": "Citation previews in the sidebar now display only substantive document text, omitting structural headers and page titles to make them easier to scan."
+    },
+    {
+      "tag": "Enhancement",
+      "title": "Collapsed duplicate citations in panel",
+      "description": "The citation panel now groups multiple versions of the same topic together under the most recent source, reducing visual clutter from duplicate results."
+    },
+    {
+      "tag": "Fixed",
+      "title": "Fixed scrolling in long citation lists",
+      "description": "Users on smaller screens can now scroll through citation panels containing more than six sources."
+    },
+    {
+      "tag": "Fixed",
+      "title": "Reliable follow-up question suggestions",
+      "description": "Suggested follow-up questions now automatically retry when rate-limited, preventing suggestion chips from blanking out during consecutive rapid queries."
+    },
+    {
+      "tag": "Known",
+      "title": "Chat generation latency",
+      "description": "Responses may take 18 to 28 seconds to fully generate due to AI model processing times."
+    },
+    {
+      "tag": "Planned",
+      "title": "Progressive streaming for chat responses",
+      "description": "Development is planned for progressive text streaming, which will display responses word-by-word as they generate to reduce perceived waiting times."
+    },
+    {
+      "tag": "Known",
+      "title": "Version filtering unavailable for XSIAM",
+      "description": "Searches specifying XSIAM version numbers will display a notice explaining that XSIAM documents are organized by calendar date, falling back to general XSIAM docs."
+    },
+    {
+      "tag": "Known",
+      "title": "Limited coverage for Cortex AgentiX",
+      "description": "Due to the recent launch of Cortex AgentiX, documentation coverage is currently limited, and queries may temporarily return answers drawn from general XSOAR documentation."
+    }
+  ]
+}
