@@ -117,7 +117,12 @@ jobs:
               --head "$BRANCH" \
               --title "auto: Cortex Catalyst $VERSION release notes" \
               --body "$PR_BODY"
-            gh pr merge "$BRANCH" --merge --delete-branch
+            PR_NUMBER=$(gh pr view "$BRANCH" --json number --jq '.number')
+            gh api repos/PCS-LAB-ORG/swat-releases/pulls/$PR_NUMBER/merge \
+              -X PUT \
+              -f merge_method=merge \
+              -f commit_title="auto: Cortex Catalyst $VERSION release notes"
+            gh api repos/PCS-LAB-ORG/swat-releases/git/refs/heads/$BRANCH -X DELETE
 
             git checkout main
             echo "::endgroup::"
