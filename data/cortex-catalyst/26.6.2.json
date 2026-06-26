@@ -1,0 +1,53 @@
+{
+  "version": "26.6.2",
+  "date": "June 2026",
+  "release_url": "https://github.com/PCS-LAB-ORG/catalyst-rag-agent/releases/tag/26.6.2",
+  "summary": "This release improves citation clarity, restores date-based search filtering, and ensures that follow-up question suggestions generate reliably.",
+  "entries": [
+    {
+      "tag": "Enhancement",
+      "title": "Scope notices for fallback searches",
+      "description": "When a product or date filter returns no results, the interface now displays a notice explaining that search results have expanded to include other products and timeframes rather than silently showing out-of-scope answers."
+    },
+    {
+      "tag": "Fixed",
+      "title": "Restored temporal date filtering for queries",
+      "description": "Queries seeking documents from specific timeframes (such as 'last 6 months') now correctly filter by publication date instead of failing back to the entire unfiltered document corpus."
+    },
+    {
+      "tag": "Enhancement",
+      "title": "Substantive excerpts in citation panels",
+      "description": "Citation previews in the side panel now display actual document body text rather than redundant structural headers, making it easier to evaluate sources quickly."
+    },
+    {
+      "tag": "Enhancement",
+      "title": "Deduplicated citations for multiple document versions",
+      "description": "The citation panel now collapses duplicate topics across different software versions to show only the most recent source, reducing visual clutter in the sidebar."
+    },
+    {
+      "tag": "Fixed",
+      "title": "Citation panel scrolling on small viewports",
+      "description": "Users can now scroll through long lists of citation sources (more than 6) on smaller screens without the list cutting off."
+    },
+    {
+      "tag": "Fixed",
+      "title": "Reliable follow-up suggestion chip generation",
+      "description": "Follow-up question chips will no longer occasionally disappear during rapid back-to-back queries, as the app now automatically retries when hitting API rate limits."
+    },
+    {
+      "tag": "Known",
+      "title": "Prolonged response generation latency",
+      "description": "Average response times range between 18 and 28 seconds due to backend model generation limits; streaming capabilities are planned for a future release."
+    },
+    {
+      "tag": "Known",
+      "title": "Unavailable version filtering for Cortex XSIAM",
+      "description": "Queries specifying a version for Cortex XSIAM will trigger a scope notice because XSIAM documentation is organized by date rather than version number."
+    },
+    {
+      "tag": "Known",
+      "title": "Limited Cortex AgentiX documentation coverage",
+      "description": "Because Cortex AgentiX is a newly launched platform, queries may return general XSOAR information while its documentation corpus continues to grow."
+    }
+  ]
+}
