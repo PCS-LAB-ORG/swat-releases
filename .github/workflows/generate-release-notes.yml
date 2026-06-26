@@ -63,8 +63,11 @@ jobs:
         if: steps.poll.outputs.new_versions != ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_VERSIONS: ${{ steps.poll.outputs.new_versions }}
+          FORCE_VERSION: ${{ inputs.force_version }}
         run: |
-          for VERSION in ${{ steps.poll.outputs.new_versions }}; do
+          for VERSION in $NEW_VERSIONS; do
             echo "::group::Processing Cortex Catalyst $VERSION"
 
             BRANCH="auto/release-notes/cortex-catalyst-$VERSION"
@@ -72,7 +75,7 @@ jobs:
 
             # Stage 1: extract JSON artifact via Gemini
             FORCE_FLAG=""
-            if [ -n "${{ inputs.force_version }}" ]; then
+            if [ -n "$FORCE_VERSION" ]; then
               FORCE_FLAG="--force"
             fi
             python scripts/extract.py cortex-catalyst "$VERSION" $FORCE_FLAG
@@ -99,5 +102,3 @@ jobs:
             git checkout main
             echo "::endgroup::"
           done
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
