@@ -1,0 +1,53 @@
+{
+  "version": "26.6.2",
+  "date": "June 2026",
+  "release_url": "https://github.com/PCS-LAB-ORG/catalyst-rag-agent/releases/tag/26.6.2",
+  "summary": "This release delivers cleaner citation formatting, restores accurate date-based filtering, improves follow-up suggestions, and addresses known content and performance limits.",
+  "entries": [
+    {
+      "tag": "Enhancement",
+      "title": "Clear scope notices for empty filter results",
+      "description": "When a filtered search returns no results, the application now clearly notifies you that it has broadened its search to other products and time periods rather than silently falling back to the wider database."
+    },
+    {
+      "tag": "Fixed",
+      "title": "Restored date-scoped document filtering",
+      "description": "Temporal searches like \"last 6 months\" or \"since 2026\" now correctly filter results based on document publication dates rather than displaying unfiltered search results."
+    },
+    {
+      "tag": "Enhancement",
+      "title": "Cleaner citation side-panel excerpts",
+      "description": "Citation excerpts now display clean, substantive document content by stripping out distracting structural headers and technical metadata."
+    },
+    {
+      "tag": "Enhancement",
+      "title": "Grouped citation versions for cleaner lists",
+      "description": "When search results retrieve multiple versions of the same topic, the citation panel now collapses them into a single entry featuring only the most recent version."
+    },
+    {
+      "tag": "Fixed",
+      "title": "Scroll support for long citation lists",
+      "description": "Corrected an issue where users on smaller screens could not scroll down to view citations when more than six sources were returned."
+    },
+    {
+      "tag": "Enhancement",
+      "title": "Consistent follow-up question suggestions",
+      "description": "Follow-up question chips now automatically retry and load during back-to-back rapid searches, preventing empty spaces caused by temporary rate limits."
+    },
+    {
+      "tag": "Known",
+      "title": "Response latencies of 18 to 28 seconds",
+      "description": "Response generation times average 18 to 28 seconds; streaming support is planned to help display text progressively."
+    },
+    {
+      "tag": "Known",
+      "title": "Version filtering unavailable for Cortex XSIAM",
+      "description": "Queries targeting specific Cortex XSIAM versions will display a scope notice and return broader chronological results, as XSIAM documentation is organized by date rather than version."
+    },
+    {
+      "tag": "Known",
+      "title": "Limited documentation coverage for Cortex AgentiX",
+      "description": "Queries regarding the newly launched Cortex AgentiX may yield limited results or fall back to general XSOAR documentation while its dedicated knowledge base is expanded."
+    }
+  ]
+}
