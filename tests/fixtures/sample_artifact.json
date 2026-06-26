@@ -1,0 +1,18 @@
+{
+  "version": "26.7.1",
+  "date": "July 2026",
+  "release_url": "https://github.com/PCS-LAB-ORG/catalyst-rag-agent/releases/tag/26.7.1",
+  "summary": "Citation panel and inline markers ship as core UI features.",
+  "entries": [
+    {
+      "tag": "Feature",
+      "title": "Citation Panel",
+      "description": "A slide-out panel shows the topic snippet, document title, and live URL for each source referenced in the response."
+    },
+    {
+      "tag": "Feature",
+      "title": "Inline Citation Markers",
+      "description": "Source references appear as clickable [1] [2] [3] markers embedded at the exact sentence drawing from each source."
+    }
+  ]
+}

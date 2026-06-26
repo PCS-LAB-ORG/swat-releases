@@ -4,3 +4,9 @@ session-summaries/
 .playwright-mcp/
 /*.png
 node_modules/
+docs/superpowers/
+.plans/
+__pycache__/
+*.pyc
+.pytest_cache/
+venv/
