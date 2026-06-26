@@ -1,0 +1,18 @@
+## Complete Chat Frontend
+
+Built the entire Next.js 15 App Router frontend from scratch.
+
+**Citation panel** (#15) — Perplexity-style slide-in drawer with numbered source cards,
+document titles, and deep-links to original documentation.
+
+**Inline [N] citation markers** (#37) — Context chunks numbered [1], [2], [3] embedded
+at the sentence level in responses.
+
+## Monitoring Stack
+
+Added Cloud Logging structured log sink, alert policies, and uptime checks.
+No user-facing changes.
+
+## Test Suite Overhaul
+
+270 backend tests added. pytest fixtures refactored.

@@ -1,0 +1,107 @@
+name: Generate Release Notes
+
+on:
+  schedule:
+    - cron: '0 6 * * *'     # daily 06:00 UTC
+  workflow_dispatch:
+    inputs:
+      force_version:
+        description: 'Force re-process a specific version (e.g. 26.7.1). Skip logic bypassed.'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write            # WIF
+
+env:
+  WIF_PROVIDER: projects/855530889800/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider
+  WIF_SERVICE_ACCOUNT: swat-releases-pipeline@pcs-swat-resources.iam.gserviceaccount.com
+  GOOGLE_CLOUD_PROJECT: pcs-swat-resources
+  GOOGLE_CLOUD_LOCATION: global
+  GOOGLE_GENAI_USE_ENTERPRISE: "True"
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Authenticate to GCP (WIF)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.WIF_SERVICE_ACCOUNT }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Poll for new releases
+        id: poll
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_FORCE_VERSION: ${{ inputs.force_version }}
+        run: python scripts/poll.py
+
+      - name: Generate release notes per version
+        if: steps.poll.outputs.new_versions != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_VERSIONS: ${{ steps.poll.outputs.new_versions }}
+          FORCE_VERSION: ${{ inputs.force_version }}
+        run: |
+          for VERSION in $NEW_VERSIONS; do
+            echo "::group::Processing Cortex Catalyst $VERSION"
+
+            git checkout main
+            git pull origin main
+            BRANCH="auto/release-notes/cortex-catalyst-$VERSION"
+            git checkout -b "$BRANCH"
+
+            # Stage 1: extract JSON artifact via Gemini
+            FORCE_FLAG=""
+            if [ -n "$FORCE_VERSION" ]; then
+              FORCE_FLAG="--force"
+            fi
+            python scripts/extract.py cortex-catalyst "$VERSION" $FORCE_FLAG
+
+            # Stage 2: render HTML and update index.html
+            python scripts/render.py cortex-catalyst "$VERSION"
+
+            # Commit
+            git add "data/cortex-catalyst/$VERSION.json" \
+                    "cortex-catalyst/$VERSION.html" \
+                    "cortex-catalyst/"*.html \
+                    "index.html"
+            git commit -m "auto: Cortex Catalyst $VERSION release notes [skip ci]"
+            git push origin "$BRANCH"
+
+            # Create PR and auto-merge
+            PR_BODY=$(python scripts/pr_body.py "data/cortex-catalyst" "$VERSION")
+            gh pr create \
+              --base main \
+              --head "$BRANCH" \
+              --title "auto: Cortex Catalyst $VERSION release notes" \
+              --body "$PR_BODY"
+            gh pr merge "$BRANCH" --merge --auto
+
+            git checkout main
+            echo "::endgroup::"
+          done

@@ -1,0 +1,13 @@
+tools:
+  - id: cortex-catalyst
+    name: "Cortex® Catalyst"
+    repo: PCS-LAB-ORG/catalyst-rag-agent
+    folder: cortex-catalyst
+    panel_id: catalyst
+    model: user-facing
+    prompt: scripts/prompts/model1_user_facing.txt
+    description: >
+      AI-powered research and troubleshooting assistant for the Cortex Product Suite.
+      Ask questions in natural language and receive grounded answers from official
+      documentation.
+    app_url: https://catalyst.pcs.lab.twistlock.com

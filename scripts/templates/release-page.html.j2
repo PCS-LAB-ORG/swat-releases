@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="{{ favicon }}" />
+  <title>{{ tool_name }} Release Notes — {{ version }}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #0f1117;
+      --bg-card:      #1a1d27;
+      --bg-table-hd:  #1e2130;
+      --bg-table-row: #161923;
+      --bg-table-alt: #1a1d27;
+      --border:       #2a2e3f;
+      --text:         #d4d8e8;
+      --text-muted:   #7b82a0;
+      --text-strong:  #eef0f8;
+      --accent:       #fa582d;
+      --accent-dim:   rgba(250,88,45,.15);
+      --blue:         #4a9eff;
+      --green:        #3ecf8e;
+      --yellow:       #f4c94f;
+      --purple:       #a78bfa;
+      --teal:         #06b6d4;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 15px;
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    .wrapper { max-width: 960px; margin: 0 auto; padding: 0 24px 80px; }
+
+    .topbar {
+      background: #0b0d14;
+      border-bottom: 1px solid var(--border);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar-center {
+      position: absolute; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center;
+    }
+    .topbar-badge {
+      margin-left: auto;
+      background: var(--accent-dim); color: var(--accent);
+      border: 1px solid rgba(250,88,45,.3); border-radius: 20px;
+      padding: 2px 10px; font-size: 12px; font-weight: 600; letter-spacing: .04em;
+    }
+
+    .hero {
+      padding: 60px 0 40px; border-bottom: 1px solid var(--border);
+      margin-bottom: 48px; position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: fixed; top: 0; right: 0; width: 32%; height: 60vh;
+      background-image: url('{{ bg }}');
+      background-size: contain; background-repeat: no-repeat;
+      background-position: right center; opacity: 0.07;
+      pointer-events: none; z-index: 0;
+    }
+    .hero > * { position: relative; z-index: 1; }
+    .hero h1 {
+      font-size: 36px; font-weight: 800; color: var(--text-strong);
+      line-height: 1.2; margin-bottom: 18px; letter-spacing: -.02em;
+    }
+    .hero-meta { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+    .hero-meta-item { font-size: 13px; color: var(--text-muted); }
+    .hero-meta-item strong { color: var(--text); font-weight: 600; }
+    .hero p { font-size: 15px; color: var(--text-muted); max-width: 640px; line-height: 1.7; }
+
+    section { margin-bottom: 56px; scroll-margin-top: 120px; }
+    h2.section-title {
+      font-size: 22px; font-weight: 700; color: var(--text-strong);
+      margin-bottom: 6px; letter-spacing: -.01em;
+    }
+    .section-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; max-width: 640px; }
+
+    .version-nav { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .version-pill { padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+    .version-pill.active { background: var(--accent); color: #fff; }
+    .version-pill.inactive {
+      background: var(--bg-card); color: var(--text-muted);
+      border: 1px solid var(--border); text-decoration: none;
+      transition: color .15s, border-color .15s;
+    }
+    .version-pill.inactive:hover { color: var(--text); border-color: var(--text-muted); }
+
+    .table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead tr { background: var(--bg-table-hd); }
+    thead th {
+      padding: 12px 16px; text-align: left;
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr {
+      background: var(--bg-table-row); border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+    tbody tr:nth-child(even) { background: var(--bg-table-alt); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(74,158,255,.05); }
+    td { padding: 14px 16px; vertical-align: top; line-height: 1.6; color: var(--text); }
+    td:first-child { font-weight: 600; color: var(--text-strong); min-width: 200px; }
+
+    .tag {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 11px; font-weight: 700; letter-spacing: .04em; white-space: nowrap;
+    }
+    .tag-feature    { background: rgba(62,207,142,.15);  color: var(--green); }
+    .tag-enhancement{ background: rgba(74,158,255,.12);  color: var(--blue); }
+    .tag-fixed      { background: rgba(245,158,11,.12);  color: #f59e0b; }
+    .tag-planned    { background: rgba(244,201,79,.12);  color: var(--yellow); }
+    .tag-known      { background: rgba(250,88,45,.12);   color: var(--accent); }
+    .tag-architecture{ background: rgba(167,139,250,.12); color: var(--purple); }
+    .tag-infrastructure{ background: rgba(6,182,212,.12); color: var(--teal); }
+
+    footer {
+      border-top: 1px solid var(--border); padding: 32px 24px;
+      text-align: center; max-width: 960px; margin: 0 auto;
+    }
+    footer p { font-size: 12px; color: var(--text-muted); max-width: 600px; margin: 0 auto; line-height: 1.6; }
+
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 26px; }
+      td:first-child { min-width: unset; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="topbar" style="position:sticky;">
+    <span class="topbar-center">
+      <img src="{{ logo }}" alt="Palo Alto Networks | Cortex" height="60" />
+    </span>
+    <span class="topbar-badge">{{ version }}</span>
+  </nav>
+
+  <div class="wrapper">
+
+    <div class="hero">
+      <h1>{{ tool_name }}<br>Release Notes</h1>
+      <div class="hero-meta">
+        <div class="hero-meta-item"><strong>Release</strong> &nbsp;{{ version }}</div>
+        <div class="hero-meta-item"><strong>Released</strong> &nbsp;{{ date }}</div>
+        {% if app_url %}
+        <div class="hero-meta-item"><strong>Application</strong> &nbsp;<a href="{{ app_url }}" style="color:var(--accent);text-decoration:none;">{{ app_url_display }}</a></div>
+        {% endif %}
+      </div>
+      <p>{{ tool_description }}</p>
+    </div>
+
+    <section id="changes">
+      <h2 class="section-title">Changes</h2>
+      <p class="section-desc">{{ summary }}</p>
+
+      <div class="version-nav">
+        {% for v in all_versions %}
+        {% if v.is_current %}
+        <span class="version-pill active">{{ v.label }}</span>
+        {% else %}
+        <a href="{{ v.href }}" class="version-pill inactive">{{ v.label }}</a>
+        {% endif %}
+        {% endfor %}
+      </div>
+
+      {% if entries %}
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Change</th><th>Description</th></tr></thead>
+          <tbody>
+            {% for entry in entries %}
+            <tr>
+              <td>{{ entry.title }} <span class="tag tag-{{ entry.tag | lower | replace(' ', '-') }}">{{ entry.tag }}</span></td>
+              <td>{{ entry.description }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p style="color:var(--text-muted);font-size:14px;">No user-facing changes in this release.</p>
+      {% endif %}
+    </section>
+
+  </div>
+
+  <footer>
+    <p>PCS SWAT Team &nbsp;·&nbsp; Palo Alto Networks &nbsp;·&nbsp;
+    <a href="{{ release_url }}" style="color:var(--text-muted);">GitHub Release</a></p>
+  </footer>
+
+</body>
+</html>
