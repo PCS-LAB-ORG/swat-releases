@@ -108,7 +108,7 @@ jobs:
                     "cortex-catalyst/"*.html \
                     "index.html"
             git commit -m "auto: Cortex Catalyst $VERSION release notes [skip ci]"
-            git push origin "$BRANCH"
+            git push --force origin "$BRANCH"
 
             # Create PR and auto-merge
             PR_BODY=$(python scripts/pr_body.py "data/cortex-catalyst" "$VERSION")
