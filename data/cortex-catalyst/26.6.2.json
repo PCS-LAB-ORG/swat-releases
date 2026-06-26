@@ -1,0 +1,58 @@
+{
+  "version": "26.6.2",
+  "date": "June 2026",
+  "release_url": "https://github.com/PCS-LAB-ORG/catalyst-rag-agent/releases/tag/26.6.2",
+  "summary": "This release restores time-based search filters, refines citation formatting to reduce clutter, and ensures follow-up suggestions load reliably.",
+  "entries": [
+    {
+      "tag": "Fixed",
+      "title": "Time-based query filters restored",
+      "description": "Temporal queries like \"last 6 months\" or \"since 2026\" now correctly filter search results based on document publication dates instead of searching the entire catalog."
+    },
+    {
+      "tag": "Enhancement",
+      "title": "Scope notifications for fallback searches",
+      "description": "When a filtered search (by product or date) yields no results, the application now explicitly notifies you that the search has expanded to include the broader documentation corpus."
+    },
+    {
+      "tag": "Enhancement",
+      "title": "Clearer citation panel excerpts",
+      "description": "Citation snippets in the side panel now display the actual content body of source documents rather than repetitive structural headers and titles."
+    },
+    {
+      "tag": "Enhancement",
+      "title": "Deduplicated documentation versions in citations",
+      "description": "The citation panel now groups multiple versions of the same document topic into a single entry referencing the newest version, reducing visual noise."
+    },
+    {
+      "tag": "Fixed",
+      "title": "Scrollable citation panel on small screens",
+      "description": "Fixed an issue where citation lists containing more than six sources were cut off and unscrollable on smaller monitors or windows."
+    },
+    {
+      "tag": "Fixed",
+      "title": "Reliable follow-up suggestion rendering",
+      "description": "Follow-up question chips now automatically retry loading during rapid usage, preventing blank suggestion spaces caused by transient rate limits."
+    },
+    {
+      "tag": "Known",
+      "title": "Elevated response generation latency",
+      "description": "Answers currently take between 18 and 28 seconds to fully generate, primarily due to large language model processing times."
+    },
+    {
+      "tag": "Planned",
+      "title": "Experimental real-time response streaming",
+      "description": "Support for streaming responses is planned for an upcoming release to allow you to read answers progressively as they are being generated."
+    },
+    {
+      "tag": "Known",
+      "title": "Version-specific filtering unavailable for XSIAM",
+      "description": "Queries targeting specific Cortex XSIAM version numbers will search across all XSIAM documentation, as XSIAM documentation is structured by date rather than version."
+    },
+    {
+      "tag": "Known",
+      "title": "Limited documentation coverage for AgentiX",
+      "description": "Because Cortex AgentiX is a newly launched platform, documentation coverage is currently limited, and some queries may draw from general XSOAR documentation instead."
+    }
+  ]
+}
