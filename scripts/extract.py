@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 import os
+from datetime import datetime, timezone
 import sys
 from pathlib import Path
 from typing import Protocol
@@ -32,7 +33,7 @@ class GeminiClient(Protocol):
 
 class VertexGeminiClient:
     def __init__(self) -> None:
-        self._client = genai.Client(http_options=HttpOptions(api_version="v1"))
+        self._client = genai.Client(vertexai=True, project=os.environ.get("GOOGLE_CLOUD_PROJECT", "pcs-swat-resources"), location=os.environ.get("GOOGLE_CLOUD_LOCATION", "global"), http_options=HttpOptions(api_version="v1"))
 
     def generate(
         self,
@@ -141,6 +142,12 @@ def main() -> None:
         release["html_url"],
         release["body"],
     )
+
+    # Always override date from GitHub API — never trust Gemini for dates
+    published_at = release.get("published_at", "")
+    if published_at:
+        dt = datetime.strptime(published_at, "%Y-%m-%dT%H:%M:%SZ")
+        data["date"] = dt.strftime("%B %Y")
 
     output_file.write_text(json.dumps(data, indent=2))
     print(f"Written: {output_file}", file=sys.stderr)

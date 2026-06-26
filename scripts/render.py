@@ -42,20 +42,42 @@ def load_assets(source_html: str | None = None, folder: str | None = None) -> di
 
 # ── Version and release data helpers ─────────────────────────────────────────
 
-def load_all_versions(data_folder: str, current_version: str) -> list[dict]:
-    """Build version nav list from all JSON artifacts, newest first."""
-    folder = Path(data_folder)
-    versions = []
-    for json_file in sorted(folder.glob("*.json"), key=lambda f: f.stem, reverse=True):
+def load_all_versions(data_folder: str, current_version: str,
+                      html_folder: str | None = None) -> list[dict]:
+    """Build version nav list from JSON artifacts + existing HTML pages, newest first."""
+    seen: dict[str, dict] = {}
+
+    # 1. JSON artifacts (generated releases) — date comes from the artifact
+    data_dir = Path(data_folder)
+    for json_file in data_dir.glob("*.json"):
         data = json.loads(json_file.read_text())
         v = data["version"]
-        versions.append({
+        seen[v] = {
             "version": v,
             "label": f"{data['date']} — {v}",
             "is_current": v == current_version,
             "href": f"{v}.html",
-        })
-    return versions
+        }
+
+    # 2. Hand-authored HTML pages without a JSON artifact — extract date from HTML
+    if html_folder:
+        date_re = re.compile(
+            r'<div class="hero-meta-item"><strong>Released</strong>\s*&nbsp;([^<]+)</div>'
+        )
+        for html_file in Path(html_folder).glob("*.html"):
+            v = html_file.stem
+            if v in seen:
+                continue  # already have it from JSON
+            match = date_re.search(html_file.read_text())
+            date = match.group(1).strip() if match else v
+            seen[v] = {
+                "version": v,
+                "label": f"{date} — {v}",
+                "is_current": v == current_version,
+                "href": f"{v}.html",
+            }
+
+    return sorted(seen.values(), key=lambda x: x["version"], reverse=True)
 
 
 def load_all_release_data(data_folder: str) -> list[dict]:
@@ -183,7 +205,7 @@ def main() -> None:
     data = json.loads(json_path.read_text())
 
     assets = load_assets(folder=tool["folder"])
-    all_versions = load_all_versions(str(data_folder), version)
+    all_versions = load_all_versions(str(data_folder), version, html_folder=tool["folder"])
 
     engine = TemplateEngine("scripts/templates")
     updater = IndexUpdater(engine, "index.html")
@@ -201,7 +223,7 @@ def main() -> None:
         if other_version == version:
             continue  # already rendered above
         other_data = json.loads(other_json.read_text())
-        other_all_versions = load_all_versions(str(data_folder), other_version)
+        other_all_versions = load_all_versions(str(data_folder), other_version, html_folder=tool["folder"])
         other_html = renderer.render_release_page(tool, other_version, other_data, other_all_versions)
         other_path = Path(tool["folder"]) / f"{other_version}.html"
         # Only update if the file exists (don't create pages for JSON-only artifacts)

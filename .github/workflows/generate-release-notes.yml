@@ -52,20 +52,37 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Fetch tokens from Secret Manager
+        id: get-tokens
+        run: |
+          ORG_TOKEN=$(gcloud secrets versions access latest \
+            --secret=svc-pcs-lab-GitHub-Org-Access-Token \
+            --project=855530889800 | tr -d '[:space:]')
+          echo "::add-mask::$ORG_TOKEN"
+          echo "org_token=$ORG_TOKEN" >> $GITHUB_OUTPUT
+
+          PR_TOKEN=$(gcloud secrets versions access latest \
+            --secret=svc-pcs-lab-github-swat-releases-actions-token \
+            --project=855530889800 | tr -d '[:space:]')
+          echo "::add-mask::$PR_TOKEN"
+          echo "pr_token=$PR_TOKEN" >> $GITHUB_OUTPUT
+
       - name: Poll for new releases
         id: poll
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.get-tokens.outputs.org_token }}
           INPUT_FORCE_VERSION: ${{ inputs.force_version }}
+          PYTHONPATH: ${{ github.workspace }}
         run: python scripts/poll.py
 
       - name: Generate release notes per version
         if: steps.poll.outputs.new_versions != ''
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.get-tokens.outputs.org_token }}
+          GH_TOKEN: ${{ steps.get-tokens.outputs.pr_token }}
           NEW_VERSIONS: ${{ steps.poll.outputs.new_versions }}
           FORCE_VERSION: ${{ inputs.force_version }}
+          PYTHONPATH: ${{ github.workspace }}
         run: |
           for VERSION in $NEW_VERSIONS; do
             echo "::group::Processing Cortex Catalyst $VERSION"
@@ -91,7 +108,7 @@ jobs:
                     "cortex-catalyst/"*.html \
                     "index.html"
             git commit -m "auto: Cortex Catalyst $VERSION release notes [skip ci]"
-            git push origin "$BRANCH"
+            git push --force origin "$BRANCH"
 
             # Create PR and auto-merge
             PR_BODY=$(python scripts/pr_body.py "data/cortex-catalyst" "$VERSION")
@@ -100,7 +117,12 @@ jobs:
               --head "$BRANCH" \
               --title "auto: Cortex Catalyst $VERSION release notes" \
               --body "$PR_BODY"
-            gh pr merge "$BRANCH" --merge --auto
+            PR_NUMBER=$(gh pr view "$BRANCH" --json number --jq '.number')
+            gh api repos/PCS-LAB-ORG/swat-releases/pulls/$PR_NUMBER/merge \
+              -X PUT \
+              -f merge_method=merge \
+              -f commit_title="auto: Cortex Catalyst $VERSION release notes"
+            gh api repos/PCS-LAB-ORG/swat-releases/git/refs/heads/$BRANCH -X DELETE
 
             git checkout main
             echo "::endgroup::"
