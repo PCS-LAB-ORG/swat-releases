@@ -90,15 +90,10 @@
     }
     .section-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; max-width: 640px; }
 
-    .version-nav { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
-    .version-pill { padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; }
-    .version-pill.active { background: var(--accent); color: #fff; }
-    .version-pill.inactive {
       background: var(--bg-card); color: var(--text-muted);
       border: 1px solid var(--border); text-decoration: none;
       transition: color .15s, border-color .15s;
     }
-    .version-pill.inactive:hover { color: var(--text); border-color: var(--text-muted); }
 
     .table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
@@ -168,31 +163,8 @@
 
     <section id="changes">
       <h2 class="section-title">Changes</h2>
-      <p class="section-desc">This release delivers cleaner citation previews, resolves temporal filtering and UI display bugs, and introduces clearer scope notifications when search filters expand.</p>
+      <p class="section-desc">This release improves citation quality, restores search date filtering, ensures follow-up suggestions load reliably, and fixes several user interface bugs.</p>
 
-      <div class="version-nav">
-        
-        
-        <span class="version-pill active">June 2026 — 26.6.2</span>
-        
-        
-        
-        <a href="26.6.1.html" class="version-pill inactive">June 2026 — 26.6.1</a>
-        
-        
-        
-        <a href="26.3.1.html" class="version-pill inactive">March 2026 — 26.3.1</a>
-        
-        
-        
-        <a href="26.2.2.html" class="version-pill inactive">February 2026 — 26.2.2</a>
-        
-        
-        
-        <a href="26.2.1.html" class="version-pill inactive">February 2026 — 26.2.1</a>
-        
-        
-      </div>
 
       
       <div class="table-wrap">
@@ -201,53 +173,48 @@
           <tbody>
             
             <tr>
-              <td>Restored time-based query filtering <span class="tag tag-fixed">Fixed</span></td>
-              <td>Queries specifying temporal constraints (such as &#39;last 6 months&#39;) now correctly filter by document publication dates, resolving an issue where the full, unfiltered documentation corpus was returned instead.</td>
+              <td>Date-filtered searches now work correctly <span class="tag tag-fixed">Fixed</span></td>
+              <td>Temporal search queries, such as &#34;last 6 months&#34; or &#34;since 2026,&#34; once again properly filter search results based on the publication date instead of returning the entire unfiltered document set.</td>
             </tr>
             
             <tr>
-              <td>Scrollable citation panel for large source lists <span class="tag tag-fixed">Fixed</span></td>
-              <td>Fixed an issue that prevented users from scrolling through the citation panel on smaller screens when more than six sources were returned.</td>
+              <td>Clearer notifications for empty filtered searches <span class="tag tag-enhancement">Enhancement</span></td>
+              <td>When a search filtered by product or date finds no matching results, the assistant now clearly notifies you that it has expanded the search to a broader, unfiltered set of documents.</td>
             </tr>
             
             <tr>
-              <td>Reliable rendering of follow-up suggestions <span class="tag tag-fixed">Fixed</span></td>
-              <td>Follow-up question suggestions now automatically retry loading if they are temporarily interrupted, ensuring recommended next steps consistently display even during rapid back-to-back searches.</td>
+              <td>Cleaner and more readable citation previews <span class="tag tag-enhancement">Enhancement</span></td>
+              <td>The citation side panel now displays the actual substantive text of the source documents rather than showing redundant structural headers and URL paths.</td>
             </tr>
             
             <tr>
-              <td>Cleaner citation previews with stripped headers <span class="tag tag-enhancement">Enhancement</span></td>
-              <td>Citation previews in the side panel now display actual document body text rather than repetitive structural headers and file paths, making it easier to quickly evaluate source relevance.</td>
+              <td>Duplicated documentation versions are now collapsed <span class="tag tag-enhancement">Enhancement</span></td>
+              <td>When a search returns multiple versions of the same documentation topic (e.g., across different software versions), the citation panel collapses them into a single entry pointing to the latest version to reduce noise.</td>
             </tr>
             
             <tr>
-              <td>Deduplicated citations for multi-version documentation <span class="tag tag-enhancement">Enhancement</span></td>
-              <td>The citation panel now automatically collapses duplicate topics across multiple product versions to show only the most recent source, significantly reducing clutter and redundant entries.</td>
+              <td>Scrollbar restored for long citation lists <span class="tag tag-fixed">Fixed</span></td>
+              <td>Resolved an issue where users on smaller screens could not scroll down to view more than six sources in the citation panel.</td>
             </tr>
             
             <tr>
-              <td>Scope notifications for fallback search results <span class="tag tag-enhancement">Enhancement</span></td>
-              <td>When a highly filtered query returns zero results and falls back to a broader search, a notification now clearly informs you that the results span multiple products or time periods.</td>
+              <td>Follow-up question chips load reliably <span class="tag tag-fixed">Fixed</span></td>
+              <td>Suggested follow-up questions now automatically retry loading if rate limits are hit, ensuring they consistently appear beneath responses even during rapid search sessions.</td>
             </tr>
             
             <tr>
-              <td>Elevated initial response generation latency <span class="tag tag-known">Known</span></td>
-              <td>Average response times currently range between 18 to 28 seconds due to backend processing limits while we work on introducing response streaming.</td>
+              <td>Temporary latency when generating responses <span class="tag tag-known">Known</span></td>
+              <td>Responses currently take between 18 to 28 seconds to fully generate. Work is underway to introduce streaming responses to display text progressively.</td>
             </tr>
             
             <tr>
-              <td>Version-specific filtering unavailable for Cortex XSIAM <span class="tag tag-known">Known</span></td>
-              <td>Searching for specific XSIAM version numbers will trigger a fallback notification, as XSIAM documentation is organized by calendar date rather than version.</td>
+              <td>Version-specific filtering unavailable for XSIAM <span class="tag tag-known">Known</span></td>
+              <td>Because Cortex XSIAM documentation is organized by date rather than version numbers, queries specifying XSIAM versions will search all XSIAM documents and display a scope notice.</td>
             </tr>
             
             <tr>
               <td>Limited documentation coverage for Cortex AgentiX <span class="tag tag-known">Known</span></td>
-              <td>Because Cortex AgentiX is a newly launched platform, queries may temporarily pull from general Cortex XSOAR documentation when specific AgentiX resources are unavailable.</td>
-            </tr>
-            
-            <tr>
-              <td>Progressive response streaming <span class="tag tag-planned">Planned</span></td>
-              <td>An experimental feature to stream text progressively as it is generated is planned to significantly reduce the perceived wait time for search responses.</td>
+              <td>As Cortex AgentiX is a newly launched platform, its documentation coverage is currently limited. Some queries may fall back to general XSOAR documentation.</td>
             </tr>
             
           </tbody>
