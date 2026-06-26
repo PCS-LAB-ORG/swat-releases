@@ -9,15 +9,22 @@ import re
 import sys
 from pathlib import Path
 
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from scripts.poll import load_config
 
 
 # ── Asset loading ────────────────────────────────────────────────────────────
 
-def load_assets(source_html: str = "cortex-catalyst/26.6.1.html") -> dict:
+def load_assets(source_html: str | None = None, folder: str | None = None) -> dict:
     """Extract base64 image data URIs from an existing release page."""
+    if source_html is None:
+        if folder is None:
+            raise ValueError("Either source_html or folder must be provided")
+        candidates = sorted(Path(folder).glob("*.html"), reverse=True)
+        if not candidates:
+            raise RuntimeError(f"No HTML files found in {folder} to extract assets from")
+        source_html = str(candidates[0])
     content = Path(source_html).read_text()
     favicon_match = re.search(r'href="(data:image/png;base64,[^"]+)"', content)
     logo_match = re.search(r'<img src="(data:image/png;base64,[^"]+)"', content)
@@ -75,7 +82,7 @@ class TemplateEngine:
     def __init__(self, templates_dir: str) -> None:
         self._env = Environment(
             loader=FileSystemLoader(templates_dir),
-            autoescape=False,
+            autoescape=select_autoescape(['html', 'j2']),
         )
 
     def render(self, template_name: str, **context) -> str:
@@ -113,7 +120,7 @@ class IndexUpdater:
         start = start_match.start()
 
         # Find the next tool-panel div (end boundary)
-        next_panel_re = re.compile(r'\n\s+<div class="tool-panel"')
+        next_panel_re = re.compile(r'\n\s+<div class="tool-panel[^"]*" id="panel-(?!catalyst)')
         next_panel = next_panel_re.search(content, start + 1)
         if not next_panel:
             raise RuntimeError("Could not find end boundary of panel-catalyst in index.html")
@@ -175,7 +182,7 @@ def main() -> None:
     json_path = data_folder / f"{version}.json"
     data = json.loads(json_path.read_text())
 
-    assets = load_assets(f"{tool['folder']}/26.6.1.html")
+    assets = load_assets(folder=tool["folder"])
     all_versions = load_all_versions(str(data_folder), version)
 
     engine = TemplateEngine("scripts/templates")
@@ -187,6 +194,20 @@ def main() -> None:
     output_path = Path(tool["folder"]) / f"{version}.html"
     output_path.write_text(html)
     print(f"Written: {output_path}", file=sys.stderr)
+
+    # Re-render all OTHER existing JSON-backed pages to update their version nav
+    for other_json in sorted(data_folder.glob("*.json")):
+        other_version = other_json.stem
+        if other_version == version:
+            continue  # already rendered above
+        other_data = json.loads(other_json.read_text())
+        other_all_versions = load_all_versions(str(data_folder), other_version)
+        other_html = renderer.render_release_page(tool, other_version, other_data, other_all_versions)
+        other_path = Path(tool["folder"]) / f"{other_version}.html"
+        # Only update if the file exists (don't create pages for JSON-only artifacts)
+        if other_path.exists():
+            other_path.write_text(other_html)
+            print(f"Updated nav: {other_path}", file=sys.stderr)
 
     # Rebuild index.html panel from all artifacts
     all_releases = load_all_release_data(str(data_folder))

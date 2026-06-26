@@ -70,6 +70,8 @@ jobs:
           for VERSION in $NEW_VERSIONS; do
             echo "::group::Processing Cortex Catalyst $VERSION"
 
+            git checkout main
+            git pull origin main
             BRANCH="auto/release-notes/cortex-catalyst-$VERSION"
             git checkout -b "$BRANCH"
 
