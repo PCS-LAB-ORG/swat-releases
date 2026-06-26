@@ -32,7 +32,7 @@ class GeminiClient(Protocol):
 
 class VertexGeminiClient:
     def __init__(self) -> None:
-        self._client = genai.Client(http_options=HttpOptions(api_version="v1"))
+        self._client = genai.Client(vertexai=True, project=os.environ.get("GOOGLE_CLOUD_PROJECT", "pcs-swat-resources"), location=os.environ.get("GOOGLE_CLOUD_LOCATION", "global"), http_options=HttpOptions(api_version="v1"))
 
     def generate(
         self,
