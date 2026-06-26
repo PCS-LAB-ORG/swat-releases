@@ -57,7 +57,7 @@ jobs:
         run: |
           ORG_TOKEN=$(gcloud secrets versions access latest \
             --secret=svc-pcs-lab-GitHub-Org-Access-Token \
-            --project=855530889800)
+            --project=855530889800 | tr -d '[:space:]')
           echo "::add-mask::$ORG_TOKEN"
           echo "org_token=$ORG_TOKEN" >> $GITHUB_OUTPUT
 
