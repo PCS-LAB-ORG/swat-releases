@@ -117,7 +117,7 @@ jobs:
               --head "$BRANCH" \
               --title "auto: Cortex Catalyst $VERSION release notes" \
               --body "$PR_BODY"
-            gh pr merge "$BRANCH" --merge --auto
+            gh pr merge "$BRANCH" --merge --delete-branch
 
             git checkout main
             echo "::endgroup::"
