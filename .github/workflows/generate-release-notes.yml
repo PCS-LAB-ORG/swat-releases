@@ -52,8 +52,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Fetch GitHub org token from Secret Manager
-        id: get-gh-token
+      - name: Fetch tokens from Secret Manager
+        id: get-tokens
         run: |
           ORG_TOKEN=$(gcloud secrets versions access latest \
             --secret=svc-pcs-lab-GitHub-Org-Access-Token \
@@ -61,10 +61,16 @@ jobs:
           echo "::add-mask::$ORG_TOKEN"
           echo "org_token=$ORG_TOKEN" >> $GITHUB_OUTPUT
 
+          PR_TOKEN=$(gcloud secrets versions access latest \
+            --secret=svc-pcs-lab-github-swat-releases-actions-token \
+            --project=855530889800 | tr -d '[:space:]')
+          echo "::add-mask::$PR_TOKEN"
+          echo "pr_token=$PR_TOKEN" >> $GITHUB_OUTPUT
+
       - name: Poll for new releases
         id: poll
         env:
-          GITHUB_TOKEN: ${{ steps.get-gh-token.outputs.org_token }}
+          GITHUB_TOKEN: ${{ steps.get-tokens.outputs.org_token }}
           INPUT_FORCE_VERSION: ${{ inputs.force_version }}
           PYTHONPATH: ${{ github.workspace }}
         run: python scripts/poll.py
@@ -72,8 +78,8 @@ jobs:
       - name: Generate release notes per version
         if: steps.poll.outputs.new_versions != ''
         env:
-          GITHUB_TOKEN: ${{ steps.get-gh-token.outputs.org_token }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.get-tokens.outputs.org_token }}
+          GH_TOKEN: ${{ steps.get-tokens.outputs.pr_token }}
           NEW_VERSIONS: ${{ steps.poll.outputs.new_versions }}
           FORCE_VERSION: ${{ inputs.force_version }}
           PYTHONPATH: ${{ github.workspace }}
