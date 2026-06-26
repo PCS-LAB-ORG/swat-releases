@@ -1,0 +1,30 @@
+        <div class="tool-panel {{ 'active' if is_default else '' }}" id="panel-{{ tool.panel_id }}">
+          <h2 class="tool-title">{{ tool.name }}</h2>
+          <p class="tool-desc">{{ tool.description | trim }}</p>
+          {% if latest %}
+          <div class="release-list">
+            <a href="{{ tool.folder }}/{{ latest.version }}.html" class="release-featured">
+              <span class="r-version">{{ latest.version }}</span>
+              <span class="r-badge">Latest</span>
+              <span class="r-date">{{ latest.date }}</span>
+              <span class="r-summary">{{ latest.summary }}</span>
+              <span class="r-arrow">→</span>
+            </a>
+            {% for group in month_groups %}
+            <details>
+              <summary>{{ group.month }}</summary>
+              {% for rel in group.releases %}
+              <a href="{{ tool.folder }}/{{ rel.version }}.html" class="release-row">
+                <span class="r-version">{{ rel.version }}</span>
+                <span class="r-date">{{ rel.date }}</span>
+                <span class="r-summary">{{ rel.summary }}</span>
+                <span class="r-arrow">→</span>
+              </a>
+              {% endfor %}
+            </details>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="coming-soon"><div class="coming-soon-dot"></div>Release notes coming soon.</div>
+          {% endif %}
+        </div>
