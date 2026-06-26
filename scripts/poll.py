@@ -67,14 +67,19 @@ class ReleasePollService:
         self._filter = release_filter
 
     def get_new_versions(self, tool: dict) -> list[tuple[str, str]]:
-        """Return [(version, body), ...] for releases not yet processed."""
+        """Return [(version, body)] for the latest release if not yet processed.
+
+        Only the most recently published release is checked automatically.
+        Older releases require explicit force_version to process.
+        """
         releases = self._client.get_releases(tool["repo"])
-        result = []
-        for release in releases:
-            version = release["tag_name"]
-            if self._filter.is_new(version, tool["folder"]):
-                result.append((version, release["body"]))
-        return result
+        if not releases:
+            return []
+        latest = releases[0]  # API returns newest first
+        version = latest["tag_name"]
+        if self._filter.is_new(version, tool["folder"]):
+            return [(version, latest["body"])]
+        return []
 
 
 # ── Entry point ──────────────────────────────────────────────────────────────
