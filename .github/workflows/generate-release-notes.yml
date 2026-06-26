@@ -66,6 +66,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.get-gh-token.outputs.org_token }}
           INPUT_FORCE_VERSION: ${{ inputs.force_version }}
+          PYTHONPATH: ${{ github.workspace }}
         run: python scripts/poll.py
 
       - name: Generate release notes per version
@@ -75,6 +76,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NEW_VERSIONS: ${{ steps.poll.outputs.new_versions }}
           FORCE_VERSION: ${{ inputs.force_version }}
+          PYTHONPATH: ${{ github.workspace }}
         run: |
           for VERSION in $NEW_VERSIONS; do
             echo "::group::Processing Cortex Catalyst $VERSION"
