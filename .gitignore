@@ -6,3 +6,7 @@ session-summaries/
 node_modules/
 docs/superpowers/
 .plans/
+__pycache__/
+*.pyc
+.pytest_cache/
+venv/
