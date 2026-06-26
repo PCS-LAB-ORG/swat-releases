@@ -78,7 +78,9 @@ def test_extractor_returns_validated_dict():
 
 def test_extractor_overrides_release_url():
     """release_url in JSON is always replaced with the canonical URL."""
-    extractor = GeminiExtractor(mock_gemini_client(), ResponseValidator())
+    wrong_url_artifact = {**VALID_ARTIFACT, "release_url": "https://github.com/wrong-url"}
+    client = mock_gemini_client(response=json.dumps(wrong_url_artifact))
+    extractor = GeminiExtractor(client, ResponseValidator())
     canonical = "https://github.com/PCS-LAB-ORG/catalyst-rag-agent/releases/tag/26.7.1"
     result = extractor.extract("p", "26.7.1", canonical, "body")
     assert result["release_url"] == canonical

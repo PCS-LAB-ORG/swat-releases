@@ -10,7 +10,6 @@ import sys
 from pathlib import Path
 from typing import Protocol
 
-import requests
 from google import genai
 from google.genai.types import HttpOptions
 
