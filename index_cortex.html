@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cortex Unity — AI Automation Platform v2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #080B10;
+      --s1:      #0C1018;
+      --s2:      #101520;
+      --s3:      #161D28;
+      --border:  #1A2535;
+      --bhi:     #243448;
+      --t1:      #F0F4FF;
+      --t2:      #6B7A90;
+      --t3:      #334057;
+      /* XSIAM palette */
+      --lime:    #00FF7F;   /* Cortex primary green */
+      --lime-dim: rgba(0,255,127,.12);
+      --teal:    #00C8C8;   /* secondary */
+      --teal-dim: rgba(0,200,200,.1);
+      /* module accent colours (unchanged) */
+      --orange:  #FF5722;
+      --blue:    #00B4D8;
+      --purple:  #7B61FF;
+      --green:   #00C896;
+      --pink:    #FF4F7B;
+      --amber:   #FFB800;
+      --fh: 'Inter', system-ui, sans-serif;
+      --fb: 'Inter', system-ui, sans-serif;
+      --fm: 'JetBrains Mono', monospace;
+      /* type scale */
+      --tx-xs:   0.65rem;
+      --tx-sm:   0.78rem;
+      --tx-base: 0.92rem;
+      --tx-md:   1rem;
+      --tx-lg:   1.15rem;
+      --tx-xl:   1.5rem;
+      --tx-2xl:  2.25rem;
+      --tx-hero: clamp(2.5rem, 5vw, 4rem);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--t1);
+      font-family: var(--fb);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* dot-grid bg — XSIAM style */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: radial-gradient(circle, rgba(0,255,127,.08) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ambient glow */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -20vh; left: 30%; right: 30%;
+      height: 50vh;
+      background: radial-gradient(ellipse at center, rgba(0,255,127,.04) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 200; height: 58px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2.5rem;
+      background: rgba(6,11,20,.9);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-brand {
+      font-family: var(--fh); font-weight: 700;
+      font-size: 1rem; letter-spacing: -.02em;
+      display: flex; align-items: center; gap: .5rem;
+    }
+
+    .nav-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--lime);
+      box-shadow: 0 0 8px var(--lime);
+      animation: blink 2s ease-in-out infinite;
+    }
+
+    @keyframes blink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+
+    .nav-pills { list-style: none; display: flex; gap: .2rem; }
+    .nav-pills a {
+      color: var(--t2); text-decoration: none;
+      font-size: .72rem; font-weight: 500;
+      letter-spacing: .06em; text-transform: uppercase;
+      padding: .3rem .8rem; border-radius: 4px;
+      transition: all 150ms;
+    }
+    .nav-pills a:hover { color: var(--t1); background: var(--s2); }
+
+    /* ─── HERO — KOI STYLE ─── */
+    #hero {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      padding-top: 58px;
+      display: flex; flex-direction: column;
+      justify-content: center;
+    }
+
+    .hero-inner {
+      max-width: 1360px; margin: 0 auto;
+      padding: 3rem 2.5rem;
+      display: flex; flex-direction: column; gap: 2rem;
+    }
+
+    /* Title strip */
+    .hero-title-row {
+      display: block;
+    }
+
+    .hero-title-row h1 {
+      font-family: var(--fh);
+      font-size: var(--tx-hero);
+      font-weight: 700;
+      letter-spacing: -.04em;
+      line-height: 1;
+    }
+
+    .hero-title-row h1 .brand {
+      background: linear-gradient(120deg, var(--lime) 0%, var(--teal) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-title-row .sub {
+      font-size: clamp(.85rem, 1.5vw, 1rem);
+      color: var(--t2); font-weight: 400;
+      letter-spacing: .02em;
+    }
+
+    /* Main two-column layout */
+    .hero-body {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    /* ── LEFT: Platform Diagram ── */
+    .diagram-wrap {
+      display: flex; flex-direction: column; gap: 1.5rem;
+    }
+
+    /* The bordered container */
+    .platform-box {
+      border: 1px solid rgba(0,255,127,.3);
+      border-radius: 8px;
+      padding: 1.5rem;
+      background: rgba(0,255,127,.02);
+      display: flex; flex-direction: column; gap: 1rem;
+      position: relative;
+      box-shadow: 0 0 40px rgba(0,255,127,.04), inset 0 0 40px rgba(0,255,127,.02);
+    }
+
+    .platform-box-label {
+      position: absolute;
+      top: -11px; left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg);
+      padding: 0 1rem;
+      font-family: var(--fm);
+      font-size: var(--tx-sm); color: var(--lime);
+      letter-spacing: .1em; text-transform: uppercase;
+    }
+
+    /* Row: Module boxes */
+    .mod-row-label {
+      font-family: var(--fm);
+      font-size: var(--tx-sm); color: var(--teal);
+      letter-spacing: .1em; text-transform: uppercase;
+      text-align: center;
+    }
+
+    .mod-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .6rem;
+    }
+
+    .mod-box {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: .75rem .6rem;
+      text-align: center;
+      font-size: var(--tx-base); font-weight: 500;
+      color: var(--t1);
+      background: var(--s2);
+      cursor: pointer;
+      transition: all 200ms;
+      line-height: 1.3;
+    }
+
+    .mod-box:hover {
+      border-color: var(--lime);
+      color: var(--lime);
+      background: var(--lime-dim);
+    }
+
+    /* AI Engine bar */
+    .ai-bar {
+      border: 1px solid rgba(0,200,200,.3);
+      border-radius: 6px;
+      padding: .9rem 1.25rem;
+      background: var(--teal-dim);
+    }
+
+    .ai-bar-title {
+      font-family: var(--fh);
+      font-size: var(--tx-lg); font-weight: 600;
+      letter-spacing: -.01em;
+      text-align: center;
+      margin-bottom: .5rem;
+      color: var(--teal);
+    }
+
+    .ai-bar-sub {
+      font-family: var(--fm);
+      font-size: var(--tx-sm); color: rgba(0,200,200,.8);
+      text-align: center; letter-spacing: .04em;
+    }
+
+    /* Integration row below box */
+    .integration-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem 1rem;
+      margin-top: 1rem;
+    }
+
+    .int-item {
+      display: flex; flex-direction: column;
+      align-items: center; gap: .35rem;
+    }
+
+    .int-icon {
+      width: 40px; height: 40px; border-radius: 6px;
+      background: var(--s2);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      transition: all 200ms;
+    }
+
+    .int-item:hover .int-icon {
+      border-color: var(--lime);
+      box-shadow: 0 0 12px rgba(0,255,127,.15);
+    }
+
+    .int-label {
+      font-size: var(--tx-sm); color: var(--t1);
+      text-transform: uppercase; letter-spacing: .06em;
+      text-align: center; line-height: 1.5;
+    }
+
+    .diagram-tagline {
+      text-align: center;
+      font-family: var(--fh);
+      font-size: var(--tx-base); font-weight: 500;
+      color: var(--lime);
+      letter-spacing: .02em;
+      border-top: 1px solid rgba(0,255,127,.12);
+      padding-top: 1rem;
+    }
+
+    /* ── RIGHT: Value Statements ── */
+    .values-col {
+      display: flex; flex-direction: column; gap: 1.75rem;
+      padding-top: .5rem;
+    }
+
+    .value-item {}
+
+    .value-h {
+      font-family: var(--fh);
+      font-size: var(--tx-lg); font-weight: 600;
+      color: var(--lime);
+      letter-spacing: -.01em;
+      margin-bottom: .5rem;
+    }
+
+    .value-p {
+      font-size: var(--tx-base); color: var(--t1);
+      line-height: 1.75;
+    }
+
+    .values-scroll-hint {
+      display: flex; align-items: center; gap: .5rem;
+      font-size: .65rem; color: var(--t3);
+      letter-spacing: .1em; text-transform: uppercase;
+      margin-top: 1rem;
+      animation: float 2.5s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%,100%{transform:translateY(0)} 50%{transform:translateY(7px)}
+    }
+
+    /* ─── SECTION COMMON ─── */
+    section { position: relative; z-index: 1; }
+
+    .wrap {
+      max-width: 1240px; margin: 0 auto;
+      padding: 5.5rem 2.5rem;
+    }
+
+    .eyebrow {
+      font-family: var(--fm);
+      font-size: var(--tx-sm); color: var(--teal);
+      letter-spacing: .12em; text-transform: uppercase;
+      margin-bottom: .85rem;
+    }
+
+    .sec-h2 {
+      font-family: var(--fh);
+      font-size: var(--tx-2xl);
+      font-weight: 700; letter-spacing: -.03em;
+      line-height: 1.1; margin-bottom: 1.25rem;
+    }
+
+    .sec-p {
+      font-size: 1rem; color: var(--t1);
+      max-width: 560px; line-height: 1.8;
+    }
+
+    /* ─── MODULES SECTION ─── */
+    #modules { border-top: 1px solid var(--border); }
+
+    .mod-header {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      margin-bottom: 2.5rem; gap: 2rem;
+    }
+
+    .mod-hint {
+      font-size: .8rem; color: var(--t1); line-height: 1.7;
+      max-width: 280px; flex-shrink: 0;
+    }
+
+    .mod-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+
+    /* no overrides — all 6 cards in 2-col grid */
+
+    .mcard {
+      position: relative;
+      background: var(--s1);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem;
+      cursor: pointer;
+      transition: transform 250ms ease, box-shadow 250ms ease, border-color 250ms;
+      overflow: hidden;
+    }
+
+    .mcard::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 20% 20%, var(--cg, transparent) 0%, transparent 70%);
+      opacity: 0; transition: opacity 300ms; pointer-events: none;
+    }
+
+    .mcard:hover::after { opacity: 1; }
+    .mcard:hover {
+      border-color: var(--cc);
+      transform: translateY(-5px);
+      box-shadow: 0 24px 48px rgba(0,0,0,.35), 0 0 0 1px var(--cc);
+    }
+
+    .mcard-bar {
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--cc); border-radius: 12px 12px 0 0;
+    }
+
+    .mcard-num {
+      font-family: var(--fm); font-size: .6rem;
+      color: var(--cc); letter-spacing: .14em;
+      text-transform: uppercase; margin-bottom: .9rem;
+    }
+
+    .mcard-icon {
+      width: 44px; height: 44px; border-radius: 9px;
+      border: 1px solid var(--cc); background: var(--cg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; margin-bottom: 1.1rem;
+    }
+
+    .mcard-name {
+      font-family: var(--fh);
+      font-size: 1.15rem; font-weight: 700;
+      letter-spacing: -.02em; line-height: 1.2;
+      margin-bottom: .45rem; color: var(--cc);
+    }
+
+    .mcard-pitch {
+      font-size: .82rem; color: var(--t1); line-height: 1.65;
+      margin-bottom: 1.4rem;
+    }
+
+    .mcard-cta {
+      display: flex; align-items: center; gap: .35rem;
+      font-size: .68rem; font-weight: 600;
+      color: var(--cc); letter-spacing: .07em;
+      text-transform: uppercase; transition: gap 150ms;
+    }
+    .mcard:hover .mcard-cta { gap: .55rem; }
+
+    .mcard-tag {
+      position: absolute; top: 1.25rem; right: 1.25rem;
+      font-size: .55rem; color: var(--t3);
+      letter-spacing: .1em; text-transform: uppercase;
+      background: var(--s3); padding: .18rem .5rem; border-radius: 3px;
+    }
+
+    /* Wide card inner layout (Module 05) */
+    .wide-card .mcard-inner {
+      display: flex; align-items: flex-start; gap: 2.5rem;
+    }
+    .wide-card .mcard-body { flex: 1; }
+    .wide-card .mcard-checks {
+      flex: 1; display: flex; flex-wrap: wrap; gap: .4rem;
+      margin-top: .25rem;
+    }
+
+    .check-pill {
+      font-family: var(--fm); font-size: .6rem;
+      padding: .2rem .55rem; border-radius: 4px;
+      background: var(--s3); color: var(--t2);
+      letter-spacing: .05em; border: 1px solid var(--border);
+    }
+
+    /* ─── ARCHITECTURE ─── */
+    #architecture { border-top: 1px solid var(--border); }
+
+    .arch-wrap {
+      margin-top: 3rem;
+      border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+    }
+
+    .arch-row {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+    }
+
+    .acell {
+      padding: 1.5rem .75rem;
+      border-right: 1px solid var(--border);
+      text-align: center;
+    }
+    .acell:last-child { border-right: none; }
+    .acell-icon { font-size: 1.6rem; margin-bottom: .5rem; }
+    .acell-n {
+      font-family: var(--fh); font-size: .68rem; font-weight: 600;
+      letter-spacing: -.01em; color: var(--t1);
+    }
+
+    .arch-backbone {
+      background: var(--s1);
+      border-top: 1px solid var(--border);
+      padding: 1.25rem 2rem; text-align: center;
+    }
+
+    .arch-bb-label {
+      font-family: var(--fm); font-size: .6rem;
+      color: var(--lime); letter-spacing: .15em;
+      text-transform: uppercase; margin-bottom: .4rem;
+    }
+
+    .arch-bb-items {
+      font-size: .78rem; color: var(--t2);
+      display: flex; justify-content: center; gap: 1.75rem; flex-wrap: wrap;
+    }
+
+    .arch-bb-items span {
+      display: flex; align-items: center; gap: .35rem;
+    }
+
+    .arch-bb-items span::before {
+      content: ''; width: 4px; height: 4px; border-radius: 50%;
+      background: var(--t3);
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem; text-align: center;
+      font-family: var(--fm); font-size: .65rem;
+      color: var(--t3); letter-spacing: .08em;
+      position: relative; z-index: 1;
+    }
+
+    /* ─── MODAL ─── */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(4,8,16,.92);
+      z-index: 500;
+      display: flex; align-items: center; justify-content: center;
+      padding: 2rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity 280ms;
+      backdrop-filter: blur(10px);
+    }
+
+    .overlay.on { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: var(--s1);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      max-width: 720px; width: 100%;
+      max-height: 88vh; overflow-y: auto;
+      position: relative;
+      transform: scale(.95) translateY(18px);
+      transition: transform 280ms ease;
+    }
+    .overlay.on .modal { transform: scale(1) translateY(0); }
+
+    .modal-top-bar {
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      border-radius: 16px 16px 0 0;
+      background: var(--mc, var(--lime));
+    }
+
+    .modal-hd {
+      padding: 2.25rem 2.5rem 1.75rem;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+
+    .modal-ey {
+      font-family: var(--fm); font-size: .65rem;
+      color: var(--mc); letter-spacing: .14em;
+      text-transform: uppercase; margin-bottom: .6rem;
+    }
+
+    .modal-name {
+      font-family: var(--fh);
+      font-size: 1.7rem; font-weight: 700;
+      letter-spacing: -.03em; margin-bottom: .65rem;
+    }
+
+    .modal-pitch { font-size: .95rem; color: var(--t1); line-height: 1.75; }
+
+    .modal-close {
+      position: absolute; top: 1.5rem; right: 1.5rem;
+      background: var(--s2); border: 1px solid var(--border);
+ width: 30px; height: 30px; border-radius: 6px;
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: center; font-size: .85rem; transition: all 150ms;
+      z-index: 10;
+    }
+    .modal-close:hover { background: var(--s3); color: var(--t1); }
+
+    .modal-bd { padding: 2rem 2.5rem 2.5rem; }
+
+    .quad {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;
+    }
+
+    .qblock {
+      background: var(--s2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1.4rem 1.5rem;
+    }
+    .qblock.wide { grid-column: 1 / -1; }
+
+    .q-label {
+      display: flex; align-items: center; gap: .5rem;
+      font-family: var(--fm); font-size: .6rem;
+      color: var(--t3); letter-spacing: .12em;
+      text-transform: uppercase; margin-bottom: .75rem;
+    }
+
+    .q-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--mc); }
+
+    .q-h {
+      font-family: var(--fh); font-size: .95rem; font-weight: 600;
+      letter-spacing: -.01em; margin-bottom: .4rem; color: var(--mc);
+    }
+
+    .q-p { font-size: .82rem; color: var(--t1); line-height: 1.7; }
+
+    .impact-row { display: flex; gap: 1.25rem; margin-top: 1rem; }
+
+    .metric {
+      background: var(--s3); border: 1px solid var(--border);
+      border-radius: 7px; padding: .7rem 1rem; flex: 1; text-align: center;
+    }
+
+    .metric-n {
+      font-family: var(--fh); font-size: 1.5rem; font-weight: 700;
+      letter-spacing: -.03em; color: var(--mc);
+    }
+    .metric-l {
+      font-size: .6rem; color: var(--t3);
+      text-transform: uppercase; letter-spacing: .1em; margin-top: .15rem;
+    }
+
+    .modal-meta {
+      display: flex; gap: 2.5rem;
+      padding-top: 1.5rem; margin-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .mmeta-l {
+      font-size: .6rem; color: var(--t3);
+      text-transform: uppercase; letter-spacing: .1em;
+    }
+    .mmeta-v {
+      font-family: var(--fh); font-size: .88rem; font-weight: 600;
+      color: var(--t1); margin-top: .2rem;
+    }
+
+    /* ─── FLOWS ─── */
+    .flow-card {
+      background: var(--s1);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.25rem;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .flow-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--fc);
+    }
+
+    .flow-card-header {
+      display: flex; align-items: center; gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .flow-badge {
+      font-family: var(--fm); font-size: .58rem;
+      letter-spacing: .1em; text-transform: uppercase;
+      padding: .25rem .7rem; border-radius: 4px;
+      white-space: nowrap; flex-shrink: 0;
+    }
+
+    .flow-title {
+      font-family: var(--fh); font-size: 1.05rem; font-weight: 700;
+      letter-spacing: -.02em; color: var(--t1);
+    }
+
+    .flow-steps {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+    }
+
+    .flow-step {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1rem 1.25rem;
+      flex: 1; min-width: 0;
+      display: flex; flex-direction: column; gap: .4rem;
+    }
+
+    .flow-step-num {
+      font-family: var(--fm); font-size: .58rem;
+      color: var(--fc); letter-spacing: .1em;
+      opacity: .8; margin-bottom: .1rem;
+    }
+
+    .flow-step-icon {
+      font-size: 1.1rem;
+      height: 1.4rem; line-height: 1.4rem;
+    }
+
+    .flow-step-label {
+      font-size: .73rem; color: var(--t1); line-height: 1.6;
+      flex: 1;
+    }
+
+    .flow-step-label strong { color: var(--t1); font-weight: 600; }
+
+    .flow-arrow {
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; width: 28px;
+      color: var(--fc); font-size: .85rem; opacity: .55;
+    }
+
+    /* ─── REVEAL ─── */
+    .reveal {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 550ms ease, transform 550ms ease;
+    }
+    .reveal.up { opacity: 1; transform: translateY(0); }
+    .reveal[data-d="1"] { transition-delay: 80ms; }
+    .reveal[data-d="2"] { transition-delay: 160ms; }
+    .reveal[data-d="3"] { transition-delay: 240ms; }
+    .reveal[data-d="4"] { transition-delay: 320ms; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; }
+      .reveal[data-d] { transition-delay: 0ms; }
+    }
+
+    @media (max-width: 1100px) {
+      .hero-body { grid-template-columns: 1fr; }
+      .values-col { flex-direction: row; flex-wrap: wrap; gap: 1.25rem; }
+      .value-item { flex: 1 1 220px; }
+      .cap-row { grid-template-columns: repeat(2, 1fr); }
+      .mod-row { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════ NAV ══════════ -->
+<nav>
+  <div class="nav-brand">
+    <div class="nav-dot"></div>
+    Cortex Unity
+  </div>
+  <ul class="nav-pills">
+    <li><a href="#hero">Overview</a></li>
+    <li><a href="#modules">Modules</a></li>
+    <li><a href="#flows">Flows</a></li>
+  </ul>
+</nav>
+
+<!-- ══════════ HERO — KOI STYLE ══════════ -->
+<section id="hero">
+  <div class="hero-inner">
+
+    <!-- Title -->
+    <div class="hero-title-row">
+      <h1><span class="brand">Cortex Unity:</span> AI Automation Platform</h1>
+    </div>
+
+    <!-- Body: diagram + values -->
+    <div class="hero-body">
+
+      <!-- LEFT: Platform Diagram -->
+      <div class="diagram-wrap">
+
+        <div class="platform-box">
+          <div class="platform-box-label">Cortex Unity Platform</div>
+
+          <!-- Module boxes -->
+          <div class="mod-row-label">Modules</div>
+          <div class="mod-row">
+            <div class="mod-box" onclick="document.getElementById('modules').scrollIntoView({behavior:'smooth'})">
+              As-Built<br>Documents
+            </div>
+            <div class="mod-box" onclick="document.getElementById('modules').scrollIntoView({behavior:'smooth'})">
+              Session<br>Planner
+            </div>
+            <div class="mod-box" onclick="document.getElementById('modules').scrollIntoView({behavior:'smooth'})">
+              RQL → XQL<br>Translator
+            </div>
+            <div class="mod-box" onclick="document.getElementById('modules').scrollIntoView({behavior:'smooth'})">
+              Cortex<br>Catalyst
+            </div>
+            <div class="mod-box" onclick="document.getElementById('modules').scrollIntoView({behavior:'smooth'})">
+              Cortex<br>Insights
+            </div>
+            <div class="mod-box" onclick="document.getElementById('modules').scrollIntoView({behavior:'smooth'})">
+              Marketplace<br>App
+            </div>
+          </div>
+
+          <!-- AI Engine bar -->
+          <div class="ai-bar">
+            <div class="ai-bar-title">Cortex Unity AI Engine</div>
+            <div class="ai-bar-sub">SHA-256 Validation &nbsp;|&nbsp; AI-Driven Health Scoring &nbsp;|&nbsp; Prescriptive Remediation &nbsp;|&nbsp; Data Sovereignty &nbsp;|&nbsp; Okta Authenticated &nbsp;|&nbsp; InfoSec Approved</div>
+          </div>
+        </div>
+
+        <!-- Integration row -->
+        <div class="integration-row">
+          <div class="int-item">
+            <div class="int-icon">🛡️</div>
+            <div class="int-label">Cortex XDR</div>
+          </div>
+          <div class="int-item">
+            <div class="int-icon">⚙️</div>
+            <div class="int-label">XSIAM</div>
+          </div>
+          <div class="int-item">
+            <div class="int-icon">☁️</div>
+            <div class="int-label">Cortex Cloud</div>
+          </div>
+          <div class="int-item">
+            <div class="int-icon">📋</div>
+            <div class="int-label">Asana</div>
+          </div>
+          <div class="int-item">
+            <div class="int-icon">📊</div>
+            <div class="int-label">BigQuery</div>
+          </div>
+          <div class="int-item">
+            <div class="int-icon">🔭</div>
+            <div class="int-label">Companion SaaS<br><span style="font-size:.68rem;opacity:.7">As-Built · Insights</span></div>
+          </div>
+          <div class="int-item">
+            <div class="int-icon">🔁</div>
+            <div class="int-label">Loop<br><span style="font-size:.68rem;opacity:.7">Session Planner · CSE Hub</span></div>
+          </div>
+          <div class="int-item">
+            <div class="int-icon">☁️</div>
+            <div class="int-label">GCP Infra</div>
+          </div>
+        </div>
+
+        <div class="diagram-tagline">
+          Built for Technical Services. Deployed Across the Portfolio.
+        </div>
+      </div>
+
+      <!-- RIGHT: Value Statements -->
+      <div class="values-col">
+
+        <div class="value-item">
+          <div class="value-h">Eliminate Repetitive Level of Effort</div>
+          <div class="value-p">Automate the recurring manual tasks that consume PS and CS engineering time on every customer engagement — every day.</div>
+        </div>
+
+        <div class="value-item">
+          <div class="value-h">Consistent, Verifiable Delivery</div>
+          <div class="value-p">SHA-256 authenticated documentation ensures every deployment is traceable back to the Statement of Work — no inconsistency, no ambiguity.</div>
+        </div>
+
+        <div class="value-item">
+          <div class="value-h">Proactive Customer Engagement</div>
+          <div class="value-p">CS teams arrive at customer meetings with comprehensive AI-generated insights — not questions. From reactive to proactive.</div>
+        </div>
+
+        <div class="value-item">
+          <div class="value-h">Scale Without Adding Headcount</div>
+          <div class="value-p">Serve a growing portfolio with the same team by replacing manual workflows with AI-driven automation. Long-term cost efficiency by reducing Level of Effort — not people.</div>
+        </div>
+
+        <div class="value-item">
+          <div class="value-h">Built-In Documentation &amp; Release Cadence</div>
+          <div class="value-p">Every module and component includes built-in links to official documentation, release notes, and release cadences — so teams always operate from the latest version of the truth.</div>
+        </div>
+
+        <div class="values-scroll-hint">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12l7 7 7-7"/>
+          </svg>
+          scroll to explore modules
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ MODULES ══════════ -->
+<section id="modules">
+  <div class="wrap">
+    <div class="mod-header">
+      <div>
+        <div class="eyebrow reveal">// The Modules</div>
+        <h2 class="sec-h2 reveal">Six modules.<br>One mission.</h2>
+      </div>
+      <p class="mod-hint reveal">
+        Each model was collaborated with various teams in the organization to eliminate specific repetitive tasks in the Technical Services Organization.
+        Each card will answer the problem, the AI approach, the impact and what's next.
+      </p>
+    </div>
+
+    <div class="mod-grid">
+
+      <!-- M1 -->
+      <div class="mcard reveal" data-d="0" onclick="openModal(0)"
+           style="--cc:var(--orange);--cg:rgba(255,87,34,.07)">
+        <div class="mcard-bar"></div>
+        <div class="mcard-num">Module 01</div>
+        <div class="mcard-icon">📄</div>
+        <div class="mcard-name">As-Built Documents</div>
+        <p class="mcard-pitch">Generates as-built documents for Cortex XDR/XSIAM and Cortex Cloud deployments — replacing a 4-to-24-hour manual process with automated SHA-256 verified documentation that proves exactly what was deployed.</p>
+        <div style="margin-top:1rem;margin-bottom:1.25rem;">
+          <div style="font-family:var(--fm);font-size:.58rem;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem;">Captured Categories</div>
+          <div style="display:flex;flex-wrap:wrap;gap:.35rem;">
+            <span class="check-pill">Tenant Administration</span>
+            <span class="check-pill">Endpoint &amp; Agent Config</span>
+            <span class="check-pill">Data Collection &amp; Integrations</span>
+            <span class="check-pill">Rules, Policies &amp; Threat Detection</span>
+            <span class="check-pill">Automation &amp; Response</span>
+          </div>
+        </div>
+        <div class="mcard-cta">Explore ↗</div>
+        <div class="mcard-tag">PS</div>
+      </div>
+
+      <!-- M2 -->
+      <div class="mcard reveal" data-d="1" onclick="openModal(1)"
+           style="--cc:var(--blue);--cg:rgba(0,180,216,.07)">
+        <div class="mcard-bar"></div>
+        <div class="mcard-num">Module 02</div>
+        <div class="mcard-icon">🤖</div>
+        <div class="mcard-name">Session Planner</div>
+        <div style="font-family:var(--fm);font-size:.58rem;color:var(--t3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.6rem;">Scale &amp; Optimize</div>
+        <p class="mcard-pitch">An internal automation tool for Customer Success Engineers — automating Asana project creation, Google Calendar scheduling, and customer communications so CSEs can focus on driving outcomes instead of managing admin.</p>
+        <div class="mcard-cta">Explore ↗</div>
+        <div class="mcard-tag">CS</div>
+      </div>
+
+      <!-- M3 -->
+      <div class="mcard reveal" data-d="2" onclick="openModal(2)"
+           style="--cc:var(--purple);--cg:rgba(123,97,255,.07)">
+        <div class="mcard-bar"></div>
+        <div class="mcard-num">Module 03</div>
+        <div class="mcard-icon">🔄</div>
+        <div class="mcard-name">RQL to XQL Translator</div>
+        <p class="mcard-pitch">The Automated AI RQL to XQL Converter, designed for customers migrating from Prisma Cloud to Cortex Cloud — enabling expedited conversion and validation of queries to accelerate the migration process.</p>
+        <div class="mcard-cta">Explore ↗</div>
+        <div class="mcard-tag">Technical Services</div>
+      </div>
+
+      <!-- M4 -->
+      <div class="mcard reveal" data-d="3" onclick="openModal(3)"
+           style="--cc:var(--green);--cg:rgba(0,200,150,.07)">
+        <div class="mcard-bar"></div>
+        <div class="mcard-num">Module 04</div>
+        <div class="mcard-icon">⚡</div>
+        <div class="mcard-name">Cortex Catalyst</div>
+        <p class="mcard-pitch">AI-powered research and troubleshooting assistant for the Cortex Product Suite — answers natural language questions with grounded, accurate responses drawn from real-time official product documentation synced daily.</p>
+        <div class="mcard-cta">Explore ↗</div>
+        <div class="mcard-tag">Technical Services</div>
+      </div>
+
+      <!-- M5 -->
+      <div class="mcard reveal" data-d="4" onclick="openModal(4)"
+           style="--cc:var(--pink);--cg:rgba(255,79,123,.07)">
+        <div class="mcard-bar"></div>
+        <div class="mcard-num">Module 05</div>
+        <div class="mcard-icon">🔬</div>
+        <div class="mcard-name">Cortex Insights</div>
+        <p class="mcard-pitch">Automated health check and comprehensive security assessment framework for Cortex XDR, XSIAM, and Cortex Cloud — enabling CS teams to proactively assess customer tenants via the Companion SaaS platform.</p>
+        <div style="margin-top:1rem;margin-bottom:1.25rem;">
+          <div style="font-family:var(--fm);font-size:.58rem;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem;">Assessment Categories</div>
+          <div style="display:flex;flex-wrap:wrap;gap:.35rem;">
+            <span class="check-pill">Agents</span>
+            <span class="check-pill">Analytics</span>
+            <span class="check-pill">Cloud</span>
+            <span class="check-pill">Compliance</span>
+            <span class="check-pill">Datasets</span>
+            <span class="check-pill">Integrations</span>
+            <span class="check-pill">Playbook Analytics</span>
+            <span class="check-pill">Posture Badges</span>
+            <span class="check-pill">Runtime Badges</span>
+            <span class="check-pill">Security Events</span>
+            <span class="check-pill">System Status</span>
+          </div>
+        </div>
+        <div class="mcard-cta">Explore ↗</div>
+        <div class="mcard-tag">CS</div>
+      </div>
+
+      <!-- M6 -->
+      <div class="mcard reveal" data-d="5" onclick="openModal(5)"
+           style="--cc:var(--amber);--cg:rgba(255,184,0,.07)">
+        <div class="mcard-bar"></div>
+        <div class="mcard-num">Module 06</div>
+        <div class="mcard-icon">🛍️</div>
+        <div class="mcard-name">Marketplace App</div>
+        <p class="mcard-pitch">A marketplace app available for every Cortex Cloud and XSIAM customer to download — bringing Cortex Insights health visualizations and value statements directly into the platform, with no external tools required.</p>
+        <div class="mcard-cta">Explore ↗</div>
+        <div class="mcard-tag">Technical Services</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ USER FLOWS ══════════ -->
+<section id="flows" style="border-top:1px solid var(--border);position:relative;z-index:1;">
+  <div class="wrap">
+    <div class="eyebrow reveal">// End-to-End User Flows</div>
+    <h2 class="sec-h2 reveal">The platform in motion.</h2>
+    <p class="sec-p reveal" style="margin-bottom:3rem;">
+      The six modules working together across real Technical Services scenarios — from first deployment to ongoing customer value.
+    </p>
+
+    <!-- FLOW 1 -->
+    <div class="flow-card reveal" style="--fc:var(--orange)">
+      <div class="flow-card-header">
+        <span class="flow-badge" style="background:rgba(255,87,34,.15);color:var(--orange)">Professional Services</span>
+        <div class="flow-title">New Cortex / Cloud Deployment</div>
+      </div>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-step-icon">🛡️</div>
+          <div class="flow-step-label">XSIAM or Cortex Cloud deployment completed by PS engineer</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-icon" style="color:var(--orange)">📄</div>
+          <div class="flow-step-label"><strong>As-Built Documents</strong> auto-generates from console</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-icon">🔐</div>
+          <div class="flow-step-label">SHA-256 hash computed per file — SOW traceability confirmed</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-icon">✅</div>
+          <div class="flow-step-label">Verified as-built deliverable handed to customer</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-icon" style="color:var(--blue)">🤖</div>
+          <div class="flow-step-label"><strong>Session Planner</strong> (via Loop) creates base Asana success plan — CS team takes over with full baseline ready</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLOW 2 -->
+    <div class="flow-card reveal" style="--fc:var(--blue)">
+      <div class="flow-card-header">
+        <span class="flow-badge" style="background:rgba(0,180,216,.15);color:var(--blue)">Customer Success — New Engagement</span>
+        <div class="flow-title">Onboarding a New Customer</div>
+      </div>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-step-icon">🤝</div>
+          <div class="flow-step-label">New customer engagement begins</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-icon" style="color:var(--blue)">🤖</div>
+          <div class="flow-step-label"><strong>Session Planner</strong> launched — CSE defines value goals &amp; components to achieve</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-icon">📅</div>
+          <div class="flow-step-label">Success plan created, sessions auto-scheduled, calendar invites &amp; pre-reqs sent</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-icon" style="color:var(--pink)">🔬</div>
+          <div class="flow-step-label"><strong>Cortex Insights</strong> run against the customer's environment</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-icon">📊</div>
+          <div class="flow-step-label">Health baseline established — CSE has full context before the first session</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLOW 3 -->
+    <div class="flow-card reveal" style="--fc:var(--pink)">
+      <div class="flow-card-header">
+        <span class="flow-badge" style="background:rgba(255,79,123,.15);color:var(--pink)">Customer Success — Ongoing</span>
+        <div class="flow-title">Day-to-Day CS Engagement</div>
+      </div>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-step-icon">📅</div>
+          <div class="flow-step-label">Scheduled session arrives — auto-created by Session Planner</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-icon" style="color:var(--pink)">🔬</div>
+          <div class="flow-step-label"><strong>Cortex Insights</strong> run against customer tenant pre-session or during session with customer consent</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-icon">🧠</div>
+          <div class="flow-step-label">AI generates personas, health report &amp; prioritized remediation plan</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-icon">🎯</div>
+          <div class="flow-step-label">CSE presents findings &amp; recommendations to customer</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-icon" style="color:var(--blue)">🤖</div>
+          <div class="flow-step-label"><strong>Session Planner</strong> auto-schedules next session &amp; updates Asana</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLOW 4 -->
+    <div class="flow-card reveal" style="--fc:var(--amber)">
+      <div class="flow-card-header">
+        <span class="flow-badge" style="background:rgba(255,184,0,.15);color:var(--amber)">CS &amp; PS — Customer Journey</span>
+        <div class="flow-title">Marketplace App — Value Visualization &amp; Dashboard</div>
+      </div>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-step-icon">🛍️</div>
+          <div class="flow-step-label">Customer downloads the <strong>Cortex Insights Marketplace App</strong> directly from the Cortex Cloud or XSIAM marketplace</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-icon" style="color:var(--amber)">📲</div>
+          <div class="flow-step-label">App installs natively on the customer's tenant — data never leaves their environment, no external API queries</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-icon">🥉</div>
+          <div class="flow-step-label">Customer tracks <strong>value statements</strong> and achievements — progressing through Bronze, Silver, and Gold trophies throughout their journey</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-icon">📊</div>
+          <div class="flow-step-label">Value progression and security outcomes visualized directly on the customer's dashboard — no data ever gathered externally</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-icon">🥇</div>
+          <div class="flow-step-label">Customer reaches <strong>Gold</strong> — full value realization confirmed within the platform</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLOW 5 -->
+    <div class="flow-card reveal" style="--fc:var(--purple)">
+      <div class="flow-card-header">
+        <span class="flow-badge" style="background:rgba(123,97,255,.15);color:var(--purple)">Technical Services — Migration</span>
+        <div class="flow-title">Prisma Cloud → Cortex Cloud Migration</div>
+      </div>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-step-icon">☁️</div>
+          <div class="flow-step-label">Customer migrating from Prisma Cloud to Cortex Cloud</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-icon" style="color:var(--purple)">🔄</div>
+          <div class="flow-step-label"><strong>RQL→XQL Translator</strong> converts queries, correlation rules &amp; 160 network policies</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-icon">✅</div>
+          <div class="flow-step-label">Rules validated — OOTB &amp; custom compliance assignments carried over</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-icon" style="color:var(--green)">⚡</div>
+          <div class="flow-step-label"><strong>Cortex Catalyst</strong> answers migration questions in real time from live documentation</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-icon">🚀</div>
+          <div class="flow-step-label">Customer live on Cortex Cloud — migration complete</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer>
+  Cortex Unity &nbsp;·&nbsp; PANW SWAT Internal &nbsp;·&nbsp; Confidential &nbsp;·&nbsp; 2026
+</footer>
+
+<!-- ══════════ MODAL ══════════ -->
+<div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-top-bar" id="m-bar"></div>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-hd">
+      <div class="modal-ey" id="m-ey"></div>
+      <div class="modal-name" id="m-name"></div>
+      <div class="modal-pitch" id="m-pitch"></div>
+    </div>
+    <div class="modal-bd">
+      <div class="quad" id="m-quad"></div>
+      <div class="modal-meta" id="m-meta"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = [
+  {
+    num: "Module 01", name: "As-Built Documents", color: "#FF5722",
+    pitch: "Generates as-built documents for Cortex XDR/XSIAM and Cortex Cloud deployments — replacing a 4-to-24-hour manual process with automated SHA-256 verified documentation that proves exactly what was deployed.",
+    problem: {
+      h: "4 to 24 Hours. Up to 300 Pages. Every Deployment.",
+      p: "Professional Services engineers manually author as-built documents after every XSIAM and Cortex Cloud deployment. Depending on customer complexity, this takes between 4 and 24 hours and can produce documents up to 300 pages long. The result is inconsistency across deliverables and a document that does not provide the proof of authenticity the customer actually needs."
+    },
+    framework: {
+      h: "SHA-256 Automated Verification Across 5 Configuration Categories",
+      p: "The generator captures only the settings modified or deployed by the Palo Alto Networks consultant during the engagement — never customer-made changes. It downloads configuration data directly from the console and computes a SHA-256 hash per file, creating cryptographic proof that what was deployed matches the SOW exactly. Captured across five categories: (1) Tenant Administration &amp; Security — session management, access controls, IP ranges, SBAC, user expiration; (2) Endpoint &amp; Agent — upgrade schedules, disconnection timers, duplicate cleanup, global uninstall passwords; (3) Data Collection &amp; Integrations — Broker VM configs, custom collectors (Syslog, CSV, FTP, Netflow, WEC), Cloud Identity Engine; (4) Rules, Policies &amp; Threat Detection — custom parsing rules, data model rules, BIOCs, malware/exploit profiles; (5) Automation &amp; Response — custom playbooks, scripts, scheduled jobs, saved credentials, Action Center configurations."
+    },
+    impact: {
+      h: "50 Projects/Quarter. ~600 Engineer-Hours Reclaimed.",
+      p: "Professional Services delivers 50 XSIAM projects per quarter globally, each requiring one as-built document. The average document takes approximately 14 hours to produce manually — the midpoint of the observed range — with a ±20% variance (roughly 11 to 17 hours) depending on customer complexity. With the Cortex As-Built automation, each document is generated in 1 hour and requires 1 additional hour to present to the customer — 2 hours total. At the midpoint, that is an ~86% LOE reduction per document and approximately 600 engineer-hours reclaimed every quarter.",
+      metrics: [
+        { n: "50", l: "Projects / Quarter" },
+        { n: "~86%", l: "LOE Reduction" },
+        { n: "~600h", l: "Reclaimed / Quarter" }
+      ]
+    },
+    future: {
+      h: "Continuous Evolution in Step with Cortex",
+      p: "The Cortex platform continues to evolve, introducing additional components that customers are required to deploy and document. As each new Cortex version matures, the As-Built tool will be updated in lockstep — ensuring that every new capability, integration, or configuration requirement is captured automatically, without the documentation process ever falling behind the product."
+    },
+    code: "Adam Hamilton, James McGrath", qa: "Lead Pramod Dhamenia and the entire PS org 🙂", enhancements: "Paolo Luise, JL Jerez Guerrero", collaborations: "Shane Hale, Vincent Mejia", enablement: "Roksana Radecka, Sveta"
+  },
+  {
+    num: "Module 02", name: "Session Planner (Scale & Optimize)", color: "#00B4D8",
+    pitch: "An internal automation tool for Customer Success Engineers — automating Asana project creation, Google Calendar scheduling, and customer communications so CSEs can focus on driving outcomes instead of managing admin.",
+    problem: {
+      h: "CSEs Were Spending Hours on Admin Instead of Customers",
+      p: "Customer Success Engineers were manually creating success plans in spreadsheets and documents without standards or measurable value, individually scheduling recurring customer sessions, and drafting and sending manual pre-requisites for every call. On top of that, CSEs were filling in status update decks manually, context-switching across multiple tools, and logging time in a separate application (Clarizen) — completely disconnected from the rest of the workflow. This fragmented, administrative overhead consumed hours that should have been spent driving prescriptive customer outcomes and acting as trusted advisors."
+    },
+    framework: {
+      h: "End-to-End Scheduling &amp; Operations Automation — Hosted in Loop",
+      p: "The S&amp;O Session Planner is hosted inside Loop — the internal CSE hub that serves as the main starting point for all Customer Success Engineers, providing documentation, module information, and built-in links to release notes and release cadences for every component. The planner automates the full CSE operational workflow: it creates a standardized Asana project and task set in the CSE's region (NAM, EMEA, JAPAC, LATAM), instantly generates and sends Google Calendar invites with Zoom links included, and features a Bulk Scheduling capability that cascades recurring session dates automatically from a single start date. It also drafts and sends a professional HTML Email Summary with a session agenda and prerequisites to all invitees. The tool enforces the 'Golden Rule' — one active project per customer — and if a project already exists, it adds new tasks without deleting ongoing work, keeping Asana perfectly aligned with Google Calendar and current delivery goals."
+    },
+    impact: {
+      h: "~83% Weekly Admin Reduction. ~250 Hours Reclaimed Per CSE Per Year.",
+      p: "Before the tool, each CSE spent approximately 6 hours per week on total account admin — a blend of active and dormant accounts covering scheduling, pre-reqs, Clarizen time logging, deck updates, and status reporting. With the Session Planner, the entire workflow consolidates to approximately 1 hour per week — roughly 5 minutes per customer — with bulk scheduling, time entries, success plans, and pre-reqs all handled in one place. That is an ~83% reduction in weekly admin LOE, translating to approximately 5 hours saved per CSE per week and ~250 engineer-hours reclaimed per CSE per year.",
+      metrics: [
+        { n: "~83%", l: "Weekly Admin Reduction" },
+        { n: "~250h", l: "Saved Per CSE / Year" },
+        { n: "6h → 1h", l: "Per Week / Per CSE" }
+      ]
+    },
+    future: {
+      h: "Live Globally. Continuously Evolving with the Field.",
+      p: "The Session Planner is live and rolled out globally. The tool is platform-agnostic — covering Cortex, Cloud, and Network Security — and serves the full breadth of Technical Services practices. Active development continues based on differentiators and requirements surfaced directly from the field, ensuring the tool evolves in step with what CSEs actually need. There is no end state — continuous improvement driven by field feedback is the roadmap."
+    },
+    code: "Nevo Laron, Adam Hamilton", qa: "Global CS Team 🙂", enhancements: "Itamar Orlov, Ziv Salomon, Paul Burega, Syed Jawad Ameer", collaborations: "Global CS Team 🙂", enablement: "H.S. Song, Ben Nicholson, Sveta, Paul Burega"
+  },
+  {
+    num: "Module 03", name: "RQL to XQL Translator", color: "#7B61FF",
+    pitch: "The Automated AI RQL to XQL Converter, designed for customers migrating from Prisma Cloud to Cortex Cloud — enabling expedited conversion and validation of queries to accelerate the migration process.",
+    problem: {
+      h: "Migrating from Prisma Cloud Meant Rebuilding Everything From Scratch",
+      p: "Customers migrating from Prisma Cloud to Cortex Cloud faced a significant operational gap: existing audit log rules, network policies, correlation rules, and compliance assignments could not be carried over automatically. Teams were left manually recreating hundreds of platform rules per tenant — a time-consuming, error-prone process with no standardized approach."
+    },
+    framework: {
+      h: "AI-Driven Query Conversion + Automated Rules Management",
+      p: "The tool automates RQL to XQL conversion and includes a Correlation Rules automation script with exclusions management — covering 160 rules for event and network-based issue creation based on recommended XQL queries. An Excel-based automated management system handles all platform OOTB and custom rules, compliance standard assignments, and supports bulk add/edit including translated policies. Automated AppSec to CSPM mapped rules creation and linking is also included. The tool has been deployed and validated across multiple Prisma Cloud and Cortex Cloud client environments."
+    },
+    impact: {
+      h: "Day-to-Day Usability — No Telemetry Collected",
+      p: "This is a stealth, self-standing browser tool. No telemetry is collected and no usage metrics are tracked. Its impact is felt directly in day-to-day operations — every time a team needs to convert Prisma Cloud queries and rules to Cortex Cloud, the tool is there and ready to use.",
+      metrics: [
+        { n: "160", l: "Automated Rules" },
+        { n: "~95%", l: "Code Complete" },
+        { n: "In Use", l: "On Demand" }
+      ]
+    },
+    future: {
+      h: "Complete and Available — Optimized as Needed",
+      p: "The tool is approximately 95% complete. Code can always be further optimized, but there are no planned feature additions. It is a stable, available utility — deployed whenever a Prisma Cloud to Cortex Cloud migration requires query and rules conversion."
+    },
+    code: "Oleg Kostine", qa: "Oleg Kostine &amp; James McGrath", enhancements: "James McGrath", collaborations: "Technical Services", enablement: "Sveta, James McGrath"
+  },
+  {
+    num: "Module 04", name: "Cortex Catalyst", color: "#00C896",
+    pitch: "AI-powered research and troubleshooting assistant for the Cortex Product Suite — answers natural language questions with grounded, accurate responses drawn from real-time official product documentation synced daily.",
+    problem: {
+      h: "Manual Documentation Research Is a Time Tax on Every Engagement",
+      p: "Engineers and CS teams across the Cortex product suite — XDR, XSIAM, XSOAR, Xpanse, and Cloud — spent significant time manually searching through product documentation to answer customer questions and troubleshoot issues. This slow, inconsistent process delayed issue resolution and reduced operational efficiency across the board."
+    },
+    framework: {
+      h: "Google Vertex AI + Gemini + FluidTopics API",
+      p: "Cortex Catalyst leverages Google Cloud's Vertex AI and Gemini models, grounded in official product documentation synced daily via the FluidTopics API. Users ask natural language questions and receive accurate, documentation-backed answers in real time. The tool also supports natural language to XQL statement conversion. Originally prototyped as a Gemini Gem using a Google Drive knowledge base, it was scaled into an enterprise-grade application within the SWAT team."
+    },
+    impact: {
+      h: "First GCS Service Powered by Real-Time Product Documentation",
+      p: "Cortex Catalyst is the first Global Customer Support (GCS) service powered by real-time product documentation. It accelerates issue resolution by replacing the manual research cycle — opening docs, running searches, querying Glean — with a single natural language question answered in seconds, saving approximately 5 minutes per query across the team.",
+      metrics: [
+        { n: "Daily", l: "Docs Sync" },
+        { n: "5", l: "Cortex Products" },
+        { n: "~5min", l: "Saved Per Query vs. Manual Search" }
+      ]
+    },
+    future: {
+      h: "Merging into Companion SaaS in Collaboration with the Center of Excellence",
+      p: "The roadmap for Cortex Catalyst is its integration into the Companion SaaS platform — bringing its AI-powered research and troubleshooting capabilities directly into the unified internal toolset. This initiative is being developed in collaboration with the Center of Excellence, with the goal of enhancing and extending the current tools available to Technical Services teams globally."
+    },
+    code: "Adam Hamilton, Brandon Goldstein", qa: "Adam Hamilton, Brandon Goldstein, Sveta Poluektova", enhancements: "Brandon Goldstein", collaborations: "Product Management", enablement: "Brandon Goldstein"
+  },
+  {
+    num: "Module 05", name: "Cortex Insights", color: "#FF4F7B",
+    pitch: "Automated health check and comprehensive security assessment framework for Cortex XDR, XSIAM, and Cortex Cloud — enabling CS teams to proactively assess customer tenants via the internal Companion SaaS platform, without needing to validate tests live in the customer console.",
+    problem: {
+      h: "Reactive Engagement: Validating Tests in the Customer's Console",
+      p: "Customer Success teams had to validate multiple checks directly inside the customer's console, with the customer present. This reactive, manual approach was time-consuming, inconsistent, and left the CS team without a comprehensive view of the tenant's health ahead of customer interactions."
+    },
+    framework: {
+      h: "XQL + Cortex APIs + AI-Generated Personas",
+      p: "Cortex Insights runs automated assessments using XQL queries and public Cortex APIs across 11 categories: Agents, Analytics, Cloud, Compliance, Datasets, Integrations, Playbook Analytics, Posture Badges, Runtime Badges, Security Events, and System Status. An AI engine then generates 8 personas from the findings — including Security Administrator, Vulnerability Management, CISO, and Scale &amp; Optimize (which includes specific hour blocks for the CSE to remediate findings with the customer). The tool is accessible via the internal Companion SaaS platform and can be executed directly against the customer's tenant."
+    },
+    impact: {
+      h: "6-Hour Manual Process → 2 Hours. Proactive, Not Reactive.",
+      p: "By automating checks that were previously done manually inside the customer console, Cortex Insights significantly reduces assessment time. CS teams now arrive at customer engagements with a complete, AI-generated report — shifting from reactive validation to proactive guidance. Output includes a professional PDF or .docx with step-by-step recommendations, plus a details.xlsx with the full raw dataset.",
+      metrics: [
+        { n: "6h → 2h", l: "Assessment Time" },
+        { n: "11", l: "Check Categories" },
+        { n: "8", l: "AI Personas" }
+      ]
+    },
+    future: {
+      h: "90-Day Trend Analysis via BigQuery &amp; Grafana",
+      p: "Insights data is pushed to BigQuery and visualized over time using Grafana dashboards or Cortex Cloud Content Packs — enabling trend analysis of a customer's Cortex health across 90-day periods. This transforms one-time assessments into a continuous posture monitoring capability."
+    },
+    code: "Adam Hamilton, James McGrath, Marius Banica, Bishvesh Pachauli", qa: "Pramod Dhamenia, Paul Burega", enhancements: "Neel Rohit, Gozde Yildiz, Liz Lopanov, TSA Team, Paul Burega", collaborations: "Product Management", enablement: "Sveta, Adam Hamilton, Pramod Dhamenia, Marius Banica"
+  },
+  {
+    num: "Module 06", name: "Marketplace App", color: "#FFB800",
+    pitch: "A marketplace app available for every Cortex Cloud and XSIAM customer to download — bringing Cortex Insights health visualizations and value statements directly into the platform, with no external tools required.",
+    problem: {
+      h: "Querying Customer Data via APIs Created Data Sovereignty Risks",
+      p: "Gathering insights from customer environments previously required querying data through external APIs — meaning customer data left their tenant and was handled outside their environment. This created data sovereignty concerns and prevented teams from providing in-platform value visualization at scale. The Marketplace App was developed specifically to eliminate this problem: by running natively inside the customer's own Cortex Cloud or XSIAM tenant, the data never leaves their environment and is never gathered externally."
+    },
+    framework: {
+      h: "XQL + Mathematical Calculations — Native, No Data Leaves the Tenant",
+      p: "The Marketplace App is not AI-driven — it is built entirely on XQL, the native query language of the Cortex platform, combined with mathematical calculations that generate trend data over time. These queries power a suite of dashboard widgets that visualize the customer's security posture and value progression natively inside their own environment. Every widget is mapped 1-to-1 to the value statements defined by Product Management and the Center of Excellence — ensuring that what the customer sees on their dashboard directly reflects the outcomes they were sold and the milestones they need to achieve."
+    },
+    impact: {
+      h: "In-Platform Visualization. Gamified Value Achievement.",
+      p: "Three major impacts: first, customers can now visualize the use cases they selected during onboarding — and their progress toward achieving them — directly inside their own Cortex Cloud or XSIAM platform, with no external tools required. Second, the journey to full value realization is gamified through a Bronze, Silver, and Gold trophy progression — giving customers and CS teams a clear, motivating framework for what has been achieved and what remains. Third, total visibility into platform health and value status is now accessible in 5 clicks and approximately 2 minutes of work — no preparation, no queries, no waiting.",
+      metrics: [
+        { n: "Native", l: "In-Platform Visualization" },
+        { n: "🥉🥈🥇", l: "Bronze · Silver · Gold" },
+        { n: "5 clicks", l: "Total Visibility in ~2 Minutes" }
+      ]
+    },
+    future: {
+      h: "Continuously Evolving with Product Management &amp; the Center of Excellence",
+      p: "As Product Management refines and expands the value statement framework, each new statement translates directly into a new widget — keeping the dashboard a living reflection of what the platform delivers. In ongoing collaboration with the Center of Excellence, the Marketplace App will continue to evolve: deeper trend analysis, broader Bronze-Silver-Gold milestone coverage, and expanded support as the Cortex Cloud and XSIAM platforms mature. Like the platform itself, there is no end state — continuous development aligned with product direction and field requirements is the roadmap."
+    },
+    code: "Bishvesh Pachauli, Simon Sigre", qa: "TS org 🙂", enhancements: "Neel Rohit, Gozde Yildiz, Liz Lopanov, TSA Team", collaborations: "H.S. Song, Ben Nicholson, Product Management", enablement: "Sveta, Bishvesh Pachauli"
+  }
+];
+
+function openModal(i) {
+  const d = DATA[i];
+  const ov = document.getElementById('overlay');
+
+  ov.style.setProperty('--mc', d.color);
+  document.getElementById('m-bar').style.background = d.color;
+  document.getElementById('m-ey').style.color = d.color;
+  document.getElementById('m-ey').textContent = d.num;
+  document.getElementById('m-name').textContent = d.name;
+  document.getElementById('m-pitch').textContent = d.pitch;
+
+  document.getElementById('m-quad').innerHTML = `
+    <div class="qblock">
+      <div class="q-label"><div class="q-dot"></div>01 — Problem Statement</div>
+      <div class="q-h">${d.problem.h}</div>
+      <div class="q-p">${d.problem.p}</div>
+    </div>
+    <div class="qblock">
+      <div class="q-label"><div class="q-dot"></div>02 — AI Framework</div>
+      <div class="q-h">${d.framework.h}</div>
+      <div class="q-p">${d.framework.p}</div>
+    </div>
+    <div class="qblock wide">
+      <div class="q-label"><div class="q-dot"></div>03 — Impact &amp; Results</div>
+      <div class="q-h">${d.impact.h}</div>
+      <div class="q-p">${d.impact.p}</div>
+      <div class="impact-row">
+        ${d.impact.metrics.map(m => `
+          <div class="metric">
+            <div class="metric-n">${m.n}</div>
+            <div class="metric-l">${m.l}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="qblock wide">
+      <div class="q-label"><div class="q-dot"></div>04 — Future Look</div>
+      <div class="q-h">${d.future.h}</div>
+      <div class="q-p">${d.future.p}</div>
+    </div>
+  `;
+
+  document.getElementById('m-meta').innerHTML = `
+    <div>
+      <div class="mmeta-l">Code</div>
+      <div class="mmeta-v">${d.code}</div>
+    </div>
+    <div>
+      <div class="mmeta-l">QA</div>
+      <div class="mmeta-v">${d.qa}</div>
+    </div>
+    <div>
+      <div class="mmeta-l">Enhancements</div>
+      <div class="mmeta-v">${d.enhancements}</div>
+    </div>
+    <div>
+      <div class="mmeta-l">Collaborations</div>
+      <div class="mmeta-v">${d.collaborations}</div>
+    </div>
+    <div>
+      <div class="mmeta-l">Enablement</div>
+      <div class="mmeta-v">${d.enablement}</div>
+    </div>
+  `;
+
+  ov.classList.add('on');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('modal').scrollTop = 0;
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('on');
+  document.body.style.overflow = '';
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('overlay')) closeModal();
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// Auto-number flow steps
+document.querySelectorAll('.flow-card').forEach(card => {
+  card.querySelectorAll('.flow-step').forEach((step, i) => {
+    const num = document.createElement('div');
+    num.className = 'flow-step-num';
+    num.textContent = String(i + 1).padStart(2, '0');
+    step.insertBefore(num, step.firstChild);
+  });
+});
+
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('up');
+      obs.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
