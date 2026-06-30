@@ -122,6 +122,25 @@ npm run lint  # HTMLHint + markdownlint + ESLint
 
 ---
 
+## Monitoring GitHub Pages Deployment
+
+After merging to main, Pages deploys automatically. To check status from the terminal:
+
+```bash
+# Quick status check — returns "building" or "built"
+gh api repos/PCS-LAB-ORG/swat-releases/pages --jq '.status'
+
+# Poll until deployed
+until [ "$(gh api repos/PCS-LAB-ORG/swat-releases/pages --jq '.status')" = "built" ]; do echo "still building..."; sleep 5; done && echo "deployed"
+
+# List recent deployments
+gh run list --workflow=pages-build-deployment --limit 3
+```
+
+Deploy typically takes 30–90 seconds after merge. A 404 immediately after merge is normal — wait for status to return `"built"` before concluding there's a problem.
+
+---
+
 ## Open Items
 
 | Item | Notes |
