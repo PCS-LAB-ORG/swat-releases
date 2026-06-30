@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cortex Unity — Loop Embed Test</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f4f4f5; }
+
+    .loop-chrome {
+      background: #fff;
+      border-bottom: 1px solid #e4e4e7;
+      padding: .75rem 2rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .loop-logo { font-weight: 700; font-size: 1.1rem; color: #0f4c81; }
+    .loop-nav  { font-size: .8rem; color: #6b7280; }
+
+    .loop-page {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+
+    .loop-page h1 { font-size: 1.5rem; font-weight: 700; color: #111; margin-bottom: .5rem; }
+    .loop-page p  { font-size: .9rem; color: #6b7280; margin-bottom: 1.5rem; }
+
+    .iframe-container {
+      width: 100%;
+      height: 85vh;
+      background: #fff;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      overflow: auto;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      border: none;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+<div class="loop-chrome">
+  <div class="loop-logo">Loop</div>
+  <div class="loop-nav">Palo Alto Networks · Internal</div>
+</div>
+
+<div class="loop-page">
+  <h1>Cortex Unity AI Automation Platform</h1>
+  <p>Embedded content via iframe — auto-resizes to fit content height.</p>
+
+  <div class="iframe-container">
+    <iframe id="cortex-frame"
+      src="index_cortex.html?iframeId=test-iframe-001&parentUrl=http://localhost"
+    ></iframe>
+  </div>
+</div>
+
+<script>
+  // postMessage resize handler — Loop's platform applies the resize on their end.
+  // index_cortex.html sends the height; Loop listens and resizes the iframe.
+</script>
+</body>
+</html>
