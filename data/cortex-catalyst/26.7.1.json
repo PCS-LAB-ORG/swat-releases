@@ -6,6 +6,11 @@
   "entries": [
     {
       "tag": "Feature",
+      "title": "AI follow-up questions after every response",
+      "description": "After each answer, Catalyst surfaces three contextually relevant follow-up questions based on the retrieved documentation. Clicking one submits it as your next query, making it easier to explore a topic across multiple turns without reformulating your question. Now live in production for the first time."
+    },
+    {
+      "tag": "Feature",
       "title": "Interactive feedback for empty search results",
       "description": "When the assistant cannot find relevant documentation for a query, a new opt-in feedback form appears. Users can review, edit, or redact their original query before submitting it to help administrators bridge documentation gaps."
     },
