@@ -2,7 +2,7 @@
   "version": "26.7.1",
   "date": "July 2026",
   "release_url": "https://github.com/PCS-LAB-ORG/catalyst-rag-agent/releases/tag/26.7.1",
-  "summary": "This release introduces an interactive user feedback system for empty search results and a refreshed Chat UI aligned with Palo Alto Networks XSIAM design standards.",
+  "summary": "This release brings the Suggestion Service to production, surfacing AI-generated follow-up questions after every response, alongside an interactive feedback system for empty search results and a refreshed Chat UI aligned with Palo Alto Networks XSIAM design standards.",
   "entries": [
     {
       "tag": "Feature",
