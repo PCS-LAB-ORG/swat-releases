@@ -12,12 +12,12 @@
     {
       "tag": "Enhancement",
       "title": "Refreshed Chat UI matching XSIAM styling",
-      "description": "The user interface now aligns with the official XSIAM design, featuring fully mapped dark and light modes, an updated icon library, and a responsive loading animation that changes speed based on search phases."
+      "description": "The user interface now aligns with the official XSIAM design, featuring fully mapped dark and light modes, refreshed icons, and a loading animation that reflects search progress."
     },
     {
       "tag": "Enhancement",
       "title": "Improved connection reliability under heavy load",
-      "description": "The chat assistant now automatically retries requests when encountering rate limits, reducing the likelihood of interrupted search sessions and empty responses during high-traffic periods."
+      "description": "Interrupted search sessions and empty responses during periods of high traffic are now significantly less likely."
     }
   ]
 }
