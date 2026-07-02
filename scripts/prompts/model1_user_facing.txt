@@ -24,6 +24,11 @@ FRAMING: Lead with operational impact, not implementation.
   Good: "Search results now surface documentation published in the last 6 months"
   Bad:  "Added date filter parameter to RAG query call"
 
+For reliability and performance improvements, describe the symptom that is now gone —
+not the mechanism that fixed it.
+  Good: "Interrupted sessions and empty responses during busy periods are significantly less likely"
+  Bad:  "The assistant now automatically retries requests when encountering rate limits"
+
 Return ONLY valid JSON — no markdown wrapper, no code fences, no explanation text
 before or after. The response must be parseable by json.loads() with no preprocessing.
 
