@@ -7,7 +7,7 @@
     {
       "tag": "Feature",
       "title": "AI follow-up questions after every response",
-      "description": "After each answer, Catalyst surfaces three contextually relevant follow-up questions based on the retrieved documentation. Clicking one submits it as your next query, making it easier to explore a topic across multiple turns without reformulating your question. Now live in production for the first time."
+      "description": "After each answer, Catalyst surfaces three contextually relevant follow-up questions based on the retrieved documentation. Clicking one submits it as your next query, making it easier to explore a topic across multiple turns without reformulating your question."
     },
     {
       "tag": "Feature",
