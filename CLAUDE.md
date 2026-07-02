@@ -32,7 +32,8 @@ swat-releases/
 ├── cortex-unity/                    ← hand-authored
 ├── cortex-search-pipeline/          ← coming soon
 ├── docs/
-│   └── release-notes-standards.md   ← three-model framework + tag taxonomy + citations
+│   ├── release-notes-standards.md   ← three-model framework + tag taxonomy + citations
+│   └── pipeline-operations.md       ← dispatch commands, skip logic, correction workflow, adding tools
 ├── tests/                           ← pytest (24 tests, all scripts covered)
 └── .github/workflows/
     └── generate-release-notes.yml   ← daily cron 06:00 UTC + workflow_dispatch
@@ -51,7 +52,17 @@ New Catalyst releases are generated automatically. The pipeline:
 5. Rebuilds the Catalyst panel in `index.html`
 6. Creates a branch `auto/release-notes/cortex-catalyst-{version}`, PRs to main, merges
 
-**Manual correction:** edit the JSON artifact directly, then trigger `workflow_dispatch` with `force_version={version}`.
+**Manual dispatch:**
+
+```bash
+# New release — poll detects it, no force needed
+gh workflow run generate-release-notes.yml --repo PCS-LAB-ORG/swat-releases
+
+# Re-process an existing version (failed run, bad Gemini output) — bypasses skip logic, overwrites artifact
+gh workflow run generate-release-notes.yml --repo PCS-LAB-ORG/swat-releases -f force_version=27.7.1
+```
+
+**Manual correction:** edit the JSON artifact directly, then trigger `workflow_dispatch` with `force_version={version}`. Full correction and skip logic docs: `docs/pipeline-operations.md`.
 
 **To add a new tool:** add an entry to `config/tools.yaml` and create a prompt file in `scripts/prompts/`.
 
@@ -110,6 +121,30 @@ See `docs/release-notes-standards.md` for the three-model content framework and 
 - Feature branches from `develop`, merged with `git merge --no-ff --no-verify`
 - `develop → main`: PR required, CI must pass
 - Auto-generated pipeline branches: `auto/release-notes/cortex-catalyst-{version}` — merged directly to main by the workflow
+
+### Pipeline sync rule (important)
+
+The automated pipeline merges directly to `main`, bypassing `develop`. This means `main`
+will regularly be ahead of `develop` after a pipeline run. After each pipeline merge:
+
+```bash
+git checkout main && git pull --ff-only
+git checkout develop
+git merge --no-ff --no-verify main -m "chore: sync develop with pipeline auto-commits ({version})"
+git push origin develop
+```
+
+### Pulling main safely
+
+Always keep the working tree clean before pulling main. The pre-commit hook blocks
+commits to both `main` and `develop` — if `git pull` finds local modifications and tries
+to create a merge commit, it will fail mid-merge.
+
+```bash
+git pull --ff-only   # safe: never creates a merge commit; fails cleanly if not possible
+```
+
+If `--ff-only` fails, stash local changes first, pull, then pop the stash onto a branch.
 
 ---
 
