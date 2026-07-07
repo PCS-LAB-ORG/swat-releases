@@ -110,7 +110,7 @@ gcloud auth application-default login
 PYTHONPATH=. python - << 'EOF'
 from google.cloud import storage
 from scripts.render import load_assets, GCSHTMLRenderer, GCSIndexUpdater, TemplateEngine, load_all_release_data_from_gcs
-from scripts.poll import load_config
+from scripts.config import load_config
 import json
 
 client = storage.Client()
@@ -135,6 +135,28 @@ EOF
 
 ## Hotfix Processing
 
+### Submitting a hotfix
+
+Write the fix notes as a `.md` file named with the hotfix version (e.g., `26.8.1.01.md`):
+
+```markdown
+# Cortex Catalyst 26.8.1.01
+
+## Fixes
+- Resolved an issue where multi-document queries returned empty results when
+  source documents exceeded 50 pages.
+```
+
+Upload to the same tool folder in the input bucket:
+
+```bash
+gcloud storage cp 26.8.1.01.md gs://swat-releases-input/cortex-catalyst/26.8.1.01.md
+```
+
+The generator detects the 4-part version (`YY.M.X.NN`) and appends the formatted fix entries to the parent major release page (`26.8.1`). The parent release must already be processed before the hotfix is submitted.
+
+### How hotfixes are processed
+
 Hotfix versions (`26.8.1.01`, `26.8.1.02`) are automatically detected by the 4-part version format. The generator:
 
 1. Finds the parent major release JSON (`26.8.1.json`) in the serving bucket
@@ -152,6 +174,6 @@ The parent major release must exist before a hotfix can be processed.
 | --- | --- | --- |
 | Version not processed, no error log | `.md` file is named incorrectly or missing `.md` extension | Check `gcloud storage ls gs://swat-releases-input/cortex-catalyst/` |
 | Hotfix skipped with `parent_not_found` | Parent major release not yet processed | Upload and trigger parent first |
-| `RuntimeError: Could not find panel-catalyst div` | `index.html` in serving bucket is malformed or missing | Re-seed from repo: `gcloud storage cp index.html gs://swat-releases-serve/index.html` |
+| `RuntimeError: Could not find panel-catalyst div` | `index.html` in serving bucket is malformed or missing | Download a backup from GCS history or trigger a fresh generator run after verifying index.html content; index.html is no longer tracked in git. |
 | Cloud Function times out | Large number of unprocessed files | Trigger multiple times or increase `--timeout` on the function |
 | Gemini returns invalid JSON | Model flakiness | Manual trigger re-runs Gemini; check logs for raw response |
