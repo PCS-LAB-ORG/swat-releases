@@ -17,7 +17,7 @@ env:
   AR_REPO: swat-releases
   IMAGE_NAME: proxy
   MIG_NAME: mig-swat-releases
-  MIG_HEALTH_CHECK: swat-releases-health
+  MIG_HEALTH_CHECK: auth-gateway-health
   BACKEND_URL: https://storage.googleapis.com/swat-releases-serve
   SERVE_BUCKET: swat-releases-serve
   VM_MACHINE_TYPE: e2-small
@@ -109,39 +109,29 @@ jobs:
           sed -i "s|SERVE_BUCKET_PLACEHOLDER|${{ env.SERVE_BUCKET }}|g" /tmp/cloud-init.yaml
           sed -i "s|IMAGE_URI_PLACEHOLDER|${{ env.IMAGE_URI }}|g" /tmp/cloud-init.yaml
 
-      - name: Create instance template
+      - name: Create instance template (idempotent)
         run: |
-          gcloud compute instance-templates create ${{ env.TEMPLATE_NAME }} \
-            --project=${{ env.PROJECT_ID }} \
-            --machine-type=${{ env.VM_MACHINE_TYPE }} \
-            --image-family=cos-stable \
-            --image-project=cos-cloud \
-            --network=${{ env.VM_NETWORK }} \
-            --subnet=${{ env.VM_SUBNET }} \
-            --region=${{ env.REGION }} \
-            --service-account=${{ env.VM_SERVICE_ACCOUNT }} \
-            --scopes=cloud-platform \
-            --tags=allow-health-checks,cloudrun-gateway \
-            --boot-disk-size=10GB \
-            --boot-disk-type=pd-balanced \
-            --metadata-from-file user-data=/tmp/cloud-init.yaml \
-            --labels="app=swat-releases,component=proxy,commit-sha=${{ env.IMAGE_TAG }}"
-
-      - name: Create health check (idempotent)
-        run: |
-          if ! gcloud compute health-checks describe ${{ env.MIG_HEALTH_CHECK }} \
+          if gcloud compute instance-templates describe ${{ env.TEMPLATE_NAME }} \
               --project=${{ env.PROJECT_ID }} &>/dev/null; then
-            gcloud compute health-checks create http ${{ env.MIG_HEALTH_CHECK }} \
-              --project=${{ env.PROJECT_ID }} \
-              --port=8080 \
-              --request-path=/healthz \
-              --check-interval=30s \
-              --timeout=10s \
-              --healthy-threshold=1 \
-              --unhealthy-threshold=3
+            echo "Template ${{ env.TEMPLATE_NAME }} already exists — skipping."
           else
-            echo "Health check ${{ env.MIG_HEALTH_CHECK }} already exists — skipping."
+            gcloud compute instance-templates create ${{ env.TEMPLATE_NAME }} \
+              --project=${{ env.PROJECT_ID }} \
+              --machine-type=${{ env.VM_MACHINE_TYPE }} \
+              --image-family=cos-stable \
+              --image-project=cos-cloud \
+              --network=${{ env.VM_NETWORK }} \
+              --subnet=${{ env.VM_SUBNET }} \
+              --region=${{ env.REGION }} \
+              --service-account=${{ env.VM_SERVICE_ACCOUNT }} \
+              --scopes=cloud-platform \
+              --tags=allow-health-checks,cloudrun-gateway \
+              --boot-disk-size=10GB \
+              --boot-disk-type=pd-balanced \
+              --metadata-from-file user-data=/tmp/cloud-init.yaml \
+              --labels="app=swat-releases,component=proxy,commit-sha=${{ env.IMAGE_TAG }}"
           fi
+
 
       - name: Create or update MIG
         run: |
