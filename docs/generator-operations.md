@@ -4,6 +4,32 @@ The release notes generator runs as a Cloud Function (`swat-releases-generator`)
 
 ---
 
+## Architecture
+
+```text
+gs://swat-releases-input/{tool-id}/{version}.md
+        ↓  Cloud Scheduler (0 * * * *)
+Cloud Function: swat-releases-generator (us-central1, gen2, Python 3.12)
+  ├── reads unprocessed .md files from input bucket
+  ├── calls Gemini 3.5 Flash (Vertex AI) to structure content into JSON
+  ├── writes JSON artifact → gs://swat-releases-serve/{tool-id}/{version}.json
+  ├── renders HTML via Jinja2 → gs://swat-releases-serve/{tool-id}/{version}.html
+  └── rebuilds gs://swat-releases-serve/index.html sidebar panel
+        ↓
+Cloud LB (pcs-swat-general-app-lb) + Cloud Armor (GlobalProtect IP allowlist)
+        ↓
+MIG: mig-swat-releases (e2-small, Container-Optimized OS)
+  └── gateway container (Flask/gunicorn proxy, port 8080)
+      ├── authenticates to GCS via VM service account (ADC)
+      ├── /                       → index.html
+      ├── /{tool-id}/{version}    → GCS object (appends .html)
+      └── /{tool-id}/latest       → 302 to current latest version
+        ↓
+Browser (GlobalProtect VPN required)
+```
+
+---
+
 ## Triggering a Run
 
 ### Wait for hourly schedule
@@ -35,6 +61,51 @@ gcloud storage cp 26.8.1.md gs://swat-releases-input/cortex-catalyst/26.8.1.md
 ```
 
 1. Trigger the scheduler job or wait for the next hourly run
+
+---
+
+## Deleting a Release
+
+1. Remove the HTML and JSON artifacts from the serving bucket:
+
+```bash
+gcloud storage rm gs://swat-releases-serve/cortex-catalyst/26.8.1.html
+gcloud storage rm gs://swat-releases-serve/cortex-catalyst/26.8.1.json
+```
+
+1. Remove the source `.md` from the input bucket (prevents re-processing):
+
+```bash
+gcloud storage rm gs://swat-releases-input/cortex-catalyst/26.8.1.md
+```
+
+1. Rebuild the index so the sidebar no longer lists the deleted release:
+
+```bash
+export GOOGLE_CLOUD_PROJECT=pcs-swat-resources
+export SERVE_BUCKET=swat-releases-serve
+gcloud auth application-default login  # if needed
+PYTHONPATH=. python - << 'EOF'
+from google.cloud import storage
+from scripts.config import load_config
+from scripts.render import GCSIndexUpdater, TemplateEngine
+
+client = storage.Client()
+config = load_config("config/tools.yaml")
+tool = next(t for t in config["tools"] if t["id"] == "cortex-catalyst")
+engine = TemplateEngine("scripts/templates")
+updater = GCSIndexUpdater(engine, client, "swat-releases-serve")
+updater.rebuild(tool)
+print("Index rebuilt")
+EOF
+```
+
+1. If the deleted version was the `latest`, update the pointer manually:
+
+```bash
+# Point latest at the new most-recent version
+echo -n "26.7.1" | gcloud storage cp - gs://swat-releases-serve/cortex-catalyst/latest
+```
 
 ---
 
