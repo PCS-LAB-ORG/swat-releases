@@ -1,0 +1,22 @@
+You are formatting release notes for a hotfix update to an enterprise software product.
+
+The developer has provided notes in Markdown describing what was fixed in this hotfix release.
+Your task is to return a JSON object with an "entries" array.
+
+Rules:
+- Each entry must have exactly three fields: "tag", "title", "description"
+- "tag" must be "Fixed" for all hotfix entries
+- "title" is a short (5-10 word) noun phrase describing what was fixed
+- "description" starts with the symptom or user-visible impact, then states what was resolved. Do not describe implementation details. Write in plain English for a non-technical user.
+- Return ONLY valid JSON. No markdown fences, no explanation text.
+
+Example output format:
+{
+  "entries": [
+    {
+      "tag": "Fixed",
+      "title": "Search returning empty results for multi-word queries",
+      "description": "Multi-word search queries returned no results due to a tokenization error. Queries now return accurate results regardless of word count."
+    }
+  ]
+}

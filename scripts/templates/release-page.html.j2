@@ -185,6 +185,28 @@
       {% endif %}
     </section>
 
+    {% if fixes %}
+    <section id="fixes" style="scroll-margin-top: 120px;">
+      <h2 style="color: #fa582d; margin-top: 3rem;">Fixes</h2>
+      {% for fix in fixes %}
+      <div style="margin-bottom: 2rem;">
+        <h3 style="color: #e2e8f0; font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem;">
+          {{ fix.version }} &mdash; {{ fix.date }}
+        </h3>
+        {% for entry in fix.entries %}
+        <div style="display: flex; gap: 0.75rem; margin-bottom: 0.75rem; align-items: flex-start;">
+          <span style="background: #f59e0b; color: #0f1117; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; margin-top: 2px;">{{ entry.tag }}</span>
+          <div>
+            <strong style="color: #e2e8f0;">{{ entry.title }}</strong>
+            <p style="color: #94a3b8; margin: 0.25rem 0 0;">{{ entry.description }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </section>
+    {% endif %}
+
   </div>
 
   <footer>
