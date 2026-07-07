@@ -1,5 +1,8 @@
 # Pipeline Operations Reference
 
+> **Note:** This document describes the original GitHub Actions pipeline, which was replaced in July 2026.
+> For the current GCS-based generator, see `docs/generator-operations.md`.
+
 Operational guide for the automated release notes pipeline. Covers manual dispatch, correction workflows, skip logic, local development, and adding new tools.
 
 ---
