@@ -83,19 +83,15 @@ gcloud storage rm gs://swat-releases-input/cortex-catalyst/26.8.1.md
 
 ```bash
 export GOOGLE_CLOUD_PROJECT=pcs-swat-resources
-export SERVE_BUCKET=swat-releases-serve
 gcloud auth application-default login  # if needed
 PYTHONPATH=. python - << 'EOF'
 from google.cloud import storage
 from scripts.config import load_config
-from scripts.render import GCSIndexUpdater, TemplateEngine
+from scripts.generator.main import rebuild_index
 
-client = storage.Client()
-config = load_config("config/tools.yaml")
-tool = next(t for t in config["tools"] if t["id"] == "cortex-catalyst")
-engine = TemplateEngine("scripts/templates")
-updater = GCSIndexUpdater(engine, client, "swat-releases-serve")
-updater.rebuild(tool)
+gcs = storage.Client()
+tool = load_config("config/tools.yaml")["tools"][0]
+rebuild_index(tool, gcs, "swat-releases-serve")
 print("Index rebuilt")
 EOF
 ```
