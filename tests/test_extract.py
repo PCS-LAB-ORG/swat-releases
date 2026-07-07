@@ -75,7 +75,13 @@ def test_validate_hotfix_returns_entries():
 
 def test_validate_hotfix_rejects_invalid_tag():
     raw = json.dumps({"entries": [{"tag": "BAD", "title": "X", "description": "Y"}]})
-    with pytest.raises(ValueError, match="Invalid tag"):
+    with pytest.raises(ValueError, match="must use 'Fixed' tag"):
+        ResponseValidator().validate_hotfix(raw)
+
+
+def test_validate_hotfix_rejects_non_fixed_tag():
+    raw = json.dumps({"entries": [{"tag": "Feature", "title": "X", "description": "Y"}]})
+    with pytest.raises(ValueError, match="must use 'Fixed' tag"):
         ResponseValidator().validate_hotfix(raw)
 
 
@@ -195,8 +201,7 @@ SAMPLE_CONFIG = {"tools": [{"id": "cortex-catalyst", "name": "Cortex® Catalyst"
     "description": "Test.", "app_url": "https://example.com"}]}
 
 
-def test_process_release_major_writes_artifact(tmp_path):
-    mock_gcs = MagicMock()
+def test_process_release_major_writes_artifact():
     mock_extractor = MagicMock()
     mock_md_source = MagicMock()
     mock_artifact_store = MagicMock()
@@ -208,7 +213,6 @@ def test_process_release_major_writes_artifact(tmp_path):
     result = process_release(
         "cortex-catalyst", "26.7.1",
         "swat-releases-input", "swat-releases-serve",
-        gcs_client=mock_gcs,
         gemini_extractor=mock_extractor,
         gcs_md_source=mock_md_source,
         gcs_artifact_store=mock_artifact_store,
@@ -228,7 +232,6 @@ def test_process_release_major_skips_when_exists():
     process_release(
         "cortex-catalyst", "26.7.1",
         "swat-releases-input", "swat-releases-serve",
-        gcs_client=MagicMock(),
         gemini_extractor=mock_extractor,
         gcs_md_source=mock_md_source,
         gcs_artifact_store=mock_artifact_store,
@@ -252,7 +255,6 @@ def test_process_release_hotfix_appends_to_parent():
     result = process_release(
         "cortex-catalyst", "26.7.1.01",
         "swat-releases-input", "swat-releases-serve",
-        gcs_client=MagicMock(),
         gemini_extractor=mock_extractor,
         gcs_md_source=mock_md_source,
         gcs_artifact_store=mock_artifact_store,
@@ -272,7 +274,6 @@ def test_process_release_hotfix_errors_when_no_parent():
         process_release(
             "cortex-catalyst", "26.7.1.01",
             "swat-releases-input", "swat-releases-serve",
-            gcs_client=MagicMock(),
             gemini_extractor=MagicMock(),
             gcs_md_source=MagicMock(),
             gcs_artifact_store=mock_artifact_store,

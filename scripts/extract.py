@@ -117,8 +117,8 @@ class ResponseValidator:
         for entry in data["entries"]:
             if not all(k in entry for k in ["tag", "title", "description"]):
                 raise ValueError(f"Entry missing required keys: {entry}")
-            if entry["tag"] not in VALID_TAGS:
-                raise ValueError(f"Invalid tag '{entry['tag']}', must be one of {VALID_TAGS}")
+            if entry["tag"] != "Fixed":
+                raise ValueError(f"Hotfix entries must use 'Fixed' tag, got '{entry['tag']}'")
         return data["entries"]
 
 
@@ -148,7 +148,6 @@ def process_release(
     input_bucket: str,
     serve_bucket: str,
     *,
-    gcs_client: "_storage.Client",
     gemini_extractor: "GeminiExtractor",
     gcs_md_source: "GCSMarkdownSource",
     gcs_artifact_store: "GCSArtifactStore",
@@ -191,8 +190,9 @@ def process_release(
         return parent_artifact
 
     # Major release
-    if not force and gcs_artifact_store.read_json(serve_bucket, tool_id, version) is not None:
-        return gcs_artifact_store.read_json(serve_bucket, tool_id, version)
+    existing = gcs_artifact_store.read_json(serve_bucket, tool_id, version)
+    if not force and existing is not None:
+        return existing
 
     major_prompt = Path(tool["prompt"]).read_text()
     md_content = gcs_md_source.read(input_bucket, tool_id, version)
