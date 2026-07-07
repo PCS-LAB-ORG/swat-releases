@@ -3,7 +3,7 @@
           <p class="tool-desc">{{ tool.description | trim }}</p>
           {% if latest %}
           <div class="release-list">
-            <a href="{{ tool.folder }}/{{ latest.version }}.html" class="release-featured">
+            <a href="{{ tool.folder }}/{{ latest.version }}" class="release-featured">
               <span class="r-version">{{ latest.version }}</span>
               <span class="r-badge">Latest</span>
               <span class="r-date">{{ latest.date }}</span>
@@ -14,7 +14,7 @@
             <details>
               <summary>{{ group.month }}</summary>
               {% for rel in group.releases %}
-              <a href="{{ tool.folder }}/{{ rel.version }}.html" class="release-row">
+              <a href="{{ tool.folder }}/{{ rel.version }}" class="release-row">
                 <span class="r-version">{{ rel.version }}</span>
                 <span class="r-date">{{ rel.date }}</span>
                 <span class="r-summary">{{ rel.summary }}</span>
