@@ -109,23 +109,28 @@ jobs:
           sed -i "s|SERVE_BUCKET_PLACEHOLDER|${{ env.SERVE_BUCKET }}|g" /tmp/cloud-init.yaml
           sed -i "s|IMAGE_URI_PLACEHOLDER|${{ env.IMAGE_URI }}|g" /tmp/cloud-init.yaml
 
-      - name: Create instance template
+      - name: Create instance template (idempotent)
         run: |
-          gcloud compute instance-templates create ${{ env.TEMPLATE_NAME }} \
-            --project=${{ env.PROJECT_ID }} \
-            --machine-type=${{ env.VM_MACHINE_TYPE }} \
-            --image-family=cos-stable \
-            --image-project=cos-cloud \
-            --network=${{ env.VM_NETWORK }} \
-            --subnet=${{ env.VM_SUBNET }} \
-            --region=${{ env.REGION }} \
-            --service-account=${{ env.VM_SERVICE_ACCOUNT }} \
-            --scopes=cloud-platform \
-            --tags=allow-health-checks,cloudrun-gateway \
-            --boot-disk-size=10GB \
-            --boot-disk-type=pd-balanced \
-            --metadata-from-file user-data=/tmp/cloud-init.yaml \
-            --labels="app=swat-releases,component=proxy,commit-sha=${{ env.IMAGE_TAG }}"
+          if gcloud compute instance-templates describe ${{ env.TEMPLATE_NAME }} \
+              --project=${{ env.PROJECT_ID }} &>/dev/null; then
+            echo "Template ${{ env.TEMPLATE_NAME }} already exists — skipping."
+          else
+            gcloud compute instance-templates create ${{ env.TEMPLATE_NAME }} \
+              --project=${{ env.PROJECT_ID }} \
+              --machine-type=${{ env.VM_MACHINE_TYPE }} \
+              --image-family=cos-stable \
+              --image-project=cos-cloud \
+              --network=${{ env.VM_NETWORK }} \
+              --subnet=${{ env.VM_SUBNET }} \
+              --region=${{ env.REGION }} \
+              --service-account=${{ env.VM_SERVICE_ACCOUNT }} \
+              --scopes=cloud-platform \
+              --tags=allow-health-checks,cloudrun-gateway \
+              --boot-disk-size=10GB \
+              --boot-disk-type=pd-balanced \
+              --metadata-from-file user-data=/tmp/cloud-init.yaml \
+              --labels="app=swat-releases,component=proxy,commit-sha=${{ env.IMAGE_TAG }}"
+          fi
 
       - name: Create health check (idempotent)
         run: |
