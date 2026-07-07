@@ -1,0 +1,101 @@
+name: Deploy Generator
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/**'
+      - 'config/**'
+      - 'images/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PROJECT_ID: pcs-swat-resources
+  REGION: us-central1
+  FUNCTION_NAME: swat-releases-generator
+  INPUT_BUCKET: swat-releases-input
+  SERVE_BUCKET: swat-releases-serve
+  GOOGLE_CLOUD_PROJECT: pcs-swat-resources
+  GOOGLE_CLOUD_LOCATION: global
+  GOOGLE_GENAI_USE_ENTERPRISE: "True"
+  WIF_PROVIDER: projects/855530889800/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider
+  WIF_SERVICE_ACCOUNT: swat-releases-pipeline@pcs-swat-resources.iam.gserviceaccount.com
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to GCP (WIF)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.WIF_SERVICE_ACCOUNT }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Stage Cloud Function source
+        run: |
+          # Cloud Functions requires main.py at source root.
+          # Stage the repo into a flat layout the runtime expects.
+          mkdir -p /tmp/fn-source
+          cp -r scripts/ /tmp/fn-source/scripts/
+          cp -r config/  /tmp/fn-source/config/
+          cp -r images/  /tmp/fn-source/images/
+          # generator/main.py becomes root main.py; its imports (from scripts.*) resolve fine
+          cp scripts/generator/main.py         /tmp/fn-source/main.py
+          cp scripts/generator/requirements.txt /tmp/fn-source/requirements.txt
+
+      - name: Deploy Cloud Function
+        run: |
+          gcloud functions deploy ${{ env.FUNCTION_NAME }} \
+            --gen2 \
+            --runtime=python312 \
+            --region=${{ env.REGION }} \
+            --source=/tmp/fn-source \
+            --entry-point=handle \
+            --trigger-http \
+            --no-allow-unauthenticated \
+            --service-account=${{ env.WIF_SERVICE_ACCOUNT }} \
+            --set-env-vars=INPUT_BUCKET=${{ env.INPUT_BUCKET }},SERVE_BUCKET=${{ env.SERVE_BUCKET }},GOOGLE_CLOUD_PROJECT=${{ env.GOOGLE_CLOUD_PROJECT }},GOOGLE_CLOUD_LOCATION=${{ env.GOOGLE_CLOUD_LOCATION }},GOOGLE_GENAI_USE_ENTERPRISE=${{ env.GOOGLE_GENAI_USE_ENTERPRISE }} \
+            --memory=512Mi \
+            --timeout=300s \
+            --project=${{ env.PROJECT_ID }}
+
+      - name: Create or update Cloud Scheduler job
+        run: |
+          FUNCTION_URL=$(gcloud functions describe ${{ env.FUNCTION_NAME }} \
+            --gen2 \
+            --region=${{ env.REGION }} \
+            --project=${{ env.PROJECT_ID }} \
+            --format="value(serviceConfig.uri)")
+
+          if gcloud scheduler jobs describe swat-releases-generator-hourly \
+              --location=${{ env.REGION }} \
+              --project=${{ env.PROJECT_ID }} &>/dev/null; then
+            gcloud scheduler jobs update http swat-releases-generator-hourly \
+              --location=${{ env.REGION }} \
+              --project=${{ env.PROJECT_ID }} \
+              --uri="${FUNCTION_URL}" \
+              --http-method=POST \
+              --oidc-service-account-email=${{ env.WIF_SERVICE_ACCOUNT }} \
+              --oidc-token-audience="${FUNCTION_URL}"
+          else
+            gcloud scheduler jobs create http swat-releases-generator-hourly \
+              --location=${{ env.REGION }} \
+              --project=${{ env.PROJECT_ID }} \
+              --schedule="0 * * * *" \
+              --uri="${FUNCTION_URL}" \
+              --http-method=POST \
+              --oidc-service-account-email=${{ env.WIF_SERVICE_ACCOUNT }} \
+              --oidc-token-audience="${FUNCTION_URL}" \
+              --attempt-deadline=310s
+          fi
