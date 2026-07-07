@@ -9,7 +9,6 @@ from __future__ import annotations
 import json
 import logging
 import os
-from pathlib import Path
 
 import functions_framework
 from google.cloud import storage
@@ -30,7 +29,6 @@ from scripts.render import (
     TemplateEngine,
     load_all_release_data_from_gcs,
     load_assets,
-    _group_by_month,
 )
 from scripts.config import load_config
 
@@ -71,6 +69,7 @@ def rebuild_index(
     gcs_client: storage.Client,
     serve_bucket: str,
 ) -> None:
+    from scripts.render import _group_by_month  # local import of private symbol
     assets = load_assets("images")
     engine = TemplateEngine("scripts/templates")
     updater = GCSIndexUpdater(engine, gcs_client, serve_bucket)
@@ -165,7 +164,11 @@ def run_generator(
 @functions_framework.http
 def handle(request):
     """HTTP Cloud Function entry point."""
-    config = load_config("config/tools.yaml")
-    summary = run_generator(INPUT_BUCKET, SERVE_BUCKET, config)
-    status = 500 if summary["errors"] > 0 else 200
-    return json.dumps(summary), status, {"Content-Type": "application/json"}
+    try:
+        config = load_config("config/tools.yaml")
+        summary = run_generator(INPUT_BUCKET, SERVE_BUCKET, config)
+        status = 500 if summary["errors"] > 0 else 200
+        return json.dumps(summary), status, {"Content-Type": "application/json"}
+    except Exception as exc:
+        logger.error(json.dumps({"action": "fatal_error", "error": str(exc)}))
+        return json.dumps({"error": str(exc)}), 500, {"Content-Type": "application/json"}
