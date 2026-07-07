@@ -17,7 +17,7 @@ env:
   AR_REPO: swat-releases
   IMAGE_NAME: proxy
   MIG_NAME: mig-swat-releases
-  MIG_HEALTH_CHECK: swat-releases-health
+  MIG_HEALTH_CHECK: auth-gateway-health
   BACKEND_URL: https://storage.googleapis.com/swat-releases-serve
   SERVE_BUCKET: swat-releases-serve
   VM_MACHINE_TYPE: e2-small
@@ -132,21 +132,6 @@ jobs:
               --labels="app=swat-releases,component=proxy,commit-sha=${{ env.IMAGE_TAG }}"
           fi
 
-      - name: Create health check (idempotent)
-        run: |
-          if ! gcloud compute health-checks describe ${{ env.MIG_HEALTH_CHECK }} \
-              --project=${{ env.PROJECT_ID }} &>/dev/null; then
-            gcloud compute health-checks create http ${{ env.MIG_HEALTH_CHECK }} \
-              --project=${{ env.PROJECT_ID }} \
-              --port=8080 \
-              --request-path=/healthz \
-              --check-interval=30s \
-              --timeout=10s \
-              --healthy-threshold=1 \
-              --unhealthy-threshold=3
-          else
-            echo "Health check ${{ env.MIG_HEALTH_CHECK }} already exists — skipping."
-          fi
 
       - name: Create or update MIG
         run: |
