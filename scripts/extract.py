@@ -1,53 +1,78 @@
 """extract.py — call Gemini and write the JSON artifact for one release.
 
-Usage: python scripts/extract.py <tool_id> <version> [--force]
+Orchestration is handled by scripts/generator/main.py; this module exposes
+composable classes and process_release() rather than a CLI entry point.
 """
 from __future__ import annotations
 
-import json
+import json as _json
 import os
 from datetime import datetime, timezone
-import sys
 from pathlib import Path
 from typing import Protocol
 
 from google import genai
+from google.cloud import storage as _storage
+from google.cloud.exceptions import NotFound
 from google.genai.types import HttpOptions
 
-from scripts.poll import load_config, GitHubReleaseSource
+
+# ── Version classification ────────────────────────────────────────────────────
+
+def is_hotfix(version: str) -> bool:
+    return len(version.split(".")) == 4
+
+
+def parent_version(version: str) -> str:
+    return ".".join(version.split(".")[:3])
+
+
+# ── GCS I/O classes ───────────────────────────────────────────────────────────
+
+class GCSMarkdownSource:
+    def __init__(self, client: "_storage.Client") -> None:
+        self._client = client
+
+    def read(self, bucket: str, tool_id: str, version: str) -> str:
+        blob = self._client.bucket(bucket).blob(f"{tool_id}/{version}.md")
+        return blob.download_as_text()
+
+
+class GCSArtifactStore:
+    def __init__(self, client: "_storage.Client") -> None:
+        self._client = client
+
+    def read_json(self, bucket: str, tool_id: str, version: str) -> dict | None:
+        blob = self._client.bucket(bucket).blob(f"{tool_id}/{version}.json")
+        try:
+            return _json.loads(blob.download_as_text())
+        except NotFound:
+            return None
+
+    def write_json(self, bucket: str, tool_id: str, version: str, data: dict) -> None:
+        blob = self._client.bucket(bucket).blob(f"{tool_id}/{version}.json")
+        blob.upload_from_string(_json.dumps(data, indent=2), content_type="application/json")
 
 
 # ── Protocols ────────────────────────────────────────────────────────────────
 
 class GeminiClient(Protocol):
-    def generate(
-        self,
-        system_prompt: str,
-        version: str,
-        release_url: str,
-        release_body: str,
-    ) -> str: ...
+    def generate(self, system_prompt: str, content: str) -> str: ...
 
 
 # ── Implementations ──────────────────────────────────────────────────────────
 
 class VertexGeminiClient:
     def __init__(self) -> None:
-        self._client = genai.Client(vertexai=True, project=os.environ.get("GOOGLE_CLOUD_PROJECT", "pcs-swat-resources"), location=os.environ.get("GOOGLE_CLOUD_LOCATION", "global"), http_options=HttpOptions(api_version="v1"))
-
-    def generate(
-        self,
-        system_prompt: str,
-        version: str,
-        release_url: str,
-        release_body: str,
-    ) -> str:
-        prompt = (
-            f"{system_prompt}\n\n"
-            f"Release version: {version}\n"
-            f"Release URL: {release_url}\n\n"
-            f"Release notes:\n{release_body}"
+        self._client = genai.Client(
+            vertexai=True,
+            project=os.environ.get("GOOGLE_CLOUD_PROJECT", "pcs-swat-resources"),
+            location=os.environ.get("GOOGLE_CLOUD_LOCATION", "global"),
+            http_options=HttpOptions(api_version="v1"),
         )
+
+    def generate(self, system_prompt: str, content: str) -> str:
+        prompt = f"{system_prompt}\n\n{content}"
         response = self._client.models.generate_content(
             model="gemini-3.5-flash",
             contents=prompt,
@@ -62,8 +87,8 @@ VALID_TAGS = {"Feature", "Enhancement", "Fixed", "Planned", "Known"}
 class ResponseValidator:
     def validate(self, raw: str) -> dict:
         try:
-            data = json.loads(raw)
-        except json.JSONDecodeError as e:
+            data = _json.loads(raw)
+        except _json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON from Gemini: {e}\nRaw: {raw[:300]}")
 
         missing = REQUIRED_FIELDS - data.keys()
@@ -82,76 +107,96 @@ class ResponseValidator:
                 )
         return data
 
+    def validate_hotfix(self, raw: str) -> list[dict]:
+        try:
+            data = _json.loads(raw)
+        except _json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON from Gemini: {e}\nRaw: {raw[:300]}")
+        if "entries" not in data or not isinstance(data["entries"], list):
+            raise ValueError("Hotfix response must have an 'entries' list")
+        for entry in data["entries"]:
+            if not all(k in entry for k in ["tag", "title", "description"]):
+                raise ValueError(f"Entry missing required keys: {entry}")
+            if entry["tag"] != "Fixed":
+                raise ValueError(f"Hotfix entries must use 'Fixed' tag, got '{entry['tag']}'")
+        return data["entries"]
+
 
 class GeminiExtractor:
     def __init__(self, client: GeminiClient, validator: ResponseValidator) -> None:
         self._client = client
         self._validator = validator
 
-    def extract(
-        self,
-        system_prompt: str,
-        version: str,
-        release_url: str,
-        release_body: str,
-    ) -> dict:
-        raw = self._client.generate(system_prompt, version, release_url, release_body)
+    def extract(self, system_prompt: str, md_content: str, version: str) -> dict:
+        raw = self._client.generate(system_prompt, md_content)
         data = self._validator.validate(raw)
-        data["release_url"] = release_url  # always use canonical URL
+        data["version"] = version  # always canonical
         return data
 
+    def extract_hotfix(
+        self, system_prompt: str, md_content: str, hotfix_version: str
+    ) -> list[dict]:
+        raw = self._client.generate(system_prompt, md_content)
+        return self._validator.validate_hotfix(raw)
 
-# ── Entry point ──────────────────────────────────────────────────────────────
 
-def main() -> None:
-    if len(sys.argv) < 3:
-        print("Usage: python scripts/extract.py <tool_id> <version> [--force]",
-              file=sys.stderr)
-        sys.exit(1)
+# ── Orchestration ─────────────────────────────────────────────────────────────
 
-    tool_id = sys.argv[1]
-    version = sys.argv[2]
-    force = "--force" in sys.argv
+def process_release(
+    tool_id: str,
+    version: str,
+    input_bucket: str,
+    serve_bucket: str,
+    *,
+    gemini_extractor: "GeminiExtractor",
+    gcs_md_source: "GCSMarkdownSource",
+    gcs_artifact_store: "GCSArtifactStore",
+    config: dict,
+    force: bool = False,
+) -> dict:
+    """Extract and store the JSON artifact for one release version.
 
-    config = load_config("config/tools.yaml")
+    For major releases: creates a new artifact.
+    For hotfixes: fetches parent artifact, appends fix entries, re-saves.
+    Returns the final artifact dict.
+    """
     tool = next(t for t in config["tools"] if t["id"] == tool_id)
 
-    output_dir = Path("data") / tool["folder"]
-    output_dir.mkdir(parents=True, exist_ok=True)
-    output_file = output_dir / f"{version}.json"
+    if is_hotfix(version):
+        pv = parent_version(version)
+        parent_artifact = gcs_artifact_store.read_json(serve_bucket, tool_id, pv)
+        if parent_artifact is None:
+            raise RuntimeError(
+                f"Parent artifact {tool_id}/{pv}.json not found in {serve_bucket}. "
+                f"Process {pv} before {version}."
+            )
+        # Skip if this hotfix version already exists in the parent's fixes list
+        existing_fixes = parent_artifact.get("fixes", [])
+        if not force and any(f["version"] == version for f in existing_fixes):
+            return parent_artifact
 
-    if not force and output_file.exists():
-        print(f"Skipping {version}: artifact already exists at {output_file}",
-              file=sys.stderr)
-        return
+        hotfix_prompt = Path("scripts/prompts/model1_hotfix.txt").read_text()
+        md_content = gcs_md_source.read(input_bucket, tool_id, version)
+        fix_entries = gemini_extractor.extract_hotfix(hotfix_prompt, md_content, version)
 
-    # Load prompt
-    system_prompt = Path(tool["prompt"]).read_text()
+        fix_record = {
+            "version": version,
+            "date": datetime.now(timezone.utc).strftime("%B %Y"),
+            "entries": fix_entries,
+        }
+        existing_fixes.append(fix_record)
+        parent_artifact["fixes"] = existing_fixes
+        gcs_artifact_store.write_json(serve_bucket, tool_id, pv, parent_artifact)
+        return parent_artifact
 
-    # Fetch release from GitHub
-    token = os.environ["GITHUB_TOKEN"]
-    gh_client = GitHubReleaseSource(token)
-    release = gh_client.get_release(tool["repo"], version)
+    # Major release
+    existing = gcs_artifact_store.read_json(serve_bucket, tool_id, version)
+    if not force and existing is not None:
+        return existing
 
-    # Extract via Gemini
-    gemini_client = VertexGeminiClient()
-    extractor = GeminiExtractor(gemini_client, ResponseValidator())
-    data = extractor.extract(
-        system_prompt,
-        version,
-        release["html_url"],
-        release["body"],
-    )
-
-    # Always override date from GitHub API — never trust Gemini for dates
-    published_at = release.get("published_at", "")
-    if published_at:
-        dt = datetime.strptime(published_at, "%Y-%m-%dT%H:%M:%SZ")
-        data["date"] = dt.strftime("%B %Y")
-
-    output_file.write_text(json.dumps(data, indent=2))
-    print(f"Written: {output_file}", file=sys.stderr)
-
-
-if __name__ == "__main__":
-    main()
+    major_prompt = Path(tool["prompt"]).read_text()
+    md_content = gcs_md_source.read(input_bucket, tool_id, version)
+    data = gemini_extractor.extract(major_prompt, md_content, version)
+    data.setdefault("fixes", [])
+    gcs_artifact_store.write_json(serve_bucket, tool_id, version, data)
+    return data
