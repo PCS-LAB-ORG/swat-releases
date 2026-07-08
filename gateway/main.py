@@ -104,8 +104,10 @@ def proxy(path):
         app.logger.error(f"Backend error: {exc}")
         return f"Backend error: {exc}", 502
 
-    skip = {"content-encoding", "content-length", "transfer-encoding", "connection"}
+    skip = {"content-encoding", "content-length", "transfer-encoding", "connection",
+            "cache-control"}
     out_headers = [(k, v) for k, v in resp.raw.headers.items() if k.lower() not in skip]
+    out_headers.append(("Cache-Control", "no-store"))
     return Response(resp.content, resp.status_code, out_headers)
 
 
