@@ -158,8 +158,8 @@ jobs:
               --version=template=projects/${{ env.PROJECT_ID }}/global/instanceTemplates/${{ env.TEMPLATE_NAME }} \
               --type=proactive \
               --minimal-action=replace \
-              --max-unavailable=0 \
-              --max-surge=1
+              --max-unavailable=1 \
+              --max-surge=0
           fi
 
       - name: Wait for rollout
