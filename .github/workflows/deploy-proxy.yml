@@ -168,4 +168,4 @@ jobs:
             --project=${{ env.PROJECT_ID }} \
             --region=${{ env.REGION }} \
             --stable \
-            --timeout=300
+            --timeout=600
