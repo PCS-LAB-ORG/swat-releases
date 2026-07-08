@@ -4,6 +4,56 @@ Standards for authoring release notes in this repository. All tools follow one o
 
 ---
 
+## Submitting Release Notes
+
+Write release notes as a `.md` file using the format below, then upload to `gs://swat-releases-input/{tool-id}/{version}.md`. The generator picks it up within the hour and renders the HTML automatically.
+
+### File format
+
+```markdown
+# {Tool Name} {version}
+
+## New Features
+- Brief description of each new capability
+
+## Improvements
+- What got better
+
+## Fixed
+- Bug descriptions
+
+## Known Issues
+- Issues users will encounter
+```
+
+Omit any section that has nothing to say. Do not pad with placeholder text.
+
+### Naming conventions
+
+| Release type | File name | Example |
+| --- | --- | --- |
+| Major release | `{version}.md` | `26.8.1.md` |
+| Hotfix | `{version}.{NN}.md` | `26.8.1.01.md` |
+
+**Hotfixes** append to the parent page's Fixes section — they do not create a new index entry. The parent major release must already be processed before a hotfix is uploaded.
+
+### Upload
+
+```bash
+gcloud storage cp 26.8.1.md gs://swat-releases-input/cortex-catalyst/26.8.1.md
+```
+
+Replace `cortex-catalyst` with the appropriate tool ID (`cortex-insights`, `cortex-unity`). Valid tool IDs are defined in `config/tools.yaml`.
+
+To trigger processing immediately rather than waiting for the next hourly run:
+
+```bash
+gcloud scheduler jobs run swat-releases-generator-hourly \
+  --location=us-central1 --project=pcs-swat-resources
+```
+
+---
+
 ## The Three Models
 
 ### Model 1 — User-Facing (Catalyst model)
