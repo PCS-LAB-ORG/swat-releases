@@ -82,6 +82,13 @@
     .hero-meta-item { font-size: 13px; color: var(--text-muted); }
     .hero-meta-item strong { color: var(--text); font-weight: 600; }
     .hero p { font-size: 15px; color: var(--text-muted); max-width: 640px; line-height: 1.7; }
+    .hero-copy-row { margin: 12px 0 0; }
+    .hero-copy-btn {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-muted); padding: 4px 12px; border-radius: 4px;
+      font-size: 12px; cursor: pointer; transition: color .15s, border-color .15s;
+    }
+    .hero-copy-btn:hover { color: var(--text); border-color: var(--text-muted); }
 
     section { margin-bottom: 56px; scroll-margin-top: 120px; }
     h2.section-title {
@@ -157,6 +164,12 @@
         {% if app_url %}
         <div class="hero-meta-item"><strong>Application</strong> &nbsp;<a href="{{ app_url }}" style="color:var(--accent);text-decoration:none;">{{ app_url_display }}</a></div>
         {% endif %}
+      </div>
+      <div class="hero-copy-row">
+        <button class="hero-copy-btn"
+                onclick="navigator.clipboard.writeText(window.location.href).then(()=>{this.textContent='Copied!';setTimeout(()=>{this.textContent='Copy link'},1500)}).catch(()=>{this.textContent='Failed';setTimeout(()=>{this.textContent='Copy link'},1500)})">
+          Copy link
+        </button>
       </div>
       <p>{{ tool_description }}</p>
     </div>
