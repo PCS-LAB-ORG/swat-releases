@@ -82,13 +82,14 @@
     .hero-meta-item { font-size: 13px; color: var(--text-muted); }
     .hero-meta-item strong { color: var(--text); font-weight: 600; }
     .hero p { font-size: 15px; color: var(--text-muted); max-width: 640px; line-height: 1.7; }
-    .hero-copy-row { margin: 12px 0 0; }
     .hero-copy-btn {
-      background: transparent; border: 1px solid var(--border);
-      color: var(--text-muted); padding: 4px 12px; border-radius: 4px;
-      font-size: 12px; cursor: pointer; transition: color .15s, border-color .15s;
+      background: transparent; border: none; padding: 4px;
+      color: var(--text-muted); cursor: pointer; opacity: .5;
+      border-radius: 4px; vertical-align: middle;
+      transition: opacity .15s, color .15s;
+      display: inline-flex; align-items: center; justify-content: center;
     }
-    .hero-copy-btn:hover { color: var(--text); border-color: var(--text-muted); }
+    .hero-copy-btn:hover { opacity: 1; color: var(--text); }
 
     section { margin-bottom: 56px; scroll-margin-top: 120px; }
     h2.section-title {
@@ -165,12 +166,13 @@
         <div class="hero-meta-item"><strong>Application</strong> &nbsp;<a href="{{ app_url }}" style="color:var(--accent);text-decoration:none;">{{ app_url_display }}</a></div>
         {% endif %}
       </div>
-      <div class="hero-copy-row">
-        <button class="hero-copy-btn"
-                onclick="navigator.clipboard.writeText(window.location.href).then(()=>{this.textContent='Copied!';setTimeout(()=>{this.textContent='Copy link'},1500)}).catch(()=>{this.textContent='Failed';setTimeout(()=>{this.textContent='Copy link'},1500)})">
-          Copy link
-        </button>
-      </div>
+      <button class="hero-copy-btn" title="Copy link" onclick="(function(b){
+        var L='<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\' width=\'16\' height=\'16\'><path d=\'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\'/><path d=\'M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\'/></svg>';
+        var C='<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2.5\' stroke-linecap=\'round\' stroke-linejoin=\'round\' width=\'16\' height=\'16\'><polyline points=\'20 6 9 17 4 12\'/></svg>';
+        navigator.clipboard.writeText(window.location.href)
+          .then(function(){b.innerHTML=C;b.title='Copied!';setTimeout(function(){b.innerHTML=L;b.title='Copy link'},2000)})
+          .catch(function(){b.title='Failed';setTimeout(function(){b.title='Copy link'},2000)});
+      })(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
       <p>{{ tool_description }}</p>
     </div>
 
