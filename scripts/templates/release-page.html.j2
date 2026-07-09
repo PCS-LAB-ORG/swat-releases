@@ -248,6 +248,8 @@
       var parts = window.location.pathname.replace(/\.html$/, '').split('/').filter(Boolean);
       if (parts.length >= 2) {
         window.location.replace('/#' + parts.join('/'));
+      } else {
+        window.location.replace('/');
       }
     }
   </script>
