@@ -7,8 +7,8 @@
                title="Always resolves to the most recent release">
               /{{ tool.folder }}/latest
             </a>
-            <span class="copy-link-icon" title="Copy latest link"
-                  onclick="copyLink(location.origin+'/{{ tool.folder }}/latest',this)">⎘</span>
+            <button class="copy-link-icon" aria-label="Copy latest link"
+                    onclick="copyLink(location.origin+'/{{ tool.folder }}/latest',this)">⎘</button>
           </div>
           <div class="release-list">
             <a href="{{ tool.folder }}/{{ latest.version }}" class="release-featured">

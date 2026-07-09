@@ -167,7 +167,7 @@
       </div>
       <div class="hero-copy-row">
         <button class="hero-copy-btn"
-                onclick="navigator.clipboard.writeText(window.location.href).then(()=>{this.textContent='Copied!';setTimeout(()=>{this.textContent='Copy link'},1500)})">
+                onclick="navigator.clipboard.writeText(window.location.href).then(()=>{this.textContent='Copied!';setTimeout(()=>{this.textContent='Copy link'},1500)}).catch(()=>{this.textContent='Failed';setTimeout(()=>{this.textContent='Copy link'},1500)})">
           Copy link
         </button>
       </div>
