@@ -148,6 +148,18 @@
 </head>
 <body>
 
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <defs>
+    <symbol id="icon-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+    </symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </symbol>
+  </defs>
+</svg>
+
   <nav class="topbar" style="position:sticky;">
     <span class="topbar-center">
       <img src="{{ logo }}" alt="Palo Alto Networks | Cortex" height="60" />
@@ -166,13 +178,13 @@
         <div class="hero-meta-item"><strong>Application</strong> &nbsp;<a href="{{ app_url }}" style="color:var(--accent);text-decoration:none;">{{ app_url_display }}</a></div>
         {% endif %}
       </div>
-      <button class="hero-copy-btn" title="Copy link" onclick="(function(b){
-        var L='<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\' width=\'16\' height=\'16\'><path d=\'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\'/><path d=\'M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\'/></svg>';
-        var C='<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2.5\' stroke-linecap=\'round\' stroke-linejoin=\'round\' width=\'16\' height=\'16\'><polyline points=\'20 6 9 17 4 12\'/></svg>';
+      <button class="hero-copy-btn" title="Copy link" aria-label="Copy link" onclick="(function(b){
+        var L='<svg width=\'16\' height=\'16\'><use href=\'#icon-link\'\/><\/svg>';
+        var C='<svg width=\'16\' height=\'16\'><use href=\'#icon-check\'\/><\/svg>';
         navigator.clipboard.writeText(window.location.href)
-          .then(function(){b.innerHTML=C;b.title='Copied!';setTimeout(function(){b.innerHTML=L;b.title='Copy link'},2000)})
-          .catch(function(){b.title='Failed';setTimeout(function(){b.title='Copy link'},2000)});
-      })(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
+          .then(function(){b.innerHTML=C;b.title='Copied!';b.setAttribute('aria-label','Copied!');setTimeout(function(){b.innerHTML=L;b.title='Copy link';b.setAttribute('aria-label','Copy link')},2000)})
+          .catch(function(){b.title='Failed';b.setAttribute('aria-label','Copy link failed');setTimeout(function(){b.title='Copy link';b.setAttribute('aria-label','Copy link')},2000)});
+      })(this)"><svg width="16" height="16"><use href="#icon-link"/></svg></button>
       <p>{{ tool_description }}</p>
     </div>
 
