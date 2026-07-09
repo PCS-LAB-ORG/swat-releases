@@ -35,7 +35,7 @@ repos:
         entry: npx markdownlint-cli2
         language: system
         files: \.(md|markdown)$
-        exclude: ^node_modules/
+        exclude: ^(node_modules|session-summaries|\.firecrawl|\.superpowers|docs/superpowers|docs/solid-reviews|context|memory)/
 
   # JavaScript / TypeScript linting
   - repo: local
