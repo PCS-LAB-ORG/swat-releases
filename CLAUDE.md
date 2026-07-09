@@ -2,10 +2,12 @@
 
 ## What This Repository Is
 
-Public-facing HTML release notes for PCS SWAT internal tools, served via GitHub Pages at <https://pcs-lab-org.github.io/swat-releases/>. New releases are generated automatically by a GitHub Actions pipeline (Gemini 3.5 Flash → JSON → HTML). Hand-authored pages remain in place for pre-pipeline releases.
+Private release notes portal for PCS SWAT internal tools, served at
+<https://swatreleases.pcs.lab.twistlock.com> (GlobalProtect VPN required).
+Content is generated from `.md` files dropped into GCS, processed by Gemini,
+and rendered to static HTML.
 
-**Owner:** bgoldstein / PCS SWAT
-**Visibility:** Public
+**Owner:** bgoldstein / PCS SWAT  **Visibility:** Private (VPN-gated)
 
 ---
 
@@ -13,80 +15,88 @@ Public-facing HTML release notes for PCS SWAT internal tools, served via GitHub 
 
 ```text
 swat-releases/
-├── index.html                        ← SPA portal: sidebar nav + collapsible month groups per tool
-├── images/                           ← shared brand assets (relative paths, not base64-embedded)
+├── gateway/                    ← COS proxy container (Flask/gunicorn)
+│   ├── Dockerfile
+│   ├── main.py                 ← Flask proxy: ADC auth to GCS, /latest redirect, URL routing
+│   └── requirements.txt
+├── scripts/
+│   ├── config.py               ← load_config() — reads tools.yaml
+│   ├── extract.py              ← reads .md from GCS, calls Gemini, writes JSON artifact
+│   ├── render.py               ← renders HTML via Jinja2, uploads to GCS
+│   ├── generator/
+│   │   └── main.py             ← Cloud Function HTTP entry point (hourly via Cloud Scheduler)
+│   ├── prompts/
+│   │   ├── model1_user_facing.txt  ← major release Gemini prompt
+│   │   └── model1_hotfix.txt       ← hotfix Gemini prompt (Fixed-only entries)
+│   └── templates/
+│       ├── release-page.html.j2
+│       └── catalyst-panel.html.j2
 ├── config/
-│   └── tools.yaml                    ← tool registry for the pipeline (add tools here)
-├── scripts/                          ← automated pipeline
-│   ├── poll.py                       ← detects new releases (latest only)
-│   ├── extract.py                    ← calls Gemini 3.5 Flash, writes data/{folder}/{version}.json
-│   ├── render.py                     ← JSON + HTML → rendered page + rebuilt index panel
-│   ├── pr_body.py                    ← generates PR description
-│   ├── prompts/model1_user_facing.txt← Gemini system prompt (Model 1 standards)
-│   ├── templates/                    ← Jinja2 templates
-│   └── requirements.txt             ← google-genai, jinja2, pyyaml, requests
-├── data/
-│   └── cortex-catalyst/             ← JSON artifacts (Gemini output, human-editable)
-├── cortex-catalyst/                 ← release pages (hand-authored + pipeline-generated)
-├── cortex-insights/                 ← hand-authored
-├── cortex-unity/                    ← hand-authored
-├── cortex-search-pipeline/          ← coming soon
+│   └── tools.yaml              ← tool registry
+├── images/                     ← brand PNGs (base64-embedded in release pages)
 ├── docs/
-│   ├── release-notes-standards.md   ← three-model framework + tag taxonomy + citations
-│   └── pipeline-operations.md       ← dispatch commands, skip logic, correction workflow, adding tools
-├── tests/                           ← pytest (24 tests, all scripts covered)
+│   ├── generator-operations.md ← operational runbook (current)
+│   └── pipeline-operations.md  ← DEPRECATED (old GitHub Actions pipeline)
+├── tests/
 └── .github/workflows/
-    └── generate-release-notes.yml   ← daily cron 06:00 UTC + workflow_dispatch
+    ├── deploy-proxy.yml         ← builds proxy Docker image, creates MIG instance template
+    └── deploy-generator.yml     ← deploys Cloud Function + Cloud Scheduler
 ```
 
 ---
 
 ## Automated Pipeline
 
-New Catalyst releases are generated automatically. The pipeline:
+Developer drops `{version}.md` into `gs://swat-releases-input/{tool-id}/`.
+Cloud Scheduler fires hourly → `swat-releases-generator` Cloud Function →
+Gemini → `gs://swat-releases-serve/` → proxy VM serves to browser.
 
-1. Polls `catalyst-rag-agent` for the latest release
-2. Sends the release body to Gemini 3.5 Flash with a user-facing filter prompt
-3. Writes a JSON artifact to `data/cortex-catalyst/{version}.json`
-4. Renders HTML via Jinja2 → `cortex-catalyst/{version}.html`
-5. Rebuilds the Catalyst panel in `index.html`
-6. Creates a branch `auto/release-notes/cortex-catalyst-{version}`, PRs to main, merges
-
-**Manual dispatch:**
+**Manual trigger:**
 
 ```bash
-# New release — poll detects it, no force needed
-gh workflow run generate-release-notes.yml --repo PCS-LAB-ORG/swat-releases
-
-# Re-process an existing version (failed run, bad Gemini output) — bypasses skip logic, overwrites artifact
-gh workflow run generate-release-notes.yml --repo PCS-LAB-ORG/swat-releases -f force_version=27.7.1
+gcloud scheduler jobs run swat-releases-generator-hourly \
+  --location=us-central1 --project=pcs-swat-resources
 ```
 
-**Manual correction:** edit the JSON artifact directly, then trigger `workflow_dispatch` with `force_version={version}`. Full correction and skip logic docs: `docs/pipeline-operations.md`.
+**Force re-render without Gemini:** edit JSON artifact directly in
+`gs://swat-releases-serve/{tool-id}/{version}.json`, then run
+`rebuild_index` locally (see `docs/generator-operations.md`).
 
-**To add a new tool:** add an entry to `config/tools.yaml` and create a prompt file in `scripts/prompts/`.
-
-**Local test:**
+**Adding a new release:**
 
 ```bash
-export GITHUB_TOKEN=$(gh auth token)
-export GOOGLE_CLOUD_PROJECT=pcs-swat-resources
-export GOOGLE_CLOUD_LOCATION=global
-PYTHONPATH=. python3 scripts/extract.py cortex-catalyst 26.7.1 --force
-PYTHONPATH=. python3 scripts/render.py cortex-catalyst 26.7.1
-npm run dev  # view at localhost:8765
+gcloud storage cp 26.8.1.md gs://swat-releases-input/cortex-catalyst/26.8.1.md
 ```
+
+**Hotfix versioning:** `YY.M.X.NN` (4-part) → appended to parent page's
+Fixes section; no new index entry; `latest` pointer unchanged.
 
 ---
 
-## Hand-Authoring a Release Notes Page (pre-pipeline releases or pipeline overrides)
+## GCS Buckets
 
-1. Copy the most recent release HTML as a starting point
-2. Update: version badge, release date, hero meta, all section content
-3. DO NOT add version nav pills — navigation is through the index SPA sidebar
-4. The index panel updates automatically when render.py runs
+| Bucket | Purpose |
+| --- | --- |
+| `gs://swat-releases-input` | `.md` input files from developers |
+| `gs://swat-releases-serve` | Private serving bucket (proxy reads via SA) |
 
-See `docs/release-notes-standards.md` for the three-model content framework and tag taxonomy.
+**`index.html` in GCS is partially generator-managed.** The generator
+rebuilds ONLY `<div id="panel-catalyst">`. All JS/CSS and other panel divs
+survive every hourly run. The `copyLink(url, btn)` function in the script
+block must always be present.
+
+---
+
+## Infrastructure
+
+- **MIG:** `mig-swat-releases` (us-central1, e2-small, COS, managed)
+- **Rolling update params:** `--max-unavailable=4 --max-surge=0 --timeout=600s`
+  (us-central1 has 4 zones; regional MIG requires each param to be 0 or ≥ 4)
+- **Health check:** reuses `auth-gateway-health` (pipeline SA lacks `compute.healthChecks.create`)
+- **Cache-Control:** proxy adds `no-store` to all responses — Prisma Access Browser
+  caches `private, max-age=0` aggressively across incognito sessions
+- **Pipeline SA:** `swat-releases-pipeline@pcs-swat-resources.iam.gserviceaccount.com`
+- **Proxy VM SA:** `cloudrun-testing-svc@pcs-swat-resources.iam.gserviceaccount.com`
 
 ---
 
@@ -99,7 +109,7 @@ See `docs/release-notes-standards.md` for the three-model content framework and 
 | `Fixed` | Amber `#f59e0b` | Bug fix |
 | `Planned` | Yellow `#f4c94f` | Upcoming (user-facing only) |
 | `Known` | Orange `#fa582d` | Known issue (user-facing only) |
-| `Architecture` | Purple `#a78bfa` | Structural design decision (operational/engineering) |
+| `Architecture` | Purple `#a78bfa` | Structural design decision |
 | `Infrastructure` | Teal `#06b6d4` | CI/CD, deployment, platform changes |
 
 ---
@@ -107,11 +117,10 @@ See `docs/release-notes-standards.md` for the three-model content framework and 
 ## HTML Page Design
 
 - Background: `#0f1117`, accent: `#fa582d` (Cortex orange)
-- `index.html` uses relative image paths (`images/`)
-- Individual release pages use base64-embedded images (self-contained, shareable)
-- Individual pages have NO version nav pills — users navigate via the index SPA sidebar
-- `index.html` SPA: sidebar with collapsible `<details>` month groups; clicking a release loads it inline
-- `scroll-margin-top: 120px` on `section` elements (clears sticky topbar when TOC anchors fire)
+- Individual release pages: base64-embedded images (self-contained)
+- `index.html` SPA: sidebar with `<details>` month groups; clicking a release
+  loads it inline via `fetch()` and updates the URL bar via `history.pushState`
+- Deep links: `/{tool-id}/{version}` and `/{tool-id}/latest` (proxy handles routing)
 
 ---
 
@@ -119,60 +128,22 @@ See `docs/release-notes-standards.md` for the three-model content framework and 
 
 - No direct commits to `main` or `develop`
 - Feature branches from `develop`, merged with `git merge --no-ff --no-verify`
-- `develop → main`: PR required, CI must pass
-- Auto-generated pipeline branches: `auto/release-notes/cortex-catalyst-{version}` — merged directly to main by the workflow
-
-### Pipeline sync rule (important)
-
-The automated pipeline merges directly to `main`, bypassing `develop`. This means `main`
-will regularly be ahead of `develop` after a pipeline run. After each pipeline merge:
-
-```bash
-git checkout main && git pull --ff-only
-git checkout develop
-git merge --no-ff --no-verify main -m "chore: sync develop with pipeline auto-commits ({version})"
-git push origin develop
-```
+- `develop → main`: PR required
 
 ### Pulling main safely
 
-Always keep the working tree clean before pulling main. The pre-commit hook blocks
-commits to both `main` and `develop` — if `git pull` finds local modifications and tries
-to create a merge commit, it will fail mid-merge.
-
 ```bash
-git pull --ff-only   # safe: never creates a merge commit; fails cleanly if not possible
+git pull --ff-only   # safe: never creates a merge commit
 ```
-
-If `--ff-only` fails, stash local changes first, pull, then pop the stash onto a branch.
 
 ---
 
 ## Dev Server
 
 ```bash
-npm run dev   # hot-reload at localhost:8765
 npm run lint  # HTMLHint + markdownlint + ESLint
+PYTHONPATH=. pytest tests/ -v  # 39 tests
 ```
-
----
-
-## Monitoring GitHub Pages Deployment
-
-After merging to main, Pages deploys automatically. To check status from the terminal:
-
-```bash
-# Quick status check — returns "building" or "built"
-gh api repos/PCS-LAB-ORG/swat-releases/pages --jq '.status'
-
-# Poll until deployed
-until [ "$(gh api repos/PCS-LAB-ORG/swat-releases/pages --jq '.status')" = "built" ]; do echo "still building..."; sleep 5; done && echo "deployed"
-
-# List recent deployments
-gh run list --workflow=pages-build-deployment --limit 3
-```
-
-Deploy typically takes 30–90 seconds after merge. A 404 immediately after merge is normal — wait for status to return `"built"` before concluding there's a problem.
 
 ---
 
@@ -180,7 +151,7 @@ Deploy typically takes 30–90 seconds after merge. A 404 immediately after merg
 
 | Item | Notes |
 | --- | --- |
-| Issue #12 | Pipeline live, awaiting first real production release to close |
-| Issue #10 | Data-driven pipeline architecture documented, not built |
-| cortex-search-pipeline | Folder exists, no pages yet |
-| VM hosting | Option documented in #10; GitHub Pages is current default |
+| Issue #47 | Structured request logging for proxy MIG |
+| Issue #48 | Elegant content management (edit/delete without local Python) |
+| Cortex Unity | Hand-authored pages not yet reformatted to new template |
+| Dependabot | 20 vulnerabilities (moderate/low) — not yet triaged |
