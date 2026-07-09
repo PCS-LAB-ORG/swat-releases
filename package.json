@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "browser-sync start --server --files '**/*.html, images/*' --port 8765 --no-open",
     "lint:html": "htmlhint --config .htmlhintrc 'index.html' 'cortex-catalyst/*.html' 'cortex-insights/*.html' 'cortex-unity/*.html' 'cortex-search-pipeline/*.html'",
-    "lint:md": "markdownlint-cli2 '**/*.md' '!node_modules/**' '!session-summaries/**'",
+    "lint:md": "markdownlint-cli2 '**/*.md' '!node_modules/**' '!session-summaries/**' '!.firecrawl/**' '!.superpowers/**' '!docs/superpowers/**' '!docs/solid-reviews/**' '!memory/**' '!context/**'",
     "lint:js": "eslint . --no-error-on-unmatched-pattern",
     "lint": "npm run lint:html && npm run lint:md && npm run lint:js"
   },

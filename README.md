@@ -8,29 +8,25 @@ Covers Cortex Catalyst, Cortex Insights, and Cortex Unity.
 
 ## Architecture
 
-```text
-Developer uploads .md release notes
-        ↓
-gs://swat-releases-input/{tool-id}/{version}.md
-        ↓  Cloud Scheduler fires hourly (0 * * * *)
-Cloud Function: swat-releases-generator (us-central1, gen2, Python 3.12)
-  ├── reads new .md files from input bucket
-  ├── calls Gemini 3.5 Flash (Vertex AI) to structure content
-  ├── renders HTML via Jinja2 templates
-  ├── rebuilds index.html sidebar panel
-  └── uploads all output → gs://swat-releases-serve/
-        ↓
-Cloud LB (pcs-swat-general-app-lb) + Cloud Armor (GlobalProtect IP allowlist)
-        ↓
-MIG: mig-swat-releases (e2-small, Container-Optimized OS)
-  └── gateway container (Flask/gunicorn proxy, port 8080)
-      ├── authenticates to GCS via VM service account (ADC)
-      ├── /                       → index.html
-      ├── /{tool-id}/{version}    → GCS object (appends .html)
-      └── /{tool-id}/latest       → 302 to current latest version
-        ↓
-Browser (GlobalProtect VPN required)
+```mermaid
+flowchart LR
+    Dev["Developer\n(writes .md)"] --> Input["gs://swat-releases-input\n/{tool-id}/{version}.md"]
+    Input -->|"Cloud Scheduler\nhourly (0 * * * *)"| CF["Cloud Function\nswat-releases-generator\n(us-central1, gen2, Python 3.12)"]
+    CF <-->|"Vertex AI"| Gemini["Gemini 3.5 Flash"]
+    CF --> Serve["gs://swat-releases-serve\n(HTML + JSON artifacts)"]
+    Serve --> LB["Cloud LB\n+ Cloud Armor\n(GlobalProtect IP allowlist)"]
+    LB --> MIG["mig-swat-releases\n(e2-small, COS)"]
+    MIG --> GW["gateway\n(Flask proxy, port 8080)"]
+    GW --> Browser["Browser\n(VPN required)"]
 ```
+
+**Proxy routing:**
+
+| Path | Resolves to |
+| --- | --- |
+| `/` | `index.html` |
+| `/{tool-id}/{version}` | `{tool-id}/{version}.html` |
+| `/{tool-id}/latest` | 302 redirect to current latest version |
 
 ---
 
@@ -113,8 +109,8 @@ swat-releases/
 
 | Workflow | Trigger | What it does |
 | --- | --- | --- |
-| `deploy-proxy.yml` | Push to `main` — `gateway/**` | Builds linux/amd64 Docker image, pushes to Artifact Registry, creates instance template, rolls out `mig-swat-releases` |
-| `deploy-generator.yml` | Push to `main` — `scripts/**`, `config/**`, `images/**` | Deploys Cloud Function, creates/updates Cloud Scheduler job |
+| `deploy-proxy.yml` | Push to `main` — `gateway/**`; or manual dispatch | Builds linux/amd64 Docker image, pushes to Artifact Registry, creates instance template, rolls out `mig-swat-releases` |
+| `deploy-generator.yml` | Push to `main` — `scripts/**`, `config/**`, `images/**`; or manual dispatch | Deploys Cloud Function, creates/updates Cloud Scheduler job |
 
 ---
 
