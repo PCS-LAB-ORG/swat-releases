@@ -35,7 +35,7 @@ Omit any section that has nothing to say. Do not pad with placeholder text.
 | Major release | `{version}.md` | `26.8.1.md` |
 | Hotfix | `{version}.{NN}.md` | `26.8.1.01.md` |
 
-**Hotfixes** append to the parent page's Fixes section — they do not create a new index entry. The parent major release must already be processed before a hotfix is uploaded.
+**Hotfixes** append to the parent page's Fixes section — they do not create a new index entry. The parent major release must already be processed before a hotfix is uploaded. The generator validates that all hotfix entries use the `Fixed` tag; any other tag causes a validation error and the hotfix is not processed.
 
 ### Upload
 
