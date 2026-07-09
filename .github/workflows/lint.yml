@@ -24,7 +24,7 @@ jobs:
         run: npx htmlhint --config .htmlhintrc 'index.html' 'cortex-catalyst/*.html' 'cortex-insights/*.html' 'cortex-unity/*.html' 'cortex-search-pipeline/*.html'
 
       - name: Markdownlint
-        run: npx markdownlint-cli2 '**/*.md' '!node_modules/**' '!session-summaries/**'
+        run: npx markdownlint-cli2 '**/*.md' '!node_modules/**' '!session-summaries/**' '!.firecrawl/**' '!.superpowers/**' '!docs/superpowers/**' '!context/**' '!memory/**'
 
       - name: ESLint
         run: npx eslint . --no-error-on-unmatched-pattern
