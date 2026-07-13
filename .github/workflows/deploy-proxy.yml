@@ -21,7 +21,7 @@ env:
   BACKEND_URL: https://storage.googleapis.com/swat-releases-serve
   SERVE_BUCKET: swat-releases-serve
   INPUT_BUCKET: swat-releases-input
-  UPLOAD_TOOL_IDS: cortex-catalyst
+  UPLOAD_TOOL_IDS: cortex-catalyst,cortex-insights,cortex-unity,ai-sweeper,cortex-search-pipeline,session-planner
   VM_MACHINE_TYPE: e2-small
   VM_NETWORK: pcs-swat-resources
   VM_SUBNET: cloudrun-testing
