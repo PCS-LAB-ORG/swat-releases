@@ -47,6 +47,17 @@ swat-releases/
 
 ## Automated Pipeline
 
+**Upload page:** `GET /upload` and `POST /upload` live in `gateway/main.py`. The tool dropdown
+is driven by the `UPLOAD_TOOL_IDS` env var in `deploy-proxy.yml` — NOT by reading `config/tools.yaml`
+at runtime (tools.yaml is not in the Docker image). When adding a tool, update BOTH.
+
+**Proxy deploy trigger:** The deploy-proxy workflow only fires on `gateway/**` path changes.
+A change to `.github/workflows/deploy-proxy.yml` alone (e.g. adding an env var) requires a manual
+trigger: `gh workflow run deploy-proxy.yml --repo PCS-LAB-ORG/swat-releases --ref main`
+
+**MIG scope:** The MIG instance template already uses `--scopes=cloud-platform`. New GCP API
+access only requires IAM grants on the relevant resource — no instance template or MIG update needed.
+
 Developer drops `{version}.md` into `gs://swat-releases-input/{tool-id}/`.
 Cloud Scheduler fires hourly → `swat-releases-generator` Cloud Function →
 Gemini → `gs://swat-releases-serve/` → proxy VM serves to browser.
