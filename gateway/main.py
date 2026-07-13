@@ -1,3 +1,4 @@
+import html as _html
 import logging
 import os
 import re
@@ -17,12 +18,96 @@ BACKEND_URL = os.environ.get(
     "https://storage.googleapis.com/swat-releases-serve",
 )
 SERVE_BUCKET = os.environ.get("SERVE_BUCKET", "swat-releases-serve")
+INPUT_BUCKET = os.environ.get("INPUT_BUCKET", "swat-releases-input")
+_UPLOAD_TOOL_IDS = [
+    t.strip()
+    for t in os.environ.get("UPLOAD_TOOL_IDS", "cortex-catalyst").split(",")
+    if t.strip()
+]
+_VERSION_RE_UPLOAD = re.compile(r"^\d{2}\.\d+\.\d+(\.\d+)?$")
 
 _LOCAL_HOSTS = ("localhost", "127.0.0.1", "host.docker.internal")
 _IS_LOCAL = any(h in BACKEND_URL for h in _LOCAL_HOSTS)
 
 _VERSION_RE = re.compile(r"^[^/]+/\d+\.\d+\.\d+(?:\.\d+)?$")
 _LATEST_RE = re.compile(r"^([^/]+)/latest$")
+
+_UPLOAD_PAGE = r"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Upload Release Notes — SWAT Releases</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1117;color:#e2e8f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+.card{background:#1a1d27;border:1px solid #2d3148;border-radius:12px;padding:2rem;width:100%;max-width:640px}
+h1{font-size:1.4rem;font-weight:600;margin-bottom:.25rem;color:#f8fafc}
+.sub{font-size:.85rem;color:#64748b;margin-bottom:1.75rem}
+.field{margin-bottom:1.25rem}
+label{display:block;font-size:.75rem;font-weight:500;color:#94a3b8;margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.05em}
+select,input[type=text],textarea{width:100%;background:#0f1117;border:1px solid #2d3148;border-radius:6px;color:#e2e8f0;font-size:.9rem;padding:.6rem .75rem;outline:none;transition:border-color .15s}
+select:focus,input[type=text]:focus,textarea:focus{border-color:#fa582d}
+textarea{min-height:240px;font-family:'SF Mono','Fira Code',Consolas,monospace;font-size:.8rem;resize:vertical}
+.ver-row{display:flex;gap:.75rem;align-items:flex-start}
+.ver-row input{flex:1}
+.badge{padding:.55rem .75rem;border-radius:6px;font-size:.75rem;font-weight:600;white-space:nowrap;background:#1a1d27;border:1px solid #2d3148;color:#475569}
+.badge.release{background:rgba(62,207,142,.15);border-color:#3ecf8e;color:#3ecf8e}
+.badge.hotfix{background:rgba(245,158,11,.15);border-color:#f59e0b;color:#f59e0b}
+.badge.invalid{background:rgba(239,68,68,.1);border-color:#ef4444;color:#ef4444}
+.note{font-size:.75rem;color:#475569;margin-top:.35rem}
+.err{background:rgba(239,68,68,.1);border:1px solid #ef4444;border-radius:6px;padding:.75rem 1rem;font-size:.85rem;color:#fca5a5;margin-bottom:1rem}
+.ok{background:rgba(62,207,142,.1);border:1px solid #3ecf8e;border-radius:6px;padding:.75rem 1rem;font-size:.85rem;color:#6ee7b7;margin-bottom:1rem}
+.ok code{font-family:monospace;background:rgba(0,0,0,.3);padding:.1em .3em;border-radius:3px}
+button{width:100%;padding:.7rem 1.5rem;background:#fa582d;color:#fff;border:none;border-radius:6px;font-size:.9rem;font-weight:600;cursor:pointer;transition:background .15s;margin-top:.5rem}
+button:hover{background:#e04820}
+button:disabled{background:#4a1a0a;color:#7a3a2a;cursor:not-allowed}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>Upload Release Notes</h1>
+<p class="sub">Writes a <code>.md</code> file to the pipeline bucket. The generator picks it up within the hour.</p>
+__ERRORS__
+__SUCCESS__
+<form method="POST" action="/upload">
+<div class="field">
+<label for="tool_id">Tool</label>
+<select name="tool_id" id="tool_id">__TOOL_OPTIONS__</select>
+</div>
+<div class="field">
+<label for="version">Version</label>
+<div class="ver-row">
+<input type="text" name="version" id="version" placeholder="26.7.1 or 26.7.1.01" value="__VERSION__" autocomplete="off">
+<span class="badge" id="badge">&mdash;</span>
+</div>
+<p class="note">YY.M.X for releases &nbsp;&bull;&nbsp; YY.M.X.NN for hotfixes</p>
+</div>
+<div class="field">
+<label for="content">Release Notes (Markdown)</label>
+<textarea name="content" id="content" placeholder="# 26.7.1 Release Notes&#10;&#10;...">__CONTENT__</textarea>
+</div>
+<button type="submit" id="btn">Upload to Pipeline</button>
+</form>
+</div>
+<script>
+const VRE=/^\d{2}\.\d+\.\d+(\.\d+)?$/;
+const vi=document.getElementById('version');
+const badge=document.getElementById('badge');
+const btn=document.getElementById('btn');
+function upd(){
+  const v=vi.value.trim();
+  if(!v){badge.className='badge';badge.innerHTML='&mdash;';btn.disabled=false;return;}
+  if(!VRE.test(v)){badge.className='badge invalid';badge.textContent='Invalid';btn.disabled=true;return;}
+  const p=v.split('.');
+  badge.className='badge '+(p.length===4?'hotfix':'release');
+  badge.textContent=p.length===4?'Hotfix':'Release';
+  btn.disabled=false;
+}
+vi.addEventListener('input',upd);upd();
+</script>
+</body>
+</html>"""
 
 # Module-level singletons — credentials cached and refreshed only on expiry
 if not _IS_LOCAL:
@@ -48,6 +133,88 @@ def _resolve_latest(tool_id: str) -> str:
         return "local-dev-version"
     blob = _storage_client.bucket(SERVE_BUCKET).blob(f"{tool_id}/latest")
     return blob.download_as_text().strip()
+
+
+def _render_upload(
+    *,
+    tools: list,
+    errors: list | None = None,
+    success_path: str | None = None,
+    tool_id: str = "",
+    version: str = "",
+    content: str = "",
+) -> str:
+    tool_options = "".join(
+        f'<option value="{t}"{"  selected" if t == tool_id else ""}>{t}</option>'
+        for t in tools
+    )
+    errors_html = ""
+    if errors:
+        errors_html = '<div class="err">' + "".join(f"<p>{e}</p>" for e in errors) + "</div>"
+    success_html = ""
+    if success_path:
+        success_html = (
+            f'<div class="ok"><p>Uploaded to <code>{success_path}</code>.'
+            " The pipeline will process it within the hour.</p></div>"
+        )
+    return (
+        _UPLOAD_PAGE
+        .replace("__ERRORS__", errors_html)
+        .replace("__SUCCESS__", success_html)
+        .replace("__TOOL_OPTIONS__", tool_options)
+        .replace("__VERSION__", _html.escape(version))
+        .replace("__CONTENT__", _html.escape(content))
+    )
+
+
+@app.route("/upload", methods=["GET", "POST"])
+def upload():
+    if request.method == "GET":
+        return _render_upload(tools=_UPLOAD_TOOL_IDS)
+
+    tool_id = request.form.get("tool_id", "").strip()
+    version = request.form.get("version", "").strip()
+    content = request.form.get("content", "").strip()
+
+    errors = []
+    if tool_id not in _UPLOAD_TOOL_IDS:
+        errors.append(f"Unknown tool '{_html.escape(tool_id)}'.")
+    if not _VERSION_RE_UPLOAD.match(version):
+        errors.append("Version must be YY.M.X (release) or YY.M.X.NN (hotfix).")
+    if not content:
+        errors.append("Release notes content is required.")
+    if errors:
+        return (
+            _render_upload(tools=_UPLOAD_TOOL_IDS, errors=errors,
+                           tool_id=tool_id, version=version, content=content),
+            400,
+        )
+
+    if _storage_client is None:
+        return (
+            _render_upload(tools=_UPLOAD_TOOL_IDS,
+                           errors=["Upload unavailable in local mode."],
+                           tool_id=tool_id, version=version, content=content),
+            503,
+        )
+
+    blob = _storage_client.bucket(INPUT_BUCKET).blob(f"{tool_id}/{version}.md")
+    if blob.exists():
+        return (
+            _render_upload(
+                tools=_UPLOAD_TOOL_IDS,
+                errors=[f"{_html.escape(version)} already exists for {_html.escape(tool_id)}."
+                        " Delete the existing file before re-uploading."],
+                tool_id=tool_id, version=version, content=content,
+            ),
+            409,
+        )
+
+    blob.upload_from_string(content.encode("utf-8"), content_type="text/markdown; charset=utf-8")
+    return _render_upload(
+        tools=_UPLOAD_TOOL_IDS,
+        success_path=f"gs://{INPUT_BUCKET}/{tool_id}/{version}.md",
+    )
 
 
 @app.route("/healthz")
