@@ -233,19 +233,28 @@ def upload():
             503,
         )
 
-    blob = _storage_client.bucket(INPUT_BUCKET).blob(f"{tool_id}/{version}.md")
-    if blob.exists():
+    try:
+        blob = _storage_client.bucket(INPUT_BUCKET).blob(f"{tool_id}/{version}.md")
+        if blob.exists():
+            return (
+                _render_upload(
+                    tools=_UPLOAD_TOOL_IDS,
+                    errors=[f"{_html.escape(version)} already exists for {_html.escape(tool_id)}."
+                            " Delete the existing file before re-uploading."],
+                    tool_id=tool_id, version=version, content=content,
+                ),
+                409,
+            )
+        blob.upload_from_string(content.encode("utf-8"), content_type="text/markdown; charset=utf-8")
+    except Exception as exc:
+        app.logger.error(f"GCS upload error for {tool_id}/{version}: {exc}")
         return (
-            _render_upload(
-                tools=_UPLOAD_TOOL_IDS,
-                errors=[f"{_html.escape(version)} already exists for {_html.escape(tool_id)}."
-                        " Delete the existing file before re-uploading."],
-                tool_id=tool_id, version=version, content=content,
-            ),
-            409,
+            _render_upload(tools=_UPLOAD_TOOL_IDS,
+                           errors=["Upload failed — GCS error. Try again or contact the SWAT team."],
+                           tool_id=tool_id, version=version, content=content),
+            500,
         )
 
-    blob.upload_from_string(content.encode("utf-8"), content_type="text/markdown; charset=utf-8")
     return _render_upload(
         tools=_UPLOAD_TOOL_IDS,
         success_path=f"gs://{INPUT_BUCKET}/{tool_id}/{version}.md",

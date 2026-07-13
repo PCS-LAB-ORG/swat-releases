@@ -130,6 +130,23 @@ def test_upload_post_success_hotfix(client, mock_storage):
     assert b"26.7.1.01.md" in resp.data
 
 
+def test_upload_post_gcs_exception_returns_styled_500(client, mock_storage):
+    blob = _mock_blob(exists=False)
+    blob.upload_from_string.side_effect = Exception("GCS unavailable")
+    mock_storage.bucket.return_value.blob.return_value = blob
+
+    resp = client.post("/upload", data={
+        "tool_id": "cortex-catalyst",
+        "version": "26.7.1",
+        "content": "# Notes\n\nContent.",
+    })
+    assert resp.status_code == 500
+    body = resp.data.decode()
+    assert "Upload Release Notes" in body  # styled form, not raw Flask error
+    assert "failed" in body.lower()
+    assert "26.7.1" in body  # draft preserved
+
+
 def test_upload_post_duplicate_returns_409(client, mock_storage):
     blob = _mock_blob(exists=True)
     mock_storage.bucket.return_value.blob.return_value = blob
