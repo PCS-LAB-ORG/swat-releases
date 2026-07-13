@@ -67,6 +67,11 @@ input[type=file]{display:none}
 .file-btn:hover{border-color:#fa582d;color:#e2e8f0}
 .fname{font-size:.75rem;color:#475569;margin-top:.35rem}
 .fname.loaded{color:#3ecf8e}
+.step{display:flex;align-items:baseline;gap:.6rem;margin-bottom:.5rem}
+.step-num{flex-shrink:0;width:1.35rem;height:1.35rem;border-radius:50%;background:#fa582d;color:#fff;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:.05rem}
+.step-title{font-size:.75rem;font-weight:500;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em}
+.or-divider{display:flex;align-items:center;gap:.5rem;margin:.6rem 0;color:#475569;font-size:.75rem}
+.or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:#2d3148}
 </style>
 </head>
 <body>
@@ -77,11 +82,11 @@ __ERRORS__
 __SUCCESS__
 <form method="POST" action="/upload">
 <div class="field">
-<label for="tool_id">Tool</label>
+<div class="step"><span class="step-num">1</span><span class="step-title">Choose the tool</span></div>
 <select name="tool_id" id="tool_id">__TOOL_OPTIONS__</select>
 </div>
 <div class="field">
-<label>File</label>
+<div class="step"><span class="step-num">2</span><span class="step-title">Select file or manually enter release notes below</span></div>
 <label for="fileInput" class="file-btn">
 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
 Choose .md file
@@ -90,7 +95,7 @@ Choose .md file
 <p class="fname" id="fname">No file chosen</p>
 </div>
 <div class="field">
-<label for="version">Version</label>
+<div class="step"><span class="step-num">3</span><span class="step-title">Enter version</span></div>
 <div class="ver-row">
 <input type="text" name="version" id="version" placeholder="26.7.1 or 26.7.1.01" value="__VERSION__" autocomplete="off">
 <span class="badge" id="badge">&mdash;</span>
@@ -98,9 +103,10 @@ Choose .md file
 <p class="note">YY.M.X for releases &nbsp;&bull;&nbsp; YY.M.X.NN for hotfixes &nbsp;&bull;&nbsp; auto-filled from filename</p>
 </div>
 <div class="field">
-<label for="content">Release Notes (Markdown)</label>
+<div class="step"><span class="step-num">4</span><span class="step-title">Review and correct release notes if needed</span></div>
 <textarea name="content" id="content" placeholder="# 26.7.1 Release Notes&#10;&#10;...">__CONTENT__</textarea>
 </div>
+<div class="step" style="margin-top:.75rem"><span class="step-num">5</span><span class="step-title">Submit</span></div>
 <button type="submit" id="btn">Upload to Pipeline</button>
 </form>
 </div>
