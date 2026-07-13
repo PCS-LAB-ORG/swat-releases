@@ -11,3 +11,33 @@ tools:
       Ask questions in natural language and receive grounded answers from official
       documentation.
     app_url: https://catalyst.pcs.lab.twistlock.com
+
+  - id: cortex-insights
+    name: "Cortex Insights"
+    folder: cortex-insights
+    model: user-facing
+    prompt: scripts/prompts/model1_user_facing.txt
+
+  - id: cortex-unity
+    name: "Cortex Unity"
+    folder: cortex-unity
+    model: user-facing
+    prompt: scripts/prompts/model1_user_facing.txt
+
+  - id: ai-sweeper
+    name: "AI Sweeper"
+    folder: ai-sweeper
+    model: user-facing
+    prompt: scripts/prompts/model1_user_facing.txt
+
+  - id: cortex-search-pipeline
+    name: "Cortex Search Pipeline"
+    folder: cortex-search-pipeline
+    model: user-facing
+    prompt: scripts/prompts/model1_user_facing.txt
+
+  - id: session-planner
+    name: "Session Planner"
+    folder: session-planner
+    model: user-facing
+    prompt: scripts/prompts/model1_user_facing.txt
