@@ -62,6 +62,11 @@ textarea{min-height:240px;font-family:'SF Mono','Fira Code',Consolas,monospace;f
 button{width:100%;padding:.7rem 1.5rem;background:#fa582d;color:#fff;border:none;border-radius:6px;font-size:.9rem;font-weight:600;cursor:pointer;transition:background .15s;margin-top:.5rem}
 button:hover{background:#e04820}
 button:disabled{background:#4a1a0a;color:#7a3a2a;cursor:not-allowed}
+input[type=file]{display:none}
+.file-btn{display:flex;align-items:center;gap:.5rem;padding:.6rem .75rem;background:#0f1117;border:1px solid #2d3148;border-radius:6px;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:border-color .15s;width:100%}
+.file-btn:hover{border-color:#fa582d;color:#e2e8f0}
+.fname{font-size:.75rem;color:#475569;margin-top:.35rem}
+.fname.loaded{color:#3ecf8e}
 </style>
 </head>
 <body>
@@ -76,12 +81,21 @@ __SUCCESS__
 <select name="tool_id" id="tool_id">__TOOL_OPTIONS__</select>
 </div>
 <div class="field">
+<label>File</label>
+<label for="fileInput" class="file-btn">
+<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+Choose .md file
+</label>
+<input type="file" id="fileInput" accept=".md,text/markdown">
+<p class="fname" id="fname">No file chosen</p>
+</div>
+<div class="field">
 <label for="version">Version</label>
 <div class="ver-row">
 <input type="text" name="version" id="version" placeholder="26.7.1 or 26.7.1.01" value="__VERSION__" autocomplete="off">
 <span class="badge" id="badge">&mdash;</span>
 </div>
-<p class="note">YY.M.X for releases &nbsp;&bull;&nbsp; YY.M.X.NN for hotfixes</p>
+<p class="note">YY.M.X for releases &nbsp;&bull;&nbsp; YY.M.X.NN for hotfixes &nbsp;&bull;&nbsp; auto-filled from filename</p>
 </div>
 <div class="field">
 <label for="content">Release Notes (Markdown)</label>
@@ -95,6 +109,9 @@ const VRE=/^\d{2}\.\d+\.\d+(\.\d+)?$/;
 const vi=document.getElementById('version');
 const badge=document.getElementById('badge');
 const btn=document.getElementById('btn');
+const fi=document.getElementById('fileInput');
+const fname=document.getElementById('fname');
+const ct=document.getElementById('content');
 function upd(){
   const v=vi.value.trim();
   if(!v){badge.className='badge';badge.innerHTML='&mdash;';btn.disabled=false;return;}
@@ -104,7 +121,19 @@ function upd(){
   badge.textContent=p.length===4?'Hotfix':'Release';
   btn.disabled=false;
 }
-vi.addEventListener('input',upd);upd();
+vi.addEventListener('input',upd);
+fi.addEventListener('change',function(){
+  const f=fi.files[0];
+  if(!f)return;
+  fname.textContent=f.name;
+  fname.className='fname loaded';
+  const stem=f.name.replace(/\.md$/i,'');
+  if(VRE.test(stem)){vi.value=stem;upd();}
+  const r=new FileReader();
+  r.onload=function(e){ct.value=e.target.result;};
+  r.readAsText(f);
+});
+upd();
 </script>
 </body>
 </html>"""

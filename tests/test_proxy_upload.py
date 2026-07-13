@@ -47,6 +47,13 @@ def test_upload_get_contains_tool_option(client):
     assert b"cortex-catalyst" in resp.data
 
 
+def test_upload_get_contains_file_input(client):
+    resp = client.get("/upload")
+    body = resp.data.decode()
+    assert 'type="file"' in body
+    assert 'accept=".md' in body
+
+
 # ── POST /upload — validation ────────────────────────────────────────────────
 
 def test_upload_post_invalid_version_format(client):
