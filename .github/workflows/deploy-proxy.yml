@@ -20,6 +20,8 @@ env:
   MIG_HEALTH_CHECK: auth-gateway-health
   BACKEND_URL: https://storage.googleapis.com/swat-releases-serve
   SERVE_BUCKET: swat-releases-serve
+  INPUT_BUCKET: swat-releases-input
+  UPLOAD_TOOL_IDS: cortex-catalyst
   VM_MACHINE_TYPE: e2-small
   VM_NETWORK: pcs-swat-resources
   VM_SUBNET: cloudrun-testing
@@ -91,6 +93,8 @@ jobs:
                   -p 8080:8080 \
                   -e BACKEND_URL=BACKEND_URL_PLACEHOLDER \
                   -e SERVE_BUCKET=SERVE_BUCKET_PLACEHOLDER \
+                  -e INPUT_BUCKET=INPUT_BUCKET_PLACEHOLDER \
+                  -e UPLOAD_TOOL_IDS=UPLOAD_TOOL_IDS_PLACEHOLDER \
                   IMAGE_URI_PLACEHOLDER
                 ExecStop=/usr/bin/docker stop swat-releases-proxy
                 ExecStopPost=/usr/bin/docker rm swat-releases-proxy
@@ -107,6 +111,8 @@ jobs:
           sed -i "s|REGION|${{ env.REGION }}|g" /tmp/cloud-init.yaml
           sed -i "s|BACKEND_URL_PLACEHOLDER|${{ env.BACKEND_URL }}|g" /tmp/cloud-init.yaml
           sed -i "s|SERVE_BUCKET_PLACEHOLDER|${{ env.SERVE_BUCKET }}|g" /tmp/cloud-init.yaml
+          sed -i "s|INPUT_BUCKET_PLACEHOLDER|${{ env.INPUT_BUCKET }}|g" /tmp/cloud-init.yaml
+          sed -i "s|UPLOAD_TOOL_IDS_PLACEHOLDER|${{ env.UPLOAD_TOOL_IDS }}|g" /tmp/cloud-init.yaml
           sed -i "s|IMAGE_URI_PLACEHOLDER|${{ env.IMAGE_URI }}|g" /tmp/cloud-init.yaml
 
       - name: Create instance template (idempotent)
