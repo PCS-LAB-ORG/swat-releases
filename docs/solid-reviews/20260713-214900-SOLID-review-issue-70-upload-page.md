@@ -1,10 +1,11 @@
 SOLID REVIEW — issue-70 /upload page (gateway/main.py) — 2026-07-13 21:49 UTC
 
 Scope expanded:
-  - tests/test_proxy_upload.py [SCOPE EXPANDED — Step 0a: imports gateway.main, exercises upload() directly]
-  - .github/workflows/deploy-proxy.yml [SCOPE EXPANDED — Step 0b: defines UPLOAD_TOOL_IDS and INPUT_BUCKET consumed by the changed module]
-  - scripts/generator/main.py [SCOPE EXPANDED — Step 0b: independently consumes INPUT_BUCKET env var]
-  - config/tools.yaml [SCOPE EXPANDED — Step 0b/0c: authoritative tool registry read by generator; separate from proxy's UPLOAD_TOOL_IDS]
+
+- tests/test_proxy_upload.py [SCOPE EXPANDED — Step 0a: imports gateway.main, exercises upload() directly]
+- .github/workflows/deploy-proxy.yml [SCOPE EXPANDED — Step 0b: defines UPLOAD_TOOL_IDS and INPUT_BUCKET consumed by the changed module]
+- scripts/generator/main.py [SCOPE EXPANDED — Step 0b: independently consumes INPUT_BUCKET env var]
+- config/tools.yaml [SCOPE EXPANDED — Step 0b/0c: authoritative tool registry read by generator; separate from proxy's UPLOAD_TOOL_IDS]
 
 Scores:
   S — Single Responsibility: 7/10
@@ -81,7 +82,7 @@ Gaps:
 Step 1 — Dependency Boundary Audit findings: NONE. google.cloud.storage.Client is
 thread-safe and has no shared mutable state. INPUT_BUCKET is env-var configurable. The
 GCS blob interface (.exists(), .upload_from_string()) is fully exercised by callers —
-no dead interface at this boundary. _credentials (read_only scoped) and _storage_client
+no dead interface at this boundary. \_credentials (read\_only scoped) and \_storage\_client
 (full ADC) are intentionally separate credential paths: the former is for bearer-token
 proxying to the serve bucket; the latter is for SDK calls to both buckets.
 

@@ -30,14 +30,14 @@ change correctly aligns VM_SERVICE_ACCOUNT with the established swat-releases-pi
 used by WIF_SERVICE_ACCOUNT in both workflows.
 
 One gap warrants a follow-up commit: CLAUDE.md's Infrastructure table still names
-cloudrun-testing-svc@pcs-swat-resources.iam.gserviceaccount.com as "Proxy VM SA". That
+`cloudrun-testing-svc@pcs-swat-resources.iam.gserviceaccount.com` as "Proxy VM SA". That
 entry is now incorrect — the VM instances are attached to swat-releases-pipeline. A
 developer consulting CLAUDE.md during incident response or IAM auditing will get the wrong
 SA identity.
 
 Gaps:
   [D / Config consistency] — CLAUDE.md Infrastructure section lists
-    "Proxy VM SA: cloudrun-testing-svc@pcs-swat-resources.iam.gserviceaccount.com" but
+    "Proxy VM SA: `cloudrun-testing-svc@pcs-swat-resources.iam.gserviceaccount.com`" but
     the workflow now attaches swat-releases-pipeline to VM instances. The live reference
     document is out of sync with the deployed configuration.
     File: CLAUDE.md, Infrastructure table ("Proxy VM SA" row)
@@ -45,7 +45,7 @@ Gaps:
     Why: One-line update to CLAUDE.md; trivial to apply on a docs/ chore branch.
 
   [I / Redundant env var] — After this change both WIF_SERVICE_ACCOUNT and VM_SERVICE_ACCOUNT
-    resolve to the same value (swat-releases-pipeline@pcs-swat-resources.iam.gserviceaccount.com).
+    resolve to the same value (`swat-releases-pipeline@pcs-swat-resources.iam.gserviceaccount.com`).
     The two-variable structure is still the correct pattern if the SAs ever diverge again, so
     this is an observation rather than a required fix. The current workflow could reference
     WIF_SERVICE_ACCOUNT directly at line 132 to make the identity explicit, but the redundancy
