@@ -107,7 +107,7 @@ block must always be present.
 - **Cache-Control:** proxy adds `no-store` to all responses — Prisma Access Browser
   caches `private, max-age=0` aggressively across incognito sessions
 - **Pipeline SA:** `swat-releases-pipeline@pcs-swat-resources.iam.gserviceaccount.com`
-- **Proxy VM SA:** `cloudrun-testing-svc@pcs-swat-resources.iam.gserviceaccount.com`
+- **Proxy VM SA:** `swat-releases-pipeline@pcs-swat-resources.iam.gserviceaccount.com`
 
 ---
 
