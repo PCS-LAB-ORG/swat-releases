@@ -148,12 +148,13 @@ def run_generator(
                                      "version": version, "error": str(exc)}))
             errors += 1
 
-    # Rebuild index after all versions processed
-    for tool in config["tools"]:
+    # Rebuild index — only cortex-catalyst has a managed panel in index.html
+    catalyst_tool = next((t for t in config["tools"] if t["id"] == "cortex-catalyst"), None)
+    if catalyst_tool:
         try:
-            rebuild_index(tool, gcs_client, serve_bucket)
+            rebuild_index(catalyst_tool, gcs_client, serve_bucket)
         except Exception as exc:
-            logger.error(json.dumps({"action": "index_error", "tool_id": tool["id"],
+            logger.error(json.dumps({"action": "index_error", "tool_id": "cortex-catalyst",
                                      "error": str(exc)}))
 
     summary = {"processed": processed, "skipped": skipped, "errors": errors}

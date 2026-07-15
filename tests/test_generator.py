@@ -81,6 +81,44 @@ def test_generator_skips_non_md_blobs():
     mock_process.assert_not_called()
 
 
+def test_rebuild_index_called_only_for_catalyst():
+    """rebuild_index must not run for non-catalyst tools — doing so overwrites the
+    catalyst panel with wrong data, corrupting index.html."""
+    from scripts.generator.main import run_generator
+
+    mock_storage = MagicMock()
+    mock_input_bucket = MagicMock()
+    mock_input_bucket.list_blobs.return_value = []
+    mock_storage.bucket.return_value = mock_input_bucket
+
+    multi_tool_config = {
+        "tools": [
+            {"id": "cortex-catalyst", "folder": "cortex-catalyst",
+             "prompt": "scripts/prompts/model1_user_facing.txt",
+             "name": "Cortex® Catalyst", "description": "Test.",
+             "app_url": "https://example.com", "panel_id": "catalyst",
+             "model": "user-facing", "repo": "PCS-LAB-ORG/x"},
+            {"id": "cortex-insights", "folder": "cortex-insights",
+             "prompt": "scripts/prompts/model1_user_facing.txt",
+             "name": "Cortex Insights", "description": "Test.",
+             "model": "user-facing"},
+            {"id": "ai-sweeper", "folder": "ai-sweeper",
+             "prompt": "scripts/prompts/model1_user_facing.txt",
+             "name": "AI Sweeper", "description": "Test.",
+             "model": "user-facing"},
+        ]
+    }
+
+    with patch("scripts.generator.main.rebuild_index") as mock_index, \
+         patch("scripts.generator.main.storage.Client", return_value=mock_storage), \
+         patch("scripts.generator.main.VertexGeminiClient"):
+        run_generator("swat-releases-input", "swat-releases-serve", multi_tool_config)
+
+    mock_index.assert_called_once()
+    called_tool = mock_index.call_args[0][0]
+    assert called_tool["id"] == "cortex-catalyst"
+
+
 def test_generator_logs_and_continues_on_error():
     from scripts.generator.main import run_generator
     import logging
