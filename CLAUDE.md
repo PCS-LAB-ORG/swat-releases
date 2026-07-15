@@ -106,8 +106,9 @@ block must always be present.
 - **Health check:** reuses `auth-gateway-health` (pipeline SA lacks `compute.healthChecks.create`)
 - **Cache-Control:** proxy adds `no-store` to all responses — Prisma Access Browser
   caches `private, max-age=0` aggressively across incognito sessions
-- **Pipeline SA:** `swat-releases-pipeline@pcs-swat-resources.iam.gserviceaccount.com`
+- **Pipeline SA (CI/CD + runtime):** `swat-releases-pipeline@pcs-swat-resources.iam.gserviceaccount.com`
 - **Proxy VM SA:** `swat-releases-pipeline@pcs-swat-resources.iam.gserviceaccount.com`
+- **Container logs:** COS does NOT forward container stdout/stderr to Cloud Logging by default (no Ops Agent). Flask `app.logger` output is only accessible via SSH into the running instance. Relevant for debugging proxy errors.
 
 ---
 
