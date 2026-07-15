@@ -25,7 +25,7 @@ env:
   VM_MACHINE_TYPE: e2-small
   VM_NETWORK: pcs-swat-resources
   VM_SUBNET: cloudrun-testing
-  VM_SERVICE_ACCOUNT: cloudrun-testing-svc@pcs-swat-resources.iam.gserviceaccount.com
+  VM_SERVICE_ACCOUNT: swat-releases-pipeline@pcs-swat-resources.iam.gserviceaccount.com
   WIF_PROVIDER: projects/855530889800/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider
   WIF_SERVICE_ACCOUNT: swat-releases-pipeline@pcs-swat-resources.iam.gserviceaccount.com
 
