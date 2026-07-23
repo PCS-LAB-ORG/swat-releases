@@ -77,13 +77,19 @@ The `.md` file must still be present in `gs://swat-releases-input` for the gener
 
 ## Adding a Release
 
-1. Write release notes in `.md` format (see [docs/release-notes-standards.md](release-notes-standards.md))
+1. Write release notes in `.md` format (see [release-notes-standards.md](release-notes-standards.md))
 1. Name the file `{version}.md` (e.g., `26.8.1.md` for a major release, `26.8.1.01.md` for a hotfix)
-1. Upload to `gs://swat-releases-input/{tool-id}/`:
+1. Upload via the web page or gcloud:
 
-```bash
-gcloud storage cp 26.8.1.md gs://swat-releases-input/cortex-catalyst/26.8.1.md
-```
+   _Web upload page (no CLI needed):_ Navigate to
+   `https://swatreleases.pcs.lab.twistlock.com/upload` (VPN required). Select the tool,
+   paste or upload the `.md` file, enter the version, and submit.
+
+   _gcloud CLI:_
+
+   ```bash
+   gcloud storage cp 26.8.1.md gs://swat-releases-input/cortex-catalyst/26.8.1.md
+   ```
 
 1. Trigger the scheduler job or wait for the next hourly run
 
@@ -98,28 +104,17 @@ gcloud storage rm gs://swat-releases-serve/cortex-catalyst/26.8.1.html
 gcloud storage rm gs://swat-releases-serve/cortex-catalyst/26.8.1.json
 ```
 
-1. Remove the source `.md` from the input bucket (prevents re-processing on the next hourly run):
+1. Remove the source `.md` from the input bucket (prevents re-processing on next hourly run):
 
 ```bash
 gcloud storage rm gs://swat-releases-input/cortex-catalyst/26.8.1.md
 ```
 
-1. Rebuild the index so the sidebar no longer lists the deleted release:
+1. Trigger the generator — it will rebuild the index panel without the deleted entry:
 
 ```bash
-export GOOGLE_CLOUD_PROJECT=pcs-swat-resources
-gcloud auth application-default login  # if needed
-PYTHONPATH=. python - << 'EOF'
-from google.cloud import storage
-from scripts.config import load_config
-from scripts.generator.main import rebuild_index
-
-gcs = storage.Client()
-config = load_config("config/tools.yaml")
-tool = config["tools"][0]
-rebuild_index(tool, gcs, "swat-releases-serve")
-print("Index rebuilt")
-EOF
+gcloud scheduler jobs run swat-releases-generator-hourly \
+  --location=us-central1 --project=pcs-swat-resources
 ```
 
 1. If the deleted version was the `latest`, update the pointer manually:
@@ -175,43 +170,17 @@ gcloud storage cp gs://swat-releases-serve/cortex-catalyst/26.8.1.json /tmp/26.8
 gcloud storage cp /tmp/26.8.1.json gs://swat-releases-serve/cortex-catalyst/26.8.1.json
 ```
 
-1. Re-render by triggering the generator. The `.md` file must be present in the input bucket. Because the JSON artifact already exists, Gemini is not called — the edited JSON is used directly:
+1. Re-render by triggering the generator. Because the JSON artifact already exists, Gemini
+   is not called — the edited JSON is used directly to regenerate the HTML:
 
 ```bash
 gcloud scheduler jobs run swat-releases-generator-hourly \
   --location=us-central1 --project=pcs-swat-resources
 ```
 
-1. Or render locally without touching the input bucket:
-
-```bash
-export GOOGLE_CLOUD_PROJECT=pcs-swat-resources
-export INPUT_BUCKET=swat-releases-input
-export SERVE_BUCKET=swat-releases-serve
-gcloud auth application-default login
-PYTHONPATH=. python - << 'EOF'
-from google.cloud import storage
-from scripts.render import load_assets, GCSHTMLRenderer, GCSIndexUpdater, TemplateEngine, load_all_release_data_from_gcs
-from scripts.config import load_config
-import json
-
-client = storage.Client()
-config = load_config("config/tools.yaml")
-tool = config["tools"][0]
-version = "26.8.1"
-
-artifact = json.loads(client.bucket("swat-releases-serve").blob(f"cortex-catalyst/{version}.json").download_as_text())
-assets = load_assets("images")
-engine = TemplateEngine("scripts/templates")
-updater = GCSIndexUpdater(engine, client, "swat-releases-serve")
-renderer = GCSHTMLRenderer(engine, updater, assets, client)
-
-all_releases = load_all_release_data_from_gcs(client, "swat-releases-serve", "cortex-catalyst")
-all_versions = [{"version": r["version"], "label": f"{r['date']} — {r['version']}", "is_current": r["version"] == version, "href": r["version"]} for r in all_releases]
-renderer.render_and_upload(tool, version, artifact, all_versions, "swat-releases-serve")
-print("Done")
-EOF
-```
+The `.md` file must still be present in `gs://swat-releases-input` for the generator to
+pick it up. If it was already removed, re-upload it (the existing JSON artifact acts as the
+skip guard — Gemini is not re-called).
 
 ---
 
@@ -291,7 +260,7 @@ The parent major release must exist before a hotfix can be processed.
 | Version not processed, no log entry | `.md` file is named incorrectly or missing `.md` extension | Check `gcloud storage ls gs://swat-releases-input/cortex-catalyst/` |
 | Version processed but HTML unchanged | JSON artifact already existed; Gemini not re-called | Edit JSON in GCS and re-trigger, or use force re-extraction (delete JSON first) |
 | Hotfix skipped with `parent_not_found` | Parent major release not yet processed | Upload and trigger parent first |
-| `RuntimeError: Could not find panel-catalyst div` | `index.html` in serving bucket is malformed or missing | Download from GCS version history and restore; `index.html` is not tracked in git |
+| `RuntimeError: Could not find panel-{tool} div` | `index.html` in serving bucket is malformed or the panel div was renamed/removed | Download from GCS version history and restore; `index.html` is not tracked in git |
 | Cloud Function times out (300s limit) | Large number of unprocessed files | Trigger multiple times or process in smaller batches |
 | Gemini returns invalid JSON | Model flakiness | Manual trigger re-runs Gemini; check logs for raw response |
 | Hotfix validation error: wrong tag | Hotfix `.md` contains non-Fixed entries | Hotfix entries must only describe bug fixes; all entries are validated as `Fixed` |
