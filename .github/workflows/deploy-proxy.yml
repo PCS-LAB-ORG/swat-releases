@@ -90,6 +90,8 @@ jobs:
                 ExecStartPre=-/usr/bin/docker rm swat-releases-proxy
                 ExecStart=/usr/bin/docker run \
                   --name=swat-releases-proxy \
+                  --log-driver=gcplogs \
+                  --log-opt gcp-project=pcs-swat-resources \
                   -p 8080:8080 \
                   -e BACKEND_URL=BACKEND_URL_PLACEHOLDER \
                   -e SERVE_BUCKET=SERVE_BUCKET_PLACEHOLDER \

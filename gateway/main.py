@@ -1,7 +1,9 @@
 import html as _html
+import json
 import logging
 import os
 import re
+import time
 
 import google.auth
 import google.auth.transport.requests
@@ -12,6 +14,34 @@ from google.cloud import storage
 logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
+
+
+class _JsonFormatter(logging.Formatter):
+    _LEVELS = {
+        logging.DEBUG: "DEBUG",
+        logging.INFO: "INFO",
+        logging.WARNING: "WARNING",
+        logging.ERROR: "ERROR",
+        logging.CRITICAL: "CRITICAL",
+    }
+
+    def format(self, record: logging.LogRecord) -> str:
+        payload: dict = {
+            "severity": self._LEVELS.get(record.levelno, "DEFAULT"),
+            "message": record.getMessage(),
+        }
+        if record.exc_info:
+            payload["exception"] = self.formatException(record.exc_info)
+        if hasattr(record, "fields"):
+            payload.update(record.fields)
+        return json.dumps(payload)
+
+
+_handler = logging.StreamHandler()
+_handler.setFormatter(_JsonFormatter())
+app.logger.handlers = [_handler]
+app.logger.setLevel(logging.INFO)
+app.logger.propagate = False
 
 BACKEND_URL = os.environ.get(
     "BACKEND_URL",
@@ -236,6 +266,9 @@ def upload():
     try:
         blob = _storage_client.bucket(INPUT_BUCKET).blob(f"{tool_id}/{version}.md")
         if blob.exists():
+            app.logger.warning("upload_duplicate", extra={"fields": {
+                "action": "upload_duplicate", "tool_id": tool_id, "version": version,
+            }})
             return (
                 _render_upload(
                     tools=_UPLOAD_TOOL_IDS,
@@ -247,7 +280,10 @@ def upload():
             )
         blob.upload_from_string(content.encode("utf-8"), content_type="text/markdown; charset=utf-8")
     except Exception as exc:
-        app.logger.error(f"GCS upload error for {tool_id}/{version}: {exc}")
+        app.logger.error("upload_error", extra={"fields": {
+            "action": "upload_error", "tool_id": tool_id, "version": version,
+            "error": str(exc),
+        }})
         return (
             _render_upload(tools=_UPLOAD_TOOL_IDS,
                            errors=["Upload failed — GCS error. Try again or contact the SWAT team."],
@@ -255,10 +291,12 @@ def upload():
             500,
         )
 
-    return _render_upload(
-        tools=_UPLOAD_TOOL_IDS,
-        success_path=f"gs://{INPUT_BUCKET}/{tool_id}/{version}.md",
-    )
+    gcs_path = f"gs://{INPUT_BUCKET}/{tool_id}/{version}.md"
+    app.logger.info("upload_success", extra={"fields": {
+        "action": "upload_success", "tool_id": tool_id, "version": version,
+        "gcs_path": gcs_path,
+    }})
+    return _render_upload(tools=_UPLOAD_TOOL_IDS, success_path=gcs_path)
 
 
 @app.route("/healthz")
@@ -269,13 +307,17 @@ def health():
 @app.route("/", defaults={"path": ""}, methods=["GET", "HEAD"])
 @app.route("/<path:path>", methods=["GET", "HEAD"])
 def proxy(path):
+    t0 = time.monotonic()
+
     latest_match = _LATEST_RE.match(path)
     if latest_match:
         tool_id = latest_match.group(1)
         try:
             version = _resolve_latest(tool_id)
         except Exception as exc:
-            app.logger.error(f"latest lookup failed: {exc}")
+            app.logger.error("latest_error", extra={"fields": {
+                "action": "latest_error", "tool_id": tool_id, "error": str(exc),
+            }})
             return f"latest lookup error: {exc}", 502
         return redirect(f"/{tool_id}/{version}", 302)
 
@@ -290,12 +332,12 @@ def proxy(path):
     if request.query_string:
         target = f"{target}?{request.query_string.decode()}"
 
-    app.logger.info(f"Proxying {request.method} /{path} → {target}")
-
     try:
         token = _get_access_token()
     except Exception as exc:
-        app.logger.error(f"Token error: {exc}")
+        app.logger.error("token_error", extra={"fields": {
+            "action": "token_error", "path": path, "error": str(exc),
+        }})
         return f"Token error: {exc}", 500
 
     headers = {k: v for k, v in request.headers if k.lower() != "host"}
@@ -312,8 +354,17 @@ def proxy(path):
             timeout=30,
         )
     except Exception as exc:
-        app.logger.error(f"Backend error: {exc}")
+        app.logger.error("backend_error", extra={"fields": {
+            "action": "backend_error", "method": request.method,
+            "path": path, "error": str(exc),
+        }})
         return f"Backend error: {exc}", 502
+
+    latency_ms = round((time.monotonic() - t0) * 1000)
+    app.logger.info("proxy_request", extra={"fields": {
+        "action": "proxy", "method": request.method, "path": path,
+        "gcs_path": gcs_path, "status": resp.status_code, "latency_ms": latency_ms,
+    }})
 
     skip = {"content-encoding", "content-length", "transfer-encoding", "connection",
             "cache-control"}
