@@ -181,7 +181,7 @@ def test_index_updater_replaces_panel(tmp_path):
         "panel_id": "catalyst",
     }
     latest = {"version": "26.7.1", "date": "July 2026", "summary": "Test summary."}
-    updater.rebuild_catalyst_panel(tool, latest=latest, month_groups=[], is_default=True)
+    updater.rebuild_panel(tool, latest=latest, month_groups=[], is_default=True)
 
     updated = index_path.read_text()
     assert "OLD CONTENT" not in updated
@@ -236,12 +236,133 @@ def test_gcs_index_updater_uploads_updated_index():
         "panel_id": "catalyst",
     }
     latest = {"version": "26.7.1", "date": "July 2026", "summary": "Test summary."}
-    updater.rebuild_catalyst_panel(tool, latest=latest, month_groups=[], is_default=True)
+    updater.rebuild_panel(tool, latest=latest, month_groups=[], is_default=True)
 
     mock_blob.upload_from_string.assert_called_once()
     uploaded_html = mock_blob.upload_from_string.call_args[0][0]
     assert "OLD" not in uploaded_html
     assert "26.7.1" in uploaded_html
+
+
+def test_index_updater_rebuild_panel_works_for_non_catalyst_panel(tmp_path):
+    index_content = '''\
+<div class="layout">
+  <aside class="sidebar"></aside>
+  <main class="content">
+        <div class="tool-panel active" id="panel-catalyst">
+          <h2 class="tool-title">Cortex® Catalyst</h2>
+        </div>
+
+        <div class="tool-panel" id="panel-session-planner">
+          <h2 class="tool-title">Session Planner</h2>
+          <div class="coming-soon">Release notes coming soon.</div>
+        </div>
+
+        <div class="tool-panel" id="panel-other">
+'''
+    index_path = tmp_path / "index.html"
+    index_path.write_text(index_content)
+
+    engine = TemplateEngine("scripts/templates")
+    updater = IndexUpdater(engine, str(index_path))
+
+    tool = {
+        "name": "Session Planner",
+        "description": "",
+        "folder": "session-planner",
+        "panel_id": "session-planner",
+    }
+    latest = {"version": "26.7.1", "date": "July 2026", "summary": "Test."}
+    updater.rebuild_panel(tool, latest=latest, month_groups=[], is_default=False)
+
+    updated = index_path.read_text()
+    assert "coming soon" not in updated
+    assert "session-planner/26.7.1" in updated
+    assert "Latest" in updated
+    # catalyst panel must be untouched
+    assert 'id="panel-catalyst"' in updated
+
+
+def test_index_updater_rebuild_panel_last_panel_uses_main_close_boundary(tmp_path):
+    index_content = '''\
+<div class="layout">
+  <main class="content">
+        <div class="tool-panel active" id="panel-catalyst">
+          <h2>Catalyst</h2>
+        </div>
+
+        <div class="tool-panel" id="panel-ai-sweeper">
+          <div class="coming-soon">Release notes coming soon.</div>
+        </div>
+
+      </main>
+    </div>
+'''
+    index_path = tmp_path / "index.html"
+    index_path.write_text(index_content)
+
+    engine = TemplateEngine("scripts/templates")
+    updater = IndexUpdater(engine, str(index_path))
+
+    tool = {
+        "name": "AI Sweeper",
+        "description": "",
+        "folder": "ai-sweeper",
+        "panel_id": "ai-sweeper",
+    }
+    latest = {"version": "26.7.1", "date": "July 2026", "summary": "Test."}
+    updater.rebuild_panel(tool, latest=latest, month_groups=[], is_default=False)
+
+    updated = index_path.read_text()
+    assert "coming soon" not in updated
+    assert "ai-sweeper/26.7.1" in updated
+    # Structure after the replaced panel must still contain </main>
+    assert "</main>" in updated
+    # catalyst panel untouched
+    assert 'id="panel-catalyst"' in updated
+
+
+def test_rebuild_index_only_catalyst_gets_is_default_true():
+    from scripts.generator.main import rebuild_index
+    from scripts.render import group_by_month
+
+    mock_client = MagicMock()
+    mock_bucket = MagicMock()
+    mock_blob = MagicMock()
+    mock_client.bucket.return_value = mock_bucket
+    mock_bucket.blob.return_value = mock_blob
+    mock_bucket.list_blobs.return_value = []
+
+    index_content = '''\
+<div class="layout">
+  <main class="content">
+        <div class="tool-panel active" id="panel-session-planner">
+          <div class="coming-soon">OLD</div>
+        </div>
+
+      </main>
+'''
+    mock_blob.download_as_text.return_value = index_content
+
+    engine_mock = MagicMock()
+    engine_mock.render.return_value = '<div class="tool-panel" id="panel-session-planner">NEW</div>'
+
+    from unittest.mock import patch
+    with patch("scripts.generator.main.TemplateEngine", return_value=engine_mock), \
+         patch("scripts.generator.main.GCSIndexUpdater") as mock_updater_cls, \
+         patch("scripts.generator.main.load_all_release_data_from_gcs", return_value=[]):
+        mock_updater = MagicMock()
+        mock_updater_cls.return_value = mock_updater
+
+        session_tool = {
+            "id": "session-planner", "folder": "session-planner",
+            "name": "Session Planner", "description": "", "panel_id": "session-planner",
+        }
+        rebuild_index(session_tool, mock_client, "swat-releases-serve")
+
+    mock_updater.rebuild_panel.assert_called_once()
+    call_kwargs = mock_updater.rebuild_panel.call_args
+    assert call_kwargs.kwargs.get("is_default") is False or call_kwargs.args[3] is False
 
 
 def test_gcs_html_renderer_uploads_release_page():

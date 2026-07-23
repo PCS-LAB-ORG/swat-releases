@@ -4,6 +4,7 @@ tools:
     repo: PCS-LAB-ORG/catalyst-rag-agent
     folder: cortex-catalyst
     panel_id: catalyst
+    is_default: true
     model: user-facing
     prompt: scripts/prompts/model1_user_facing.txt
     description: >
@@ -15,29 +16,34 @@ tools:
   - id: cortex-insights
     name: "Cortex Insights"
     folder: cortex-insights
+    panel_id: insights
     model: user-facing
     prompt: scripts/prompts/model1_user_facing.txt
 
   - id: cortex-unity
     name: "Cortex Unity"
     folder: cortex-unity
+    panel_id: unity
     model: user-facing
     prompt: scripts/prompts/model1_user_facing.txt
 
   - id: ai-sweeper
     name: "AI Sweeper"
     folder: ai-sweeper
+    panel_id: ai-sweeper
     model: user-facing
     prompt: scripts/prompts/model1_user_facing.txt
 
   - id: cortex-search-pipeline
     name: "Cortex Search Pipeline"
     folder: cortex-search-pipeline
+    panel_id: search-pipeline
     model: user-facing
     prompt: scripts/prompts/model1_user_facing.txt
 
   - id: session-planner
     name: "Session Planner"
     folder: session-planner
+    panel_id: session-planner
     model: user-facing
     prompt: scripts/prompts/model1_user_facing.txt

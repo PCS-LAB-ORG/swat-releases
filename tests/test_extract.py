@@ -24,7 +24,7 @@ VALID_JSON_STR = json.dumps(VALID_ARTIFACT)
 def test_validator_accepts_valid_json():
     result = ResponseValidator().validate(VALID_JSON_STR)
     assert result["version"] == "26.7.1"
-    assert len(result["entries"]) == 2
+    assert len(result["entries"]) == len(VALID_ARTIFACT["entries"])
 
 
 def test_validator_accepts_empty_entries():
