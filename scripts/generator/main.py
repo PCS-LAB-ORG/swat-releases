@@ -69,13 +69,13 @@ def rebuild_index(
     gcs_client: storage.Client,
     serve_bucket: str,
 ) -> None:
-    from scripts.render import _group_by_month  # local import of private symbol
+    from scripts.render import group_by_month
     assets = load_assets("images")
     engine = TemplateEngine("scripts/templates")
     updater = GCSIndexUpdater(engine, gcs_client, serve_bucket)
     all_releases = load_all_release_data_from_gcs(gcs_client, serve_bucket, tool["id"])
     latest = all_releases[0] if all_releases else None
-    month_groups = _group_by_month(all_releases[1:]) if len(all_releases) > 1 else []
+    month_groups = group_by_month(all_releases[1:]) if len(all_releases) > 1 else []
     updater.rebuild_panel(tool, latest=latest, month_groups=month_groups,
                          is_default=tool.get("is_default", False))
 

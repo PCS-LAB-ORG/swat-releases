@@ -324,7 +324,7 @@ def test_index_updater_rebuild_panel_last_panel_uses_main_close_boundary(tmp_pat
 
 def test_rebuild_index_only_catalyst_gets_is_default_true():
     from scripts.generator.main import rebuild_index
-    from scripts.render import _group_by_month
+    from scripts.render import group_by_month
 
     mock_client = MagicMock()
     mock_bucket = MagicMock()

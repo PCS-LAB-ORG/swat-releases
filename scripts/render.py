@@ -121,7 +121,7 @@ def load_all_release_data_from_gcs(
     return sorted(result, key=lambda x: x["version"], reverse=True)
 
 
-def _group_by_month(releases: list[dict]) -> list[dict]:
+def group_by_month(releases: list[dict]) -> list[dict]:
     """Group releases by their 'date' field for panel rendering."""
     groups: dict[str, list] = {}
     for r in releases:
@@ -157,7 +157,7 @@ class IndexUpdater:
     ) -> None:
         panel_id = tool["panel_id"]
         panel_html = self._engine.render(
-            "catalyst-panel.html.j2",
+            tool.get("panel_template", "catalyst-panel.html.j2"),
             tool=tool,
             latest=latest,
             month_groups=month_groups,
@@ -248,7 +248,7 @@ class GCSIndexUpdater:
     ) -> None:
         panel_id = tool["panel_id"]
         panel_html = self._engine.render(
-            "catalyst-panel.html.j2",
+            tool.get("panel_template", "catalyst-panel.html.j2"),
             tool=tool,
             latest=latest,
             month_groups=month_groups,
