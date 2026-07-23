@@ -177,9 +177,14 @@ class IndexUpdater:
             r'\n\s+<div class="tool-panel[^"]*" id="panel-(?!' + re.escape(panel_id) + r')'
         )
         next_panel = next_panel_re.search(content, start + 1)
-        if not next_panel:
-            raise RuntimeError(f"Could not find end boundary of panel-{panel_id} in index.html")
-        end = next_panel.start()
+        if next_panel:
+            end = next_panel.start()
+        else:
+            # Last panel in the file — boundary is the closing </main> tag
+            main_close = re.compile(r'\n\s+</main>').search(content, start + 1)
+            if not main_close:
+                raise RuntimeError(f"Could not find end boundary of panel-{panel_id} in index.html")
+            end = main_close.start()
 
         self._index_path.write_text(content[:start] + panel_html + "\n" + content[end:])
 
@@ -264,9 +269,14 @@ class GCSIndexUpdater:
             r'\n\s+<div class="tool-panel[^"]*" id="panel-(?!' + re.escape(panel_id) + r')'
         )
         next_panel = next_panel_re.search(content, start + 1)
-        if not next_panel:
-            raise RuntimeError(f"Could not find end boundary of panel-{panel_id} in index.html")
-        end = next_panel.start()
+        if next_panel:
+            end = next_panel.start()
+        else:
+            # Last panel in the file — boundary is the closing </main> tag
+            main_close = re.compile(r'\n\s+</main>').search(content, start + 1)
+            if not main_close:
+                raise RuntimeError(f"Could not find end boundary of panel-{panel_id} in index.html")
+            end = main_close.start()
 
         updated = content[:start] + panel_html + "\n" + content[end:]
         blob.upload_from_string(updated, content_type="text/html")

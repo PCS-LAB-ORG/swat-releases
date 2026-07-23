@@ -4,6 +4,7 @@ tools:
     repo: PCS-LAB-ORG/catalyst-rag-agent
     folder: cortex-catalyst
     panel_id: catalyst
+    is_default: true
     model: user-facing
     prompt: scripts/prompts/model1_user_facing.txt
     description: >

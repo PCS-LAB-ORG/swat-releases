@@ -76,7 +76,8 @@ def rebuild_index(
     all_releases = load_all_release_data_from_gcs(gcs_client, serve_bucket, tool["id"])
     latest = all_releases[0] if all_releases else None
     month_groups = _group_by_month(all_releases[1:]) if len(all_releases) > 1 else []
-    updater.rebuild_panel(tool, latest=latest, month_groups=month_groups, is_default=True)
+    updater.rebuild_panel(tool, latest=latest, month_groups=month_groups,
+                         is_default=tool.get("is_default", False))
 
     # Update the latest pointer in GCS
     if latest:
