@@ -2,6 +2,7 @@ import html as _html
 import logging
 import os
 import re
+import time
 
 import google.auth
 import google.auth.transport.requests
@@ -17,6 +18,18 @@ BACKEND_URL = os.environ.get(
     "BACKEND_URL",
     "https://storage.googleapis.com/swat-releases-serve",
 )
+_LOCAL_HOSTS = ("localhost", "127.0.0.1", "host.docker.internal")
+_IS_LOCAL = any(h in BACKEND_URL for h in _LOCAL_HOSTS)
+
+if not _IS_LOCAL:
+    import google.cloud.logging as _gcl
+    _gcl.Client().setup_logging()
+    app.logger.setLevel(logging.INFO)
+
+BACKEND_URL = os.environ.get(
+    "BACKEND_URL",
+    "https://storage.googleapis.com/swat-releases-serve",
+)
 SERVE_BUCKET = os.environ.get("SERVE_BUCKET", "swat-releases-serve")
 INPUT_BUCKET = os.environ.get("INPUT_BUCKET", "swat-releases-input")
 _UPLOAD_TOOL_IDS = [
@@ -25,9 +38,6 @@ _UPLOAD_TOOL_IDS = [
     if t.strip()
 ]
 _VERSION_RE_UPLOAD = re.compile(r"^\d{2}\.\d+\.\d+(\.\d+)?$")
-
-_LOCAL_HOSTS = ("localhost", "127.0.0.1", "host.docker.internal")
-_IS_LOCAL = any(h in BACKEND_URL for h in _LOCAL_HOSTS)
 
 _VERSION_RE = re.compile(r"^[^/]+/\d+\.\d+\.\d+(?:\.\d+)?$")
 _LATEST_RE = re.compile(r"^([^/]+)/latest$")
@@ -236,6 +246,9 @@ def upload():
     try:
         blob = _storage_client.bucket(INPUT_BUCKET).blob(f"{tool_id}/{version}.md")
         if blob.exists():
+            app.logger.warning("upload_duplicate", extra={"json_fields": {
+                "action": "upload_duplicate", "tool_id": tool_id, "version": version,
+            }})
             return (
                 _render_upload(
                     tools=_UPLOAD_TOOL_IDS,
@@ -247,7 +260,10 @@ def upload():
             )
         blob.upload_from_string(content.encode("utf-8"), content_type="text/markdown; charset=utf-8")
     except Exception as exc:
-        app.logger.error(f"GCS upload error for {tool_id}/{version}: {exc}")
+        app.logger.error("upload_error", extra={"json_fields": {
+            "action": "upload_error", "tool_id": tool_id, "version": version,
+            "error": str(exc),
+        }})
         return (
             _render_upload(tools=_UPLOAD_TOOL_IDS,
                            errors=["Upload failed — GCS error. Try again or contact the SWAT team."],
@@ -255,10 +271,12 @@ def upload():
             500,
         )
 
-    return _render_upload(
-        tools=_UPLOAD_TOOL_IDS,
-        success_path=f"gs://{INPUT_BUCKET}/{tool_id}/{version}.md",
-    )
+    gcs_path = f"gs://{INPUT_BUCKET}/{tool_id}/{version}.md"
+    app.logger.info("upload_success", extra={"json_fields": {
+        "action": "upload_success", "tool_id": tool_id, "version": version,
+        "gcs_path": gcs_path,
+    }})
+    return _render_upload(tools=_UPLOAD_TOOL_IDS, success_path=gcs_path)
 
 
 @app.route("/healthz")
@@ -269,13 +287,17 @@ def health():
 @app.route("/", defaults={"path": ""}, methods=["GET", "HEAD"])
 @app.route("/<path:path>", methods=["GET", "HEAD"])
 def proxy(path):
+    t0 = time.monotonic()
+
     latest_match = _LATEST_RE.match(path)
     if latest_match:
         tool_id = latest_match.group(1)
         try:
             version = _resolve_latest(tool_id)
         except Exception as exc:
-            app.logger.error(f"latest lookup failed: {exc}")
+            app.logger.error("latest_error", extra={"json_fields": {
+                "action": "latest_error", "tool_id": tool_id, "error": str(exc),
+            }})
             return f"latest lookup error: {exc}", 502
         return redirect(f"/{tool_id}/{version}", 302)
 
@@ -290,12 +312,12 @@ def proxy(path):
     if request.query_string:
         target = f"{target}?{request.query_string.decode()}"
 
-    app.logger.info(f"Proxying {request.method} /{path} → {target}")
-
     try:
         token = _get_access_token()
     except Exception as exc:
-        app.logger.error(f"Token error: {exc}")
+        app.logger.error("token_error", extra={"json_fields": {
+            "action": "token_error", "path": path, "error": str(exc),
+        }})
         return f"Token error: {exc}", 500
 
     headers = {k: v for k, v in request.headers if k.lower() != "host"}
@@ -312,8 +334,17 @@ def proxy(path):
             timeout=30,
         )
     except Exception as exc:
-        app.logger.error(f"Backend error: {exc}")
+        app.logger.error("backend_error", extra={"json_fields": {
+            "action": "backend_error", "method": request.method,
+            "path": path, "error": str(exc),
+        }})
         return f"Backend error: {exc}", 502
+
+    latency_ms = round((time.monotonic() - t0) * 1000)
+    app.logger.info("proxy_request", extra={"json_fields": {
+        "action": "proxy", "method": request.method, "path": path,
+        "gcs_path": gcs_path, "status": resp.status_code, "latency_ms": latency_ms,
+    }})
 
     skip = {"content-encoding", "content-length", "transfer-encoding", "connection",
             "cache-control"}
