@@ -1,5 +1,3 @@
-import json
-import logging
 import os
 import pytest
 from unittest.mock import MagicMock, patch
@@ -162,8 +160,7 @@ def test_upload_post_duplicate_returns_409(client, mock_storage):
 
 
 # ── Structured logging ────────────────────────────────────────────────────────
-# app.logger has propagate=False and a custom StreamHandler, so caplog cannot
-# intercept its records. We mock app.logger methods directly instead.
+# Mock app.logger methods directly to verify json_fields are passed correctly.
 
 def test_upload_success_emits_structured_log(client, mock_storage):
     blob = _mock_blob(exists=False)
@@ -181,7 +178,7 @@ def test_upload_success_emits_structured_log(client, mock_storage):
         if c.args[0] == "upload_success"
     ]
     assert success_calls, "Expected app.logger.info('upload_success', ...)"
-    fields = success_calls[0].kwargs.get("extra", {}).get("fields", {})
+    fields = success_calls[0].kwargs.get("extra", {}).get("json_fields", {})
     assert fields.get("action") == "upload_success"
     assert fields.get("tool_id") == "cortex-catalyst"
     assert fields.get("version") == "26.7.1"
@@ -205,23 +202,6 @@ def test_upload_gcs_error_emits_structured_log(client, mock_storage):
         if c.args[0] == "upload_error"
     ]
     assert error_calls, "Expected app.logger.error('upload_error', ...)"
-    fields = error_calls[0].kwargs.get("extra", {}).get("fields", {})
+    fields = error_calls[0].kwargs.get("extra", {}).get("json_fields", {})
     assert fields.get("action") == "upload_error"
     assert "network timeout" in fields.get("error", "")
-
-
-def test_json_formatter_emits_valid_json():
-    from gateway.main import _JsonFormatter
-    formatter = _JsonFormatter()
-    record = logging.LogRecord(
-        name="test", level=logging.INFO, pathname="", lineno=0,
-        msg="test_event", args=(), exc_info=None,
-    )
-    record.fields = {"action": "proxy", "status": 200, "latency_ms": 42}
-    output = formatter.format(record)
-    parsed = json.loads(output)
-    assert parsed["severity"] == "INFO"
-    assert parsed["message"] == "test_event"
-    assert parsed["action"] == "proxy"
-    assert parsed["status"] == 200
-    assert parsed["latency_ms"] == 42

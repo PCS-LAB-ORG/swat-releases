@@ -1,5 +1,4 @@
 import html as _html
-import json
 import logging
 import os
 import re
@@ -15,33 +14,17 @@ logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 
+BACKEND_URL = os.environ.get(
+    "BACKEND_URL",
+    "https://storage.googleapis.com/swat-releases-serve",
+)
+_LOCAL_HOSTS = ("localhost", "127.0.0.1", "host.docker.internal")
+_IS_LOCAL = any(h in BACKEND_URL for h in _LOCAL_HOSTS)
 
-class _JsonFormatter(logging.Formatter):
-    _LEVELS = {
-        logging.DEBUG: "DEBUG",
-        logging.INFO: "INFO",
-        logging.WARNING: "WARNING",
-        logging.ERROR: "ERROR",
-        logging.CRITICAL: "CRITICAL",
-    }
-
-    def format(self, record: logging.LogRecord) -> str:
-        payload: dict = {
-            "severity": self._LEVELS.get(record.levelno, "DEFAULT"),
-            "message": record.getMessage(),
-        }
-        if record.exc_info:
-            payload["exception"] = self.formatException(record.exc_info)
-        if hasattr(record, "fields"):
-            payload.update(record.fields)
-        return json.dumps(payload)
-
-
-_handler = logging.StreamHandler()
-_handler.setFormatter(_JsonFormatter())
-app.logger.handlers = [_handler]
-app.logger.setLevel(logging.INFO)
-app.logger.propagate = False
+if not _IS_LOCAL:
+    import google.cloud.logging as _gcl
+    _gcl.Client().setup_logging()
+    app.logger.setLevel(logging.INFO)
 
 BACKEND_URL = os.environ.get(
     "BACKEND_URL",
@@ -55,9 +38,6 @@ _UPLOAD_TOOL_IDS = [
     if t.strip()
 ]
 _VERSION_RE_UPLOAD = re.compile(r"^\d{2}\.\d+\.\d+(\.\d+)?$")
-
-_LOCAL_HOSTS = ("localhost", "127.0.0.1", "host.docker.internal")
-_IS_LOCAL = any(h in BACKEND_URL for h in _LOCAL_HOSTS)
 
 _VERSION_RE = re.compile(r"^[^/]+/\d+\.\d+\.\d+(?:\.\d+)?$")
 _LATEST_RE = re.compile(r"^([^/]+)/latest$")
@@ -266,7 +246,7 @@ def upload():
     try:
         blob = _storage_client.bucket(INPUT_BUCKET).blob(f"{tool_id}/{version}.md")
         if blob.exists():
-            app.logger.warning("upload_duplicate", extra={"fields": {
+            app.logger.warning("upload_duplicate", extra={"json_fields": {
                 "action": "upload_duplicate", "tool_id": tool_id, "version": version,
             }})
             return (
@@ -280,7 +260,7 @@ def upload():
             )
         blob.upload_from_string(content.encode("utf-8"), content_type="text/markdown; charset=utf-8")
     except Exception as exc:
-        app.logger.error("upload_error", extra={"fields": {
+        app.logger.error("upload_error", extra={"json_fields": {
             "action": "upload_error", "tool_id": tool_id, "version": version,
             "error": str(exc),
         }})
@@ -292,7 +272,7 @@ def upload():
         )
 
     gcs_path = f"gs://{INPUT_BUCKET}/{tool_id}/{version}.md"
-    app.logger.info("upload_success", extra={"fields": {
+    app.logger.info("upload_success", extra={"json_fields": {
         "action": "upload_success", "tool_id": tool_id, "version": version,
         "gcs_path": gcs_path,
     }})
@@ -315,7 +295,7 @@ def proxy(path):
         try:
             version = _resolve_latest(tool_id)
         except Exception as exc:
-            app.logger.error("latest_error", extra={"fields": {
+            app.logger.error("latest_error", extra={"json_fields": {
                 "action": "latest_error", "tool_id": tool_id, "error": str(exc),
             }})
             return f"latest lookup error: {exc}", 502
@@ -335,7 +315,7 @@ def proxy(path):
     try:
         token = _get_access_token()
     except Exception as exc:
-        app.logger.error("token_error", extra={"fields": {
+        app.logger.error("token_error", extra={"json_fields": {
             "action": "token_error", "path": path, "error": str(exc),
         }})
         return f"Token error: {exc}", 500
@@ -354,14 +334,14 @@ def proxy(path):
             timeout=30,
         )
     except Exception as exc:
-        app.logger.error("backend_error", extra={"fields": {
+        app.logger.error("backend_error", extra={"json_fields": {
             "action": "backend_error", "method": request.method,
             "path": path, "error": str(exc),
         }})
         return f"Backend error: {exc}", 502
 
     latency_ms = round((time.monotonic() - t0) * 1000)
-    app.logger.info("proxy_request", extra={"fields": {
+    app.logger.info("proxy_request", extra={"json_fields": {
         "action": "proxy", "method": request.method, "path": path,
         "gcs_path": gcs_path, "status": resp.status_code, "latency_ms": latency_ms,
     }})
