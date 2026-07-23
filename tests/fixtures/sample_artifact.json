@@ -13,6 +13,36 @@
       "tag": "Feature",
       "title": "Inline Citation Markers",
       "description": "Source references appear as clickable [1] [2] [3] markers embedded at the exact sentence drawing from each source."
+    },
+    {
+      "tag": "Enhancement",
+      "title": "Faster source ranking",
+      "description": "Source retrieval latency reduced by 30% through improved vector index sharding."
+    },
+    {
+      "tag": "Fixed",
+      "title": "Citation panel closes on outside click",
+      "description": "The citation panel now dismisses correctly when the user clicks anywhere outside it."
+    },
+    {
+      "tag": "Planned",
+      "title": "Multi-document comparison view",
+      "description": "Side-by-side comparison of up to three source documents is planned for the next release."
+    },
+    {
+      "tag": "Known",
+      "title": "Deep links require reload on first visit",
+      "description": "Navigating directly to a citation URL on first page load may require a manual refresh to resolve correctly."
+    },
+    {
+      "tag": "Architecture",
+      "title": "Vector store migration to pgvector",
+      "description": "Replaced the in-memory FAISS index with a persistent pgvector store backed by Cloud SQL."
+    },
+    {
+      "tag": "Infrastructure",
+      "title": "Cloud Run min-instances set to 1",
+      "description": "Cold-start latency eliminated by keeping one instance warm at all times."
     }
   ]
 }

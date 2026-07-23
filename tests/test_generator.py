@@ -81,9 +81,8 @@ def test_generator_skips_non_md_blobs():
     mock_process.assert_not_called()
 
 
-def test_rebuild_index_called_only_for_catalyst():
-    """rebuild_index must not run for non-catalyst tools — doing so overwrites the
-    catalyst panel with wrong data, corrupting index.html."""
+def test_rebuild_index_called_for_all_tools_with_panel_id():
+    """rebuild_index runs for every tool with panel_id defined, skips tools without it."""
     from scripts.generator.main import run_generator
 
     mock_storage = MagicMock()
@@ -98,14 +97,14 @@ def test_rebuild_index_called_only_for_catalyst():
              "name": "Cortex® Catalyst", "description": "Test.",
              "app_url": "https://example.com", "panel_id": "catalyst",
              "model": "user-facing", "repo": "PCS-LAB-ORG/x"},
+            {"id": "session-planner", "folder": "session-planner",
+             "prompt": "scripts/prompts/model1_user_facing.txt",
+             "name": "Session Planner", "description": "Test.",
+             "panel_id": "session-planner", "model": "user-facing"},
             {"id": "cortex-insights", "folder": "cortex-insights",
              "prompt": "scripts/prompts/model1_user_facing.txt",
              "name": "Cortex Insights", "description": "Test.",
-             "model": "user-facing"},
-            {"id": "ai-sweeper", "folder": "ai-sweeper",
-             "prompt": "scripts/prompts/model1_user_facing.txt",
-             "name": "AI Sweeper", "description": "Test.",
-             "model": "user-facing"},
+             "model": "user-facing"},  # no panel_id — must be skipped
         ]
     }
 
@@ -114,9 +113,9 @@ def test_rebuild_index_called_only_for_catalyst():
          patch("scripts.generator.main.VertexGeminiClient"):
         run_generator("swat-releases-input", "swat-releases-serve", multi_tool_config)
 
-    mock_index.assert_called_once()
-    called_tool = mock_index.call_args[0][0]
-    assert called_tool["id"] == "cortex-catalyst"
+    assert mock_index.call_count == 2
+    called_ids = {c[0][0]["id"] for c in mock_index.call_args_list}
+    assert called_ids == {"cortex-catalyst", "session-planner"}
 
 
 def test_generator_logs_and_continues_on_error():

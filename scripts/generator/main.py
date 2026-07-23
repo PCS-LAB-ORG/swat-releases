@@ -76,7 +76,7 @@ def rebuild_index(
     all_releases = load_all_release_data_from_gcs(gcs_client, serve_bucket, tool["id"])
     latest = all_releases[0] if all_releases else None
     month_groups = _group_by_month(all_releases[1:]) if len(all_releases) > 1 else []
-    updater.rebuild_catalyst_panel(tool, latest=latest, month_groups=month_groups, is_default=True)
+    updater.rebuild_panel(tool, latest=latest, month_groups=month_groups, is_default=True)
 
     # Update the latest pointer in GCS
     if latest:
@@ -148,13 +148,14 @@ def run_generator(
                                      "version": version, "error": str(exc)}))
             errors += 1
 
-    # Rebuild index — only cortex-catalyst has a managed panel in index.html
-    catalyst_tool = next((t for t in config["tools"] if t["id"] == "cortex-catalyst"), None)
-    if catalyst_tool:
+    # Rebuild index panel for every tool that declares a panel_id in tools.yaml
+    for tool in config["tools"]:
+        if "panel_id" not in tool:
+            continue
         try:
-            rebuild_index(catalyst_tool, gcs_client, serve_bucket)
+            rebuild_index(tool, gcs_client, serve_bucket)
         except Exception as exc:
-            logger.error(json.dumps({"action": "index_error", "tool_id": "cortex-catalyst",
+            logger.error(json.dumps({"action": "index_error", "tool_id": tool["id"],
                                      "error": str(exc)}))
 
     summary = {"processed": processed, "skipped": skipped, "errors": errors}
