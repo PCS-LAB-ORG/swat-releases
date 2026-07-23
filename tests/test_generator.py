@@ -118,6 +118,32 @@ def test_rebuild_index_called_for_all_tools_with_panel_id():
     assert called_ids == {"cortex-catalyst", "session-planner"}
 
 
+def test_structured_log_helpers_emit_valid_json(capsys):
+    from scripts.generator.main import _info, _warning, _error
+    import json
+
+    _info(action="processed", tool_id="cortex-catalyst", version="26.7.1")
+    _warning(action="skip", tool_id="unknown", reason="unknown_tool")
+    _error(action="error", tool_id="session-planner", error="boom")
+
+    lines = capsys.readouterr().out.strip().splitlines()
+    assert len(lines) == 3
+
+    info_entry = json.loads(lines[0])
+    assert info_entry["severity"] == "INFO"
+    assert info_entry["action"] == "processed"
+    assert info_entry["tool_id"] == "cortex-catalyst"
+    assert info_entry["version"] == "26.7.1"
+
+    warn_entry = json.loads(lines[1])
+    assert warn_entry["severity"] == "WARNING"
+    assert warn_entry["reason"] == "unknown_tool"
+
+    err_entry = json.loads(lines[2])
+    assert err_entry["severity"] == "ERROR"
+    assert err_entry["error"] == "boom"
+
+
 def test_generator_logs_and_continues_on_error():
     from scripts.generator.main import run_generator
     import logging
