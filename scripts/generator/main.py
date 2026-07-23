@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import sys
 
 import functions_framework
 from google.cloud import storage
@@ -32,8 +33,32 @@ from scripts.render import (
 )
 from scripts.config import load_config
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Emit structured JSON to stdout so Cloud Run/Cloud Functions parses each line
+# as jsonPayload rather than textPayload. Fields are filterable in Cloud Logging.
+_SEVERITY = {
+    logging.DEBUG: "DEBUG",
+    logging.INFO: "INFO",
+    logging.WARNING: "WARNING",
+    logging.ERROR: "ERROR",
+    logging.CRITICAL: "CRITICAL",
+}
+
+
+def _log(level: int, **fields) -> None:
+    print(json.dumps({**fields, "severity": _SEVERITY.get(level, "DEFAULT")}),
+          file=sys.stdout, flush=True)
+
+
+def _info(**fields) -> None:
+    _log(logging.INFO, **fields)
+
+
+def _warning(**fields) -> None:
+    _log(logging.WARNING, **fields)
+
+
+def _error(**fields) -> None:
+    _log(logging.ERROR, **fields)
 
 INPUT_BUCKET = os.environ.get("INPUT_BUCKET", "swat-releases-input")
 SERVE_BUCKET = os.environ.get("SERVE_BUCKET", "swat-releases-serve")
@@ -112,8 +137,7 @@ def run_generator(
 
         tool = next((t for t in config["tools"] if t["id"] == tool_id), None)
         if tool is None:
-            logger.warning(json.dumps({"action": "skip", "tool_id": tool_id,
-                                       "version": version, "reason": "unknown_tool"}))
+            _warning(action="skip", tool_id=tool_id, version=version, reason="unknown_tool")
             skipped += 1
             continue
 
@@ -122,9 +146,8 @@ def run_generator(
             pv = parent_version(version)
             parent_blob = gcs_client.bucket(serve_bucket).blob(f"{tool_id}/{pv}.json")
             if not parent_blob.exists():
-                logger.warning(json.dumps({"action": "skip", "tool_id": tool_id,
-                                           "version": version, "reason": "parent_not_found",
-                                           "parent": pv}))
+                _warning(action="skip", tool_id=tool_id, version=version,
+                         reason="parent_not_found", parent=pv)
                 skipped += 1
                 continue
 
@@ -140,13 +163,11 @@ def run_generator(
             # For hotfixes, render the parent page (which now includes the fix)
             render_target_version = parent_version(version) if is_hotfix(version) else version
             render_version(tool, render_target_version, artifact, gcs_client, serve_bucket)
-            logger.info(json.dumps({"action": "processed", "tool_id": tool_id,
-                                    "version": version, "type":
-                                    "hotfix" if is_hotfix(version) else "major"}))
+            _info(action="processed", tool_id=tool_id, version=version,
+                  type="hotfix" if is_hotfix(version) else "major")
             processed += 1
         except Exception as exc:
-            logger.error(json.dumps({"action": "error", "tool_id": tool_id,
-                                     "version": version, "error": str(exc)}))
+            _error(action="error", tool_id=tool_id, version=version, error=str(exc))
             errors += 1
 
     # Rebuild index panel for every tool that declares a panel_id in tools.yaml
@@ -156,11 +177,10 @@ def run_generator(
         try:
             rebuild_index(tool, gcs_client, serve_bucket)
         except Exception as exc:
-            logger.error(json.dumps({"action": "index_error", "tool_id": tool["id"],
-                                     "error": str(exc)}))
+            _error(action="index_error", tool_id=tool["id"], error=str(exc))
 
     summary = {"processed": processed, "skipped": skipped, "errors": errors}
-    logger.info(json.dumps({"action": "summary", **summary}))
+    _info(action="summary", **summary)
     return summary
 
 
@@ -173,5 +193,5 @@ def handle(request):
         status = 500 if summary["errors"] > 0 else 200
         return json.dumps(summary), status, {"Content-Type": "application/json"}
     except Exception as exc:
-        logger.error(json.dumps({"action": "fatal_error", "error": str(exc)}))
+        _error(action="fatal_error", error=str(exc))
         return json.dumps({"error": str(exc)}), 500, {"Content-Type": "application/json"}

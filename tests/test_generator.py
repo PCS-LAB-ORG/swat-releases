@@ -118,9 +118,35 @@ def test_rebuild_index_called_for_all_tools_with_panel_id():
     assert called_ids == {"cortex-catalyst", "session-planner"}
 
 
-def test_generator_logs_and_continues_on_error():
+def test_structured_log_helpers_emit_valid_json(capsys):
+    from scripts.generator.main import _info, _warning, _error
+    import json
+
+    _info(action="processed", tool_id="cortex-catalyst", version="26.7.1")
+    _warning(action="skip", tool_id="unknown", reason="unknown_tool")
+    _error(action="error", tool_id="session-planner", error="boom")
+
+    lines = capsys.readouterr().out.strip().splitlines()
+    assert len(lines) == 3
+
+    info_entry = json.loads(lines[0])
+    assert info_entry["severity"] == "INFO"
+    assert info_entry["action"] == "processed"
+    assert info_entry["tool_id"] == "cortex-catalyst"
+    assert info_entry["version"] == "26.7.1"
+
+    warn_entry = json.loads(lines[1])
+    assert warn_entry["severity"] == "WARNING"
+    assert warn_entry["reason"] == "unknown_tool"
+
+    err_entry = json.loads(lines[2])
+    assert err_entry["severity"] == "ERROR"
+    assert err_entry["error"] == "boom"
+
+
+def test_generator_logs_and_continues_on_error(capsys):
     from scripts.generator.main import run_generator
-    import logging
+    import json as _json
 
     mock_storage = MagicMock()
     mock_input_bucket = MagicMock()
@@ -134,8 +160,7 @@ def test_generator_logs_and_continues_on_error():
          patch("scripts.generator.main.rebuild_index"), \
          patch("scripts.generator.main.storage.Client", return_value=mock_storage), \
          patch("scripts.generator.main.VertexGeminiClient"):
-        # Should not raise — errors are logged and skipped
-        run_generator(
+        result = run_generator(
             input_bucket="swat-releases-input",
             serve_bucket="swat-releases-serve",
             config={"tools": [{"id": "cortex-catalyst", "folder": "cortex-catalyst",
@@ -144,3 +169,10 @@ def test_generator_logs_and_continues_on_error():
                                "app_url": "https://example.com", "panel_id": "catalyst",
                                "model": "user-facing", "repo": "PCS-LAB-ORG/x"}]},
         )
+
+    assert result["errors"] == 1
+    lines = [_json.loads(l) for l in capsys.readouterr().out.strip().splitlines()]
+    error_entries = [l for l in lines if l.get("action") == "error"]
+    assert error_entries, "Expected an 'error' action log entry"
+    assert error_entries[0]["severity"] == "ERROR"
+    assert "Gemini failed" in error_entries[0]["error"]
