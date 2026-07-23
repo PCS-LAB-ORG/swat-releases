@@ -31,7 +31,7 @@ requests through Cloud LB with GlobalProtect IP allowlisting.
 1. Developer writes release notes as a Markdown file and uploads to
    `gs://swat-releases-input/{tool-id}/{version}.md`
 2. Cloud Scheduler fires hourly (`0 * * * *`) → `swat-releases-generator` Cloud Function
-3. Function reads each unprocessed `.md` file, calls **Gemini 3.5 Flash** (via Vertex AI) to
+3. Function reads each unprocessed `.md` file, calls **Gemini** (via Vertex AI) to
    structure and tag the content, and writes a JSON artifact to `gs://swat-releases-serve/`
 4. Function renders HTML from the JSON artifact using Jinja2 templates and uploads the page
 5. Proxy (`gateway/`) on `mig-swat-releases` serves all requests: Cloud LB → Cloud Armor
@@ -78,13 +78,19 @@ Install the gcloud CLI: <https://cloud.google.com/sdk/docs/install>
 See [docs/release-notes-standards.md](docs/release-notes-standards.md) for the full tag
 taxonomy and content guidelines.
 
-### 2. Upload to the input bucket
+### 2. Upload
+
+_Option A — Web upload page (no CLI needed):_ Go to
+`https://swatreleases.pcs.lab.twistlock.com/upload` (VPN required). Select the tool,
+paste or upload the `.md` file, enter the version, and submit.
+
+_Option B — gcloud CLI:_
 
 ```bash
 gcloud storage cp 26.8.1.md gs://swat-releases-input/cortex-catalyst/26.8.1.md
 ```
 
-The site updates within the hour.
+The site updates within the hour either way.
 
 ### 3. Trigger immediately (optional)
 
@@ -200,17 +206,20 @@ For full operational procedures — monitoring, troubleshooting, local generator
 
 ## Content management
 
+See [docs/generator-operations.md](docs/generator-operations.md) for full procedures.
+Quick reference:
+
 ### Edit a published release
 
 ```bash
-# Download the JSON artifact
+# Download JSON artifact, edit it, upload back
 gcloud storage cp gs://swat-releases-serve/cortex-catalyst/26.8.1.json /tmp/26.8.1.json
-
-# Edit /tmp/26.8.1.json, then upload back
+# ... edit /tmp/26.8.1.json ...
 gcloud storage cp /tmp/26.8.1.json gs://swat-releases-serve/cortex-catalyst/26.8.1.json
 
-# Rebuild the index and re-render HTML
-PYTHONPATH=. python3 scripts/render.py cortex-catalyst 26.8.1
+# Re-render HTML from the edited JSON (Gemini not called — JSON already exists)
+gcloud scheduler jobs run swat-releases-generator-hourly \
+  --location=us-central1 --project=pcs-swat-resources
 ```
 
 ### Delete a release
@@ -218,16 +227,17 @@ PYTHONPATH=. python3 scripts/render.py cortex-catalyst 26.8.1
 ```bash
 gcloud storage rm gs://swat-releases-serve/cortex-catalyst/26.8.1.html
 gcloud storage rm gs://swat-releases-serve/cortex-catalyst/26.8.1.json
+gcloud storage rm gs://swat-releases-input/cortex-catalyst/26.8.1.md
 
-# Rebuild index to remove the entry from index.html
-PYTHONPATH=. python3 -c "from scripts.render import rebuild_index; rebuild_index()"
+# Trigger to rebuild the index panel
+gcloud scheduler jobs run swat-releases-generator-hourly \
+  --location=us-central1 --project=pcs-swat-resources
 ```
 
 ### Force re-process through Gemini
 
-Delete the JSON artifact from the serve bucket, then trigger the scheduler:
-
 ```bash
+# Delete the JSON artifact (removes the skip guard), then trigger
 gcloud storage rm gs://swat-releases-serve/cortex-catalyst/26.8.1.json
 gcloud scheduler jobs run swat-releases-generator-hourly \
   --location=us-central1 --project=pcs-swat-resources
@@ -237,17 +247,17 @@ gcloud scheduler jobs run swat-releases-generator-hourly \
 
 ## Known limitations
 
-- **Content management requires local Python** — edit/delete/force re-render workflows
-  require `PYTHONPATH=` invocations locally with GCP credentials. No web UI exists yet
-  (tracked in issue #48).
+- **Content management requires CLI or local Python** — edit/delete/force re-render workflows
+  require `gcloud storage` or local Python invocations with GCP credentials. The upload page
+  covers new releases; edit and delete are not yet web-accessible (tracked in issue #48).
 - **Cortex Unity pages not reformatted** — hand-authored Unity pages predate the current
   Gemini-rendered template and have not been migrated.
-- **Dependabot** — 20 moderate/low severity dependency vulnerabilities not yet triaged.
-- **`index.html` is partially generator-managed** — the generator rebuilds only
-  `<div id="panel-catalyst">`. Other panel divs and all JS/CSS survive each run, but edits
-  to those sections of `index.html` in GCS are not version-controlled.
+- **`index.html` is partially version-controlled** — the file lives in GCS and is rebuilt
+  by the generator on every hourly run (all tool panels with a declared `panel_id` are
+  updated). JS, CSS, and panel structure outside those divs survive each run but edits to
+  those sections are not tracked in git.
 - **Gemini token cost** — each re-process call to `extract.py` consumes Vertex AI tokens.
-  Use `--force` deliberately; avoid re-processing unnecessarily.
+  Delete the JSON artifact deliberately; avoid re-processing unnecessarily.
 
 ---
 

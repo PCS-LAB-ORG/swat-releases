@@ -43,7 +43,16 @@ Omit any section that has nothing to say. Do not pad with placeholder text.
 gcloud storage cp 26.8.1.md gs://swat-releases-input/cortex-catalyst/26.8.1.md
 ```
 
-Replace `cortex-catalyst` with the appropriate tool ID (`cortex-insights`, `cortex-unity`). Valid tool IDs are defined in `config/tools.yaml`.
+Valid tool IDs (defined in `config/tools.yaml`):
+
+| Tool ID | Tool name |
+| --- | --- |
+| `cortex-catalyst` | Cortex® Catalyst |
+| `cortex-insights` | Cortex Insights |
+| `cortex-unity` | Cortex Unity |
+| `ai-sweeper` | AI Sweeper |
+| `cortex-search-pipeline` | Cortex Search Pipeline |
+| `session-planner` | Session Planner |
 
 To trigger processing immediately rather than waiting for the next hourly run:
 
