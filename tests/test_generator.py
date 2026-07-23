@@ -144,9 +144,9 @@ def test_structured_log_helpers_emit_valid_json(capsys):
     assert err_entry["error"] == "boom"
 
 
-def test_generator_logs_and_continues_on_error():
+def test_generator_logs_and_continues_on_error(capsys):
     from scripts.generator.main import run_generator
-    import logging
+    import json as _json
 
     mock_storage = MagicMock()
     mock_input_bucket = MagicMock()
@@ -160,8 +160,7 @@ def test_generator_logs_and_continues_on_error():
          patch("scripts.generator.main.rebuild_index"), \
          patch("scripts.generator.main.storage.Client", return_value=mock_storage), \
          patch("scripts.generator.main.VertexGeminiClient"):
-        # Should not raise — errors are logged and skipped
-        run_generator(
+        result = run_generator(
             input_bucket="swat-releases-input",
             serve_bucket="swat-releases-serve",
             config={"tools": [{"id": "cortex-catalyst", "folder": "cortex-catalyst",
@@ -170,3 +169,10 @@ def test_generator_logs_and_continues_on_error():
                                "app_url": "https://example.com", "panel_id": "catalyst",
                                "model": "user-facing", "repo": "PCS-LAB-ORG/x"}]},
         )
+
+    assert result["errors"] == 1
+    lines = [_json.loads(l) for l in capsys.readouterr().out.strip().splitlines()]
+    error_entries = [l for l in lines if l.get("action") == "error"]
+    assert error_entries, "Expected an 'error' action log entry"
+    assert error_entries[0]["severity"] == "ERROR"
+    assert "Gemini failed" in error_entries[0]["error"]

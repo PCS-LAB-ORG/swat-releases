@@ -45,7 +45,7 @@ _SEVERITY = {
 
 
 def _log(level: int, **fields) -> None:
-    print(json.dumps({"severity": _SEVERITY.get(level, "DEFAULT"), **fields}),
+    print(json.dumps({**fields, "severity": _SEVERITY.get(level, "DEFAULT")}),
           file=sys.stdout, flush=True)
 
 
