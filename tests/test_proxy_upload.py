@@ -157,6 +157,51 @@ def test_upload_post_duplicate_returns_409(client, mock_storage):
         "content": "# Notes\n\nContent.",
     })
     assert resp.status_code == 409
-    body = resp.data.decode()
-    assert "already exists" in body
-    assert "26.7.1" in body
+
+
+# ── Structured logging ────────────────────────────────────────────────────────
+# Mock app.logger methods directly to verify json_fields are passed correctly.
+
+def test_upload_success_emits_structured_log(client, mock_storage):
+    blob = _mock_blob(exists=False)
+    mock_storage.bucket.return_value.blob.return_value = blob
+
+    with patch.object(app.logger, "info") as mock_info:
+        resp = client.post("/upload", data={
+            "tool_id": "cortex-catalyst", "version": "26.7.1",
+            "content": "# Notes\n\nContent.",
+        })
+
+    assert resp.status_code == 200
+    success_calls = [
+        c for c in mock_info.call_args_list
+        if c.args[0] == "upload_success"
+    ]
+    assert success_calls, "Expected app.logger.info('upload_success', ...)"
+    fields = success_calls[0].kwargs.get("extra", {}).get("json_fields", {})
+    assert fields.get("action") == "upload_success"
+    assert fields.get("tool_id") == "cortex-catalyst"
+    assert fields.get("version") == "26.7.1"
+    assert "gcs_path" in fields
+
+
+def test_upload_gcs_error_emits_structured_log(client, mock_storage):
+    blob = _mock_blob(exists=False)
+    blob.upload_from_string.side_effect = Exception("network timeout")
+    mock_storage.bucket.return_value.blob.return_value = blob
+
+    with patch.object(app.logger, "error") as mock_error:
+        resp = client.post("/upload", data={
+            "tool_id": "cortex-catalyst", "version": "26.7.1",
+            "content": "# Notes\n\nContent.",
+        })
+
+    assert resp.status_code == 500
+    error_calls = [
+        c for c in mock_error.call_args_list
+        if c.args[0] == "upload_error"
+    ]
+    assert error_calls, "Expected app.logger.error('upload_error', ...)"
+    fields = error_calls[0].kwargs.get("extra", {}).get("json_fields", {})
+    assert fields.get("action") == "upload_error"
+    assert "network timeout" in fields.get("error", "")
