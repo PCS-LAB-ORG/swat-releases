@@ -81,7 +81,7 @@ class VertexGeminiClient:
 
 
 REQUIRED_FIELDS = {"version", "date", "release_url", "summary", "entries"}
-VALID_TAGS = {"Feature", "Enhancement", "Fixed", "Planned", "Known"}
+VALID_TAGS = {"Feature", "Enhancement", "Fixed", "Planned", "Known", "Architecture", "Infrastructure"}
 
 
 class ResponseValidator:

@@ -121,7 +121,7 @@ def load_all_release_data_from_gcs(
     return sorted(result, key=lambda x: x["version"], reverse=True)
 
 
-def _group_by_month(releases: list[dict]) -> list[dict]:
+def group_by_month(releases: list[dict]) -> list[dict]:
     """Group releases by their 'date' field for panel rendering."""
     groups: dict[str, list] = {}
     for r in releases:
@@ -148,15 +148,16 @@ class IndexUpdater:
         self._engine = engine
         self._index_path = Path(index_path)
 
-    def rebuild_catalyst_panel(
+    def rebuild_panel(
         self,
         tool: dict,
         latest: dict,
         month_groups: list[dict],
         is_default: bool = True,
     ) -> None:
+        panel_id = tool["panel_id"]
         panel_html = self._engine.render(
-            "catalyst-panel.html.j2",
+            tool.get("panel_template", "catalyst-panel.html.j2"),
             tool=tool,
             latest=latest,
             month_groups=month_groups,
@@ -164,21 +165,26 @@ class IndexUpdater:
         )
         content = self._index_path.read_text()
 
-        # Find the panel div start
         start_pattern = re.compile(
-            r'<div class="tool-panel[^"]*" id="panel-catalyst">'
+            r'<div class="tool-panel[^"]*" id="panel-' + re.escape(panel_id) + r'">'
         )
         start_match = start_pattern.search(content)
         if not start_match:
-            raise RuntimeError("Could not find panel-catalyst div in index.html")
+            raise RuntimeError(f"Could not find panel-{panel_id} div in index.html")
         start = start_match.start()
 
-        # Find the next tool-panel div (end boundary)
-        next_panel_re = re.compile(r'\n\s+<div class="tool-panel[^"]*" id="panel-(?!catalyst)')
+        next_panel_re = re.compile(
+            r'\n\s+<div class="tool-panel[^"]*" id="panel-(?!' + re.escape(panel_id) + r')'
+        )
         next_panel = next_panel_re.search(content, start + 1)
-        if not next_panel:
-            raise RuntimeError("Could not find end boundary of panel-catalyst in index.html")
-        end = next_panel.start()
+        if next_panel:
+            end = next_panel.start()
+        else:
+            # Last panel in the file — boundary is the closing </main> tag
+            main_close = re.compile(r'\n\s+</main>').search(content, start + 1)
+            if not main_close:
+                raise RuntimeError(f"Could not find end boundary of panel-{panel_id} in index.html")
+            end = main_close.start()
 
         self._index_path.write_text(content[:start] + panel_html + "\n" + content[end:])
 
@@ -233,15 +239,16 @@ class GCSIndexUpdater:
         self._client = storage_client
         self._bucket = serve_bucket
 
-    def rebuild_catalyst_panel(
+    def rebuild_panel(
         self,
         tool: dict,
         latest: "dict | None",
         month_groups: list,
         is_default: bool,
     ) -> None:
+        panel_id = tool["panel_id"]
         panel_html = self._engine.render(
-            "catalyst-panel.html.j2",
+            tool.get("panel_template", "catalyst-panel.html.j2"),
             tool=tool,
             latest=latest,
             month_groups=month_groups,
@@ -250,17 +257,26 @@ class GCSIndexUpdater:
         blob = self._client.bucket(self._bucket).blob("index.html")
         content = blob.download_as_text()
 
-        start_pattern = re.compile(r'<div class="tool-panel[^"]*" id="panel-catalyst">')
+        start_pattern = re.compile(
+            r'<div class="tool-panel[^"]*" id="panel-' + re.escape(panel_id) + r'">'
+        )
         start_match = start_pattern.search(content)
         if not start_match:
-            raise RuntimeError("Could not find panel-catalyst div in index.html")
+            raise RuntimeError(f"Could not find panel-{panel_id} div in index.html")
         start = start_match.start()
 
-        next_panel_re = re.compile(r'\n\s+<div class="tool-panel[^"]*" id="panel-(?!catalyst)')
+        next_panel_re = re.compile(
+            r'\n\s+<div class="tool-panel[^"]*" id="panel-(?!' + re.escape(panel_id) + r')'
+        )
         next_panel = next_panel_re.search(content, start + 1)
-        if not next_panel:
-            raise RuntimeError("Could not find end boundary of panel-catalyst in index.html")
-        end = next_panel.start()
+        if next_panel:
+            end = next_panel.start()
+        else:
+            # Last panel in the file — boundary is the closing </main> tag
+            main_close = re.compile(r'\n\s+</main>').search(content, start + 1)
+            if not main_close:
+                raise RuntimeError(f"Could not find end boundary of panel-{panel_id} in index.html")
+            end = main_close.start()
 
         updated = content[:start] + panel_html + "\n" + content[end:]
         blob.upload_from_string(updated, content_type="text/html")
